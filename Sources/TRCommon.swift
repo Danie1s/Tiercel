@@ -61,7 +61,7 @@ protocol TiercelCompatible {
 
 
 extension TiercelCompatible {
-    var tr: Tiercel<Self> {
+    public var tr: Tiercel<Self> {
         get { return Tiercel(self) }
     }
 }
@@ -177,7 +177,7 @@ extension Tiercel where Base: DispatchQueue {
 
 
 extension Array {
-    func safeObjectAtIndex(_ index: Int) -> Element? {
+    public func safeObjectAtIndex(_ index: Int) -> Element? {
         if index < self.count {
             return self[index]
         } else {
