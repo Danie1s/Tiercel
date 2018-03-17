@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="165" id="KGk-i7-Jjw" customClass="DownloadTaskCell" customModule="Swift调试模板" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="329" height="136"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="329" height="135.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="小黄人" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Obr-qh-YFK">
+                        <rect key="frame" x="16" y="11" width="99" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="766K/4.26M" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Pyb-wY-gDY">
+                        <rect key="frame" x="16" y="95" width="175.5" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="znY-KU-sa9">
+                        <rect key="frame" x="16" y="121" width="231" height="2"/>
+                    </progressView>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="usv-X3-4y3">
+                        <rect key="frame" x="263" y="43" width="50" height="50"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="50" id="Fyj-ze-QKb"/>
+                            <constraint firstAttribute="width" constant="50" id="u7N-L8-JOe"/>
+                        </constraints>
+                        <state key="normal" image="suspend"/>
+                        <connections>
+                            <action selector="didTapButton:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="HKK-Lt-z9p"/>
+                        </connections>
+                    </button>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="751" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="0 K/s" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pUI-TD-eZ0">
+                        <rect key="frame" x="211.5" y="95" width="35.5" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="751" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="剩余时间：00: 00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PIA-pT-9a5">
+                        <rect key="frame" x="125" y="11.5" width="122" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="开始时间：" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VxF-sI-uou">
+                        <rect key="frame" x="16" y="39" width="76.5" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="结束时间：" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhP-Hb-V0O">
+                        <rect key="frame" x="16" y="67" width="76.5" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Pyb-wY-gDY" firstAttribute="top" secondItem="OhP-Hb-V0O" secondAttribute="bottom" constant="10" id="45j-KR-jHn"/>
+                    <constraint firstAttribute="trailing" secondItem="usv-X3-4y3" secondAttribute="trailing" constant="16" id="9ZU-jC-m6A"/>
+                    <constraint firstItem="Obr-qh-YFK" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="16" id="FFs-SC-S4T"/>
+                    <constraint firstItem="PIA-pT-9a5" firstAttribute="centerY" secondItem="Obr-qh-YFK" secondAttribute="centerY" id="RZQ-gL-zDX"/>
+                    <constraint firstItem="OhP-Hb-V0O" firstAttribute="top" secondItem="VxF-sI-uou" secondAttribute="bottom" constant="10" id="TOR-A9-qRX"/>
+                    <constraint firstItem="VxF-sI-uou" firstAttribute="top" secondItem="Obr-qh-YFK" secondAttribute="bottom" constant="10" id="XLy-eT-yb8"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="znY-KU-sa9" secondAttribute="bottom" constant="2" id="XUj-ud-deE"/>
+                    <constraint firstItem="Pyb-wY-gDY" firstAttribute="leading" secondItem="Obr-qh-YFK" secondAttribute="leading" id="c6w-lz-QRc"/>
+                    <constraint firstItem="VxF-sI-uou" firstAttribute="leading" secondItem="Obr-qh-YFK" secondAttribute="leading" id="cS7-jG-d7e"/>
+                    <constraint firstItem="Obr-qh-YFK" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" id="ezr-MA-pZD"/>
+                    <constraint firstItem="znY-KU-sa9" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="16" id="gLJ-ck-YvV"/>
+                    <constraint firstItem="pUI-TD-eZ0" firstAttribute="leading" secondItem="Pyb-wY-gDY" secondAttribute="trailing" constant="20" id="iVT-4t-mhx"/>
+                    <constraint firstItem="pUI-TD-eZ0" firstAttribute="centerY" secondItem="Pyb-wY-gDY" secondAttribute="centerY" id="khJ-8A-xom"/>
+                    <constraint firstAttribute="trailing" secondItem="znY-KU-sa9" secondAttribute="trailing" constant="82" id="nPX-uo-1qF"/>
+                    <constraint firstItem="usv-X3-4y3" firstAttribute="leading" secondItem="pUI-TD-eZ0" secondAttribute="trailing" constant="16" id="pd1-Z4-f6z"/>
+                    <constraint firstItem="usv-X3-4y3" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="qlX-UR-Lvi"/>
+                    <constraint firstItem="znY-KU-sa9" firstAttribute="top" secondItem="Pyb-wY-gDY" secondAttribute="bottom" constant="8" id="qqA-8Q-Dgp"/>
+                    <constraint firstItem="PIA-pT-9a5" firstAttribute="leading" secondItem="Obr-qh-YFK" secondAttribute="trailing" constant="10" id="skJ-jS-9cz"/>
+                    <constraint firstItem="PIA-pT-9a5" firstAttribute="trailing" secondItem="pUI-TD-eZ0" secondAttribute="trailing" id="va9-fh-oMg"/>
+                    <constraint firstItem="OhP-Hb-V0O" firstAttribute="leading" secondItem="Obr-qh-YFK" secondAttribute="leading" id="zjf-gB-1F4"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="bytesLabel" destination="Pyb-wY-gDY" id="Wjh-cn-dDi"/>
+                <outlet property="controlButton" destination="usv-X3-4y3" id="ck0-m5-oS5"/>
+                <outlet property="endDateLabel" destination="OhP-Hb-V0O" id="Eyj-2A-xwZ"/>
+                <outlet property="progressView" destination="znY-KU-sa9" id="MLX-NV-5cK"/>
+                <outlet property="speedLabel" destination="pUI-TD-eZ0" id="P7I-6L-O52"/>
+                <outlet property="startDateLabel" destination="VxF-sI-uou" id="pTT-Mr-1F3"/>
+                <outlet property="timeRemainingLabel" destination="PIA-pT-9a5" id="BoR-ox-aOO"/>
+                <outlet property="titleLabel" destination="Obr-qh-YFK" id="6cx-ab-1WY"/>
+            </connections>
+            <point key="canvasLocation" x="6.5" y="70"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="suspend" width="40" height="40"/>
+    </resources>
+</document>
