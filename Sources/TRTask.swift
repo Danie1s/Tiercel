@@ -69,16 +69,68 @@ public class TRTask: NSObject {
         }
     }
 
-    public var progress: Progress = Progress()
+    public internal(set) var progress: Progress = Progress()
 
-    @objc public var startDate: TimeInterval = 0
-    @objc public var endDate: TimeInterval = Date().timeIntervalSince1970
-    @objc public var speed: Int64 = 0
+
+    private var internalStartDate: Double = 0
+    @objc public internal(set) var startDate: Double {
+        get {
+            return queue.sync {
+                internalStartDate
+            }
+        }
+        set {
+            return queue.sync {
+                internalStartDate = newValue
+            }
+        }
+    }
+
+    private var internalEndDate: Double = 0
+    @objc public internal(set) var endDate: Double {
+        get {
+            return queue.sync {
+                internalEndDate
+            }
+        }
+        set {
+            return queue.sync {
+                internalEndDate = newValue
+            }
+        }
+    }
+
+
+    private var internalSpeed: Int64 = 0
+    public internal(set) var speed: Int64 {
+        get {
+            return queue.sync {
+                internalSpeed
+            }
+        }
+        set {
+            return queue.sync {
+                internalSpeed = newValue
+            }
+        }
+    }
 
     /// 默认为url最后一部分
     @objc public internal(set) var fileName: String
 
-    public var timeRemaining: Int64 = 0
+    private var internalTimeRemaining: Int64 = 0
+    public internal(set) var timeRemaining: Int64 {
+        get {
+            return queue.sync {
+                internalTimeRemaining
+            }
+        }
+        set {
+            return queue.sync {
+                internalTimeRemaining = newValue
+            }
+        }
+    }
 
     public let url: URL
     

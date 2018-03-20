@@ -25,6 +25,7 @@
 		E18CFA51205AA5570003E39A /* DownloadTaskCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E18CFA4D205AA5570003E39A /* DownloadTaskCell.xib */; };
 		E18CFA55205AA55E0003E39A /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18CFA53205AA55E0003E39A /* ListViewController.swift */; };
 		E18CFA56205AA55E0003E39A /* ListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18CFA54205AA55E0003E39A /* ListViewCell.swift */; };
+		E18D63F520608FC000E4BE40 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18D63F420608FC000E4BE40 /* BaseViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		E18CFA4D205AA5570003E39A /* DownloadTaskCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DownloadTaskCell.xib; sourceTree = "<group>"; };
 		E18CFA53205AA55E0003E39A /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		E18CFA54205AA55E0003E39A /* ListViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewCell.swift; sourceTree = "<group>"; };
+		E18D63F420608FC000E4BE40 /* BaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				E18CFA26205A71760003E39A /* AppDelegate.swift */,
+				E18D63F420608FC000E4BE40 /* BaseViewController.swift */,
 				E18CFA45205AA54A0003E39A /* ViewController1.swift */,
 				E18CFA47205AA54A0003E39A /* ViewController2.swift */,
 				E18CFA46205AA54A0003E39A /* ViewController3.swift */,
@@ -195,6 +198,7 @@
 				E18CFA49205AA54A0003E39A /* ViewController3.swift in Sources */,
 				E18CFA40205A75810003E39A /* TRCache.swift in Sources */,
 				E18CFA44205A75810003E39A /* TRTask.swift in Sources */,
+				E18D63F520608FC000E4BE40 /* BaseViewController.swift in Sources */,
 				E18CFA4A205AA54A0003E39A /* ViewController2.swift in Sources */,
 				E18CFA55205AA55E0003E39A /* ListViewController.swift in Sources */,
 				E18CFA56205AA55E0003E39A /* ListViewCell.swift in Sources */,

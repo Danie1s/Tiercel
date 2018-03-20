@@ -283,7 +283,6 @@ extension TRCache {
     
 
 
-
     /// 删除保留在本地的缓存文件
     ///
     /// - Parameter task:
@@ -296,7 +295,6 @@ extension TRCache {
             }
         }
     }
-    
 }
 
 

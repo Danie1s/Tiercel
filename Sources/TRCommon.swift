@@ -136,7 +136,8 @@ extension Tiercel where Base == Double {
     ///
     /// - Returns:
     public func convertTimeToDateString() -> String {
-        let date = Date(timeIntervalSince1970: base)
+        let time = base + 3600 * 8
+        let date = Date(timeIntervalSince1970: time)
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return formatter.string(from: date)

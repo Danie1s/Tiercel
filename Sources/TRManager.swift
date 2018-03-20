@@ -80,7 +80,6 @@ public class TRManager {
     
 
 
-
     private var internalIsCompleted: Bool = false
     private var isCompleted: Bool {
         get {
@@ -116,9 +115,34 @@ public class TRManager {
         return internalProgress
     }
     
-    public private(set) var speed: Int64 = 0
+    private var internalSpeed: Int64 = 0
+    public private(set) var speed: Int64 {
+        get {
+            return queue.sync {
+                internalSpeed
+            }
+        }
+        set {
+            return queue.sync {
+                internalSpeed = newValue
+            }
+        }
+    }
 
-    public private(set) var timeRemaining: Int64 = 0
+
+    private var internalTimeRemaining: Int64 = 0
+    public private(set) var timeRemaining: Int64 {
+        get {
+            return queue.sync {
+                internalTimeRemaining
+            }
+        }
+        set {
+            return queue.sync {
+                internalTimeRemaining = newValue
+            }
+        }
+    }
     
     internal var successHandler: TRManagerHandler?
     
@@ -148,7 +172,7 @@ public class TRManager {
 
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeoutIntervalForRequest
-
+        configuration.httpMaximumConnectionsPerHost = 10000
         let sessionDelegate = TRSessionDelegate()
         session = URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: nil)
 
@@ -167,13 +191,11 @@ public class TRManager {
     private func setupSession() -> URLSession {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeoutIntervalForRequest
-
+        configuration.httpMaximumConnectionsPerHost = 10000
         let sessionDelegate = TRSessionDelegate()
         sessionDelegate.manager = self
         return URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: nil)
     }
-
-
 }
 
 

@@ -262,7 +262,7 @@ public var tasks: [FCTask] = []
 
 
 
- ### TRCache
+### TRCache
 
 TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。同样地，TRCache没有设计成单例模式，TRCache对象一般作为TRManager对象的属性来使用，如果需要跨控制器使用，那么只需要创建跟TRManager对象同样名字的TRCache对象即可操作对应模块的缓存信息和文件。
 
