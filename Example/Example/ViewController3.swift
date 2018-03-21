@@ -15,6 +15,9 @@ class ViewController3: BaseViewController {
         super.viewDidLoad()
 
         downloadManager = TRManager("ViewController3", isStoreInfo: true)
+        
+        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
+        downloadManager?.isStartDownloadImmediately = false
 
         URLStrings = (1...5).map({ "http://120.25.226.186:32812/resources/videos/minion_0\($0).mp4" })
         

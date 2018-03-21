@@ -146,7 +146,7 @@
         <!--View Controller1-->
         <scene sceneID="qBW-vF-vcc">
             <objects>
-                <viewController id="hzf-Gg-ctm" customClass="ViewController1" customModule="Swift调试模板" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="hzf-Gg-ctm" customClass="ViewController1" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="FBA-3L-RWo"/>
                         <viewControllerLayoutGuide type="bottom" id="gCe-UX-hK9"/>
@@ -291,13 +291,13 @@
         <!--List View Controller-->
         <scene sceneID="GKI-k7-WFW">
             <objects>
-                <tableViewController id="OQp-GJ-mes" customClass="ListViewController" customModule="Swift调试模板" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="OQp-GJ-mes" customClass="ListViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="5Tg-ts-YaN">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="listCell" id="xrT-VF-286" customClass="ListViewCell" customModule="Swift调试模板" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="listCell" id="xrT-VF-286" customClass="ListViewCell" customModule="Example" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xrT-VF-286" id="wKO-lA-kkM">
@@ -345,7 +345,7 @@
         <!--View Controller3-->
         <scene sceneID="spu-eN-Uq5">
             <objects>
-                <viewController id="WS1-bt-7kH" customClass="ViewController3" customModule="Swift调试模板" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="WS1-bt-7kH" customClass="ViewController3" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Inf-bO-w9M"/>
                         <viewControllerLayoutGuide type="bottom" id="cMq-08-pfT"/>
@@ -436,6 +436,12 @@
                                             <action selector="multiDownload:" destination="WS1-bt-7kH" eventType="touchUpInside" id="EH7-fe-OhN"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总进度：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Qe-dX-WeF">
+                                        <rect key="frame" x="289.5" y="20" width="70.5" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
@@ -448,6 +454,7 @@
                                     <constraint firstItem="pkR-GN-fMX" firstAttribute="leading" secondItem="m43-JT-8ko" secondAttribute="leading" id="FF5-yw-MNe"/>
                                     <constraint firstItem="IxY-gV-f8e" firstAttribute="leading" secondItem="l0C-Sf-BAc" secondAttribute="leading" id="GkH-7c-kj9"/>
                                     <constraint firstAttribute="trailing" secondItem="0Fg-Eb-iGa" secondAttribute="trailing" constant="15" id="KUh-XY-6OH"/>
+                                    <constraint firstItem="3Qe-dX-WeF" firstAttribute="centerY" secondItem="S5q-nF-gsd" secondAttribute="centerY" id="LgU-Xh-guf"/>
                                     <constraint firstItem="08e-mn-JGF" firstAttribute="centerY" secondItem="IxY-gV-f8e" secondAttribute="centerY" id="Rcb-jQ-bMF"/>
                                     <constraint firstItem="l0C-Sf-BAc" firstAttribute="top" secondItem="0Hb-0T-POU" secondAttribute="bottom" constant="10" id="WuU-Gj-GaN"/>
                                     <constraint firstItem="0Fg-Eb-iGa" firstAttribute="centerY" secondItem="dHr-Of-Kjy" secondAttribute="centerY" id="YuY-Bs-8au"/>
@@ -459,6 +466,7 @@
                                     <constraint firstItem="18D-jn-Xo3" firstAttribute="top" secondItem="dHr-Of-Kjy" secondAttribute="bottom" constant="10" id="hTB-hB-j6h"/>
                                     <constraint firstItem="0Hb-0T-POU" firstAttribute="leading" secondItem="S5q-nF-gsd" secondAttribute="leading" id="kdw-0q-VvJ"/>
                                     <constraint firstItem="S5q-nF-gsd" firstAttribute="top" secondItem="6RR-yd-RCD" secondAttribute="top" constant="20" id="nsb-8H-bnt"/>
+                                    <constraint firstItem="3Qe-dX-WeF" firstAttribute="trailing" secondItem="0Fg-Eb-iGa" secondAttribute="trailing" id="oFS-2C-Olg"/>
                                     <constraint firstAttribute="trailing" secondItem="Qdy-9T-ftu" secondAttribute="trailing" constant="15" id="pBS-xE-do5"/>
                                     <constraint firstItem="m43-JT-8ko" firstAttribute="leading" secondItem="18D-jn-Xo3" secondAttribute="trailing" constant="20" id="sFo-c9-ZZt"/>
                                     <constraint firstAttribute="trailing" secondItem="08e-mn-JGF" secondAttribute="trailing" constant="15" id="z3i-Q0-pMK"/>
@@ -479,6 +487,7 @@
                     <connections>
                         <outlet property="tableView" destination="UJ6-RT-Vgd" id="0Ai-my-8UR"/>
                         <outlet property="timeRemainingLabel" destination="0Fg-Eb-iGa" id="jB4-zo-xaT"/>
+                        <outlet property="totalProgressLabel" destination="3Qe-dX-WeF" id="o6L-Fx-Nx4"/>
                         <outlet property="totalSpeedLabel" destination="dHr-Of-Kjy" id="cn8-Zc-rJJ"/>
                         <outlet property="totalTasksLabel" destination="S5q-nF-gsd" id="HDU-Yh-Daq"/>
                     </connections>
@@ -490,7 +499,7 @@
         <!--View Controller2-->
         <scene sceneID="dgf-g9-GoM">
             <objects>
-                <viewController id="wVe-jT-pWR" customClass="ViewController2" customModule="Swift调试模板" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="wVe-jT-pWR" customClass="ViewController2" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ePF-bI-QPJ"/>
                         <viewControllerLayoutGuide type="bottom" id="4hD-15-YYs"/>
@@ -588,6 +597,12 @@
                                             <action selector="cancelTaskLimit:" destination="wVe-jT-pWR" eventType="touchUpInside" id="eB2-79-qQ8"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总进度：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IDR-tQ-e2a">
+                                        <rect key="frame" x="289.5" y="20.5" width="70.5" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
@@ -606,6 +621,7 @@
                                     <constraint firstAttribute="trailing" secondItem="xJA-Bq-VVN" secondAttribute="trailing" constant="15" id="VM7-Q6-PCz"/>
                                     <constraint firstItem="cS7-AK-KdI" firstAttribute="centerY" secondItem="MVS-zE-nIi" secondAttribute="centerY" id="Z42-Y2-2rx"/>
                                     <constraint firstItem="iad-QJ-EZD" firstAttribute="leading" secondItem="k1I-LH-Kv4" secondAttribute="leading" id="b3u-wo-oF2"/>
+                                    <constraint firstItem="IDR-tQ-e2a" firstAttribute="trailing" secondItem="Klq-Qu-PLM" secondAttribute="trailing" id="bGw-ah-GLf"/>
                                     <constraint firstAttribute="height" constant="240" id="e0j-b6-l5i"/>
                                     <constraint firstItem="IYA-ar-lp6" firstAttribute="leading" secondItem="g7j-8G-b4t" secondAttribute="trailing" constant="20" id="hCW-hF-XOs"/>
                                     <constraint firstItem="IYA-ar-lp6" firstAttribute="centerY" secondItem="g7j-8G-b4t" secondAttribute="centerY" id="hMu-Yf-9Dw"/>
@@ -616,6 +632,7 @@
                                     <constraint firstItem="Gmm-yy-PuR" firstAttribute="centerY" secondItem="LP7-oe-oAR" secondAttribute="centerY" id="ueQ-Od-Lea"/>
                                     <constraint firstItem="LP7-oe-oAR" firstAttribute="leading" secondItem="iad-QJ-EZD" secondAttribute="leading" id="vOe-2t-zoG"/>
                                     <constraint firstItem="k1I-LH-Kv4" firstAttribute="leading" secondItem="jFB-em-SdY" secondAttribute="leading" constant="15" id="vrl-CK-ar3"/>
+                                    <constraint firstItem="IDR-tQ-e2a" firstAttribute="centerY" secondItem="k1I-LH-Kv4" secondAttribute="centerY" id="zW0-6M-XoI"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -633,6 +650,7 @@
                     <connections>
                         <outlet property="tableView" destination="QJ4-Fj-uru" id="Lsw-YF-ry9"/>
                         <outlet property="timeRemainingLabel" destination="Klq-Qu-PLM" id="Wqf-Qa-H5n"/>
+                        <outlet property="totalProgressLabel" destination="IDR-tQ-e2a" id="z5C-9H-qTh"/>
                         <outlet property="totalSpeedLabel" destination="2Ch-RH-mrD" id="OWk-nQ-NT8"/>
                         <outlet property="totalTasksLabel" destination="k1I-LH-Kv4" id="9hM-QJ-UbX"/>
                     </connections>
@@ -644,7 +662,7 @@
         <!--Download View Controller-->
         <scene sceneID="O5P-xU-gvw">
             <objects>
-                <viewController id="RE7-91-rUf" customClass="DownloadViewController" customModule="Swift调试模板" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="RE7-91-rUf" customClass="DownloadViewController" customModule="Example" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="98g-RD-IbM"/>
                         <viewControllerLayoutGuide type="bottom" id="6dG-As-YWr"/>
@@ -735,17 +753,25 @@
                                             <action selector="cancelTaskLimit:" destination="RE7-91-rUf" eventType="touchUpInside" id="Zsj-4q-fPB"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总进度：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lP3-O8-d4k">
+                                        <rect key="frame" x="289.5" y="20" width="70.5" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="cyd-F6-1FY" firstAttribute="top" secondItem="J44-Pt-OA0" secondAttribute="bottom" constant="10" id="3HA-UM-LvK"/>
                                     <constraint firstItem="D3a-QU-YmO" firstAttribute="top" secondItem="Bms-Qo-CB3" secondAttribute="top" constant="20" id="4dl-uE-jBc"/>
                                     <constraint firstAttribute="height" constant="240" id="8Rl-ce-pw9"/>
+                                    <constraint firstItem="lP3-O8-d4k" firstAttribute="trailing" secondItem="a48-an-FW1" secondAttribute="trailing" id="8cK-l2-WXz"/>
                                     <constraint firstItem="gjc-1o-OQq" firstAttribute="top" secondItem="Exf-kl-K6I" secondAttribute="bottom" constant="10" id="Gce-4u-A2Q"/>
                                     <constraint firstItem="SR3-cB-QpI" firstAttribute="leading" secondItem="cyd-F6-1FY" secondAttribute="leading" id="Hr9-jY-Dsa"/>
                                     <constraint firstItem="SR3-cB-QpI" firstAttribute="top" secondItem="cyd-F6-1FY" secondAttribute="bottom" constant="10" id="IP9-Uj-54s"/>
                                     <constraint firstAttribute="trailing" secondItem="a48-an-FW1" secondAttribute="trailing" constant="15" id="IW9-TZ-4kf"/>
                                     <constraint firstItem="Tod-kR-kwI" firstAttribute="centerY" secondItem="SR3-cB-QpI" secondAttribute="centerY" id="Jzd-iB-85f"/>
+                                    <constraint firstItem="lP3-O8-d4k" firstAttribute="centerY" secondItem="D3a-QU-YmO" secondAttribute="centerY" id="K7C-rt-7Xx"/>
                                     <constraint firstItem="a48-an-FW1" firstAttribute="centerY" secondItem="Exf-kl-K6I" secondAttribute="centerY" id="R4m-8z-Bku"/>
                                     <constraint firstItem="Tod-kR-kwI" firstAttribute="trailing" secondItem="0AJ-RD-vtF" secondAttribute="trailing" id="RKO-M4-8Au"/>
                                     <constraint firstItem="Exf-kl-K6I" firstAttribute="top" secondItem="D3a-QU-YmO" secondAttribute="bottom" constant="10" id="V9Y-RT-hqp"/>
@@ -779,6 +805,7 @@
                     <connections>
                         <outlet property="tableView" destination="BI5-Jh-R0c" id="VbC-tm-7Rl"/>
                         <outlet property="timeRemainingLabel" destination="a48-an-FW1" id="cdv-zm-A5l"/>
+                        <outlet property="totalProgressLabel" destination="lP3-O8-d4k" id="twh-Lc-lWh"/>
                         <outlet property="totalSpeedLabel" destination="Exf-kl-K6I" id="lv1-wl-bni"/>
                         <outlet property="totalTasksLabel" destination="D3a-QU-YmO" id="onL-DS-gDV"/>
                     </connections>

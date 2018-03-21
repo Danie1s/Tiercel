@@ -192,6 +192,7 @@ func TiercelLog<T>(_ message: T, file: String = #file, method: String = #functio
 
     switch TRManager.logLevel {
     case .high:
+        print("")
         print("***************FalconLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
 

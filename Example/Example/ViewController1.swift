@@ -24,7 +24,7 @@ class ViewController1: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        TRManager.logLevel = .high
     }
 
     deinit {

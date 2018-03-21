@@ -39,7 +39,7 @@ public class TRManager {
     // 最大并发数
     public var maxConcurrentTasksLimit = Int.max
 
-    public static var logLevel: TRLogLevel = .high
+    public static var logLevel: TRLogLevel = .none
 
     private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Falcon.queue")
 
@@ -110,8 +110,8 @@ public class TRManager {
 
     private let internalProgress = Progress()
     public var progress: Progress {
-        internalProgress.completedUnitCount = tasks.filter({ $0.status == .running }).reduce(0, { $0 + $1.progress.completedUnitCount })
-        internalProgress.totalUnitCount = tasks.filter({ $0.status == .running }).reduce(0, { $0 + $1.progress.totalUnitCount })
+        internalProgress.completedUnitCount = tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
+        internalProgress.totalUnitCount = tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
         return internalProgress
     }
     

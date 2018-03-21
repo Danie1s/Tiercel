@@ -15,6 +15,9 @@ class DownloadViewController: BaseViewController {
         super.viewDidLoad()
         downloadManager = ListViewController.downloadManager
 
+        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
+        downloadManager?.isStartDownloadImmediately = false
+
         guard let downloadManager = downloadManager else { return  }
 
         // 设置manager的回调

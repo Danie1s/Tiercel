@@ -14,7 +14,8 @@ class BaseViewController: UIViewController {
     @IBOutlet weak var totalTasksLabel: UILabel!
     @IBOutlet weak var totalSpeedLabel: UILabel!
     @IBOutlet weak var timeRemainingLabel: UILabel!
-
+    @IBOutlet weak var totalProgressLabel: UILabel!
+    
     // 由于执行删除running的task，结果是异步回调的，所以最好是用downloadURLStrings作为数据源
     lazy var downloadURLStrings = [String]()
 
@@ -38,8 +39,7 @@ class BaseViewController: UIViewController {
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
 
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
+        TRManager.logLevel = .high
     }
 
     func updateUI() {
@@ -47,6 +47,9 @@ class BaseViewController: UIViewController {
         totalTasksLabel.text = "总任务：\(downloadManager.completedTasks.count)/\(downloadManager.tasks.count)"
         totalSpeedLabel.text = "总速度：\(downloadManager.speed.tr.convertSpeedToString())"
         timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemaining.tr.convertTimeToString())"
+        let per = String(format: "%.2f", downloadManager.progress.fractionCompleted)
+        totalProgressLabel.text = "总进度： \(per)"
+
     }
 
 
@@ -73,7 +76,6 @@ extension BaseViewController {
     @IBAction func clearDisk(_ sender: Any) {
         guard let downloadManager = downloadManager else { return  }
         downloadManager.cache.clearDiskCache()
-        print("总任务：\(downloadManager.completedTasks.count)/\(downloadManager.tasks.count)")
         updateUI()
     }
 
@@ -97,7 +99,8 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         let URLString = downloadURLStrings[indexPath.row]
 
         guard let downloadManager = downloadManager,
-            let task = downloadManager.fetchTask(URLString) else { return cell }
+            let task = downloadManager.fetchTask(URLString)
+            else { return cell }
 
         var image: UIImage = #imageLiteral(resourceName: "resume")
         switch task.status {
