@@ -124,8 +124,8 @@ downloadManager.suspend(URLString)
 // 取消下载，没有下载完成的任务会被移除，但保留没有下载完成的缓存文件
 downloadManager.cancel(URLString)
 
-// 移除下载，所有任务都会被移除，保留已经下载完成的文件，但没有下载完成的缓存文件会被删除
-downloadManager.remove(URLString)
+// 移除下载，已经完成的任务也会被移除，没有下载完成的缓存文件会被删除，已经下载完成的文件可以选择是否保留
+downloadManager.remove(URLString, completely: false)
 ```
 
 
@@ -180,8 +180,8 @@ downloadManager.suspend(URLString)
 // 取消下载，没有下载完成的任务会被移除，但保留没有下载完成的缓存文件
 downloadManager.cancel(URLString)
 
-// 删除下载，已经完成的任务也会被移除，保留已经下载完成的文件，但没有下载完成的缓存文件会被删除
-downloadManager.remove(URLString)
+// 移除下载，已经完成的任务也会被移除，没有下载完成的缓存文件会被删除，已经下载完成的文件可以选择是否保留
+downloadManager.remove(URLString, completely: false)
 ```
 
 TRManager也提供了对所有任务同时操作的API
@@ -190,7 +190,7 @@ TRManager也提供了对所有任务同时操作的API
 downloadManager.totalStart()
 downloadManager.totalSuspend()
 downloadManager.totalCancel()
-downloadManager.totalRemove()
+downloadManager.totalRemove(completely: false)
 ```
 
 TRManager作为所有下载任务的管理者，也可以设置回调
@@ -365,9 +365,9 @@ task.progress { (task) in
 - 开启
 - 暂停
 - 取消，会从TRManager对象中的tasks中移除，但保留没有下载完成的缓存文件
-- 移除，已经完成的任务也会被移除，保留已经下载完成的文件，但没有下载完成的缓存文件会被删除
+- 移除，已经完成的任务也会被移除，没有下载完成的缓存文件会被删除，已经下载完成的文件可以选择是否保留
 
-**注意：取消和移除的任务会被销毁，会从TRManager对象的tasks中移除，但操作是异步的，马上获取的tasks可能不正确**
+**注意：取消和移除的任务会被销毁，会从TRManager对象的tasks中移除，但操作是异步的，马上获取的tasks可能不正确，在回调闭包里面获取的tasks才能保证正确**
 
 
 

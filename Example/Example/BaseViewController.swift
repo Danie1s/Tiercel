@@ -70,7 +70,7 @@ extension BaseViewController {
     }
 
     @IBAction func totalDelete(_ sender: Any) {
-        downloadManager?.totalRemove()
+        downloadManager?.totalRemove(completely: false)
     }
 
     @IBAction func clearDisk(_ sender: Any) {

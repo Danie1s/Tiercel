@@ -255,9 +255,13 @@ extension TRCache {
 
 // MARK: - remove
 extension TRCache {
-    public func remove(_ task: TRDownloadTask) {
+    public func remove(_ task: TRDownloadTask, completely: Bool) {
         removeTmpFile(task)
         removeTaskInfo(task)
+
+        if completely {
+            removeFile(task)
+        }
     }
     
     public func removeFile(_ task: TRDownloadTask) {

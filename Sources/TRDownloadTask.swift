@@ -96,6 +96,7 @@ public class TRDownloadTask: TRTask {
         
     }
 
+
     internal func remove() {
         TiercelLog("[downloadTask] did remove \(self.URLString)")
         if status == .running {
@@ -116,11 +117,13 @@ public class TRDownloadTask: TRTask {
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
+        cache.store(self)
+        TiercelLog("[downloadTask] a task did complete URLString: \(URLString)")
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
             self.successHandler?(self)
         }
-        cache.store(self)
+
     }
 
 
@@ -242,7 +245,7 @@ extension TRDownloadTask {
                 }
             }
         } else {
-            TiercelLog("[session] a session task did complete")
+
             completed()
         }
 

@@ -48,6 +48,8 @@ public class TRManager {
     private var session: URLSession
 
     public var isStartDownloadImmediately = true
+
+    private var isRemoveCompletely = false
     
     private var shouldRun: Bool {
         return runningTasks.count < maxConcurrentTasksLimit
@@ -348,10 +350,10 @@ extension TRManager {
         }
     }
 
-    public func totalRemove() {
+    public func totalRemove(completely: Bool = false) {
 
         tasks.forEach { (task) in
-            remove(task.URLString)
+            remove(task.URLString, completely: completely)
         }
         if status == .running {
             status = .remove
@@ -509,12 +511,19 @@ extension TRManager {
         task.cancel()
     }
 
+
     /// 移除任务
     /// 所有状态的任务都可以被移除
-    /// 会删除还没有下载完成的缓存文件，但会保留已经下载完成的文件
+    /// 会删除还没有下载完成的缓存文件
+    /// 可以选择是否删除下载完成的文件
     /// 不会触发task的successHandler或者failureHandler
-    public func remove(_ URLString: String) {
+    ///
+    /// - Parameters:
+    ///   - URLString: URLString
+    ///   - completely: 是否删除下载完成的文件
+    public func remove(_ URLString: String, completely: Bool = false) {
         guard let task = fetchTask(URLString) as? TRDownloadTask else { return }
+        isRemoveCompletely = completely
         task.remove()
     }
 
@@ -522,7 +531,7 @@ extension TRManager {
         guard let task = fetchTask(URLString) as? TRDownloadTask else { return }
         cache.removeTaskInfo(task)
         if task.status == .remove {
-            cache.remove(task)
+            cache.remove(task, completely: isRemoveCompletely)
         }
         guard let tasksIndex = tasks.index(where: { $0.URLString == task.URLString }) else { return  }
         tasks.remove(at: tasksIndex)

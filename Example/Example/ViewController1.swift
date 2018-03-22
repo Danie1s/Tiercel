@@ -62,7 +62,7 @@ class ViewController1: UIViewController {
     }
 
     @IBAction func deleteTask(_ sender: UIButton) {
-        downloadManager.remove(URLString)
+        downloadManager.remove(URLString, completely: false)
     }
 
     @IBAction func clearDisk(_ sender: Any) {

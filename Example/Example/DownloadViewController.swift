@@ -60,7 +60,7 @@ extension DownloadViewController {
             let URLString = downloadURLStrings[index]
             downloadURLStrings.remove(at: index)
             tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-            downloadManager.remove(URLString)
+            downloadManager.remove(URLString, completely: false)
         }
         updateUI()
     }
