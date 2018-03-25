@@ -188,23 +188,23 @@ extension Array {
 }
 
 
-func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {
+public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {
 
     switch TRManager.logLevel {
     case .high:
         print("")
-        print("***************FalconLog****************")
+        print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
 
         print("File    :  \((file as NSString).lastPathComponent)\n" +
             "Thread  :  \(threadNum)\n" +
+            "line    :  \(line)\n" +
             "Info    :  \(message)"
         )
         print("")
     case .low: print(message)
     case .none: break
     }
-
 }
 
 
