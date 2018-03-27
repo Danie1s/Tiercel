@@ -291,6 +291,7 @@ extension TRCache {
     ///
     /// - Parameter task:
     public func removeTmpFile(_ task: TRDownloadTask) {
+        objc_sync_enter(self)
         ioQueue.async {
             if task.fileName.isEmpty { return }
             let path = (self.downloadTmpPath as NSString).appendingPathComponent(task.fileName)
@@ -298,6 +299,7 @@ extension TRCache {
                 try? self.fileManager.removeItem(atPath: path)
             }
         }
+        objc_sync_exit(self)
     }
 }
 
