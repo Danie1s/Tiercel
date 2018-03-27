@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Tiercel
 
 class ViewController3: BaseViewController {
 

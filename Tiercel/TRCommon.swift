@@ -47,7 +47,7 @@ public typealias TRTaskHandler = (TRTask) -> ()
 public typealias TRManagerHandler = (TRManager) -> ()
 
 public class Tiercel<Base> {
-    private let base: Base
+    internal let base: Base
     init(_ base: Base) {
         self.base = base
     }
@@ -71,7 +71,6 @@ extension Double: TiercelCompatible {}
 extension UIDevice: TiercelCompatible {}
 extension UIView: TiercelCompatible {}
 extension DispatchQueue: TiercelCompatible {}
-
 
 extension Tiercel where Base == Int64 {
 
@@ -175,8 +174,6 @@ extension Tiercel where Base: DispatchQueue {
 }
 
 
-
-
 extension Array {
     public func safeObjectAtIndex(_ index: Int) -> Element? {
         if index < self.count {
@@ -186,6 +183,13 @@ extension Array {
         }
     }
 }
+
+extension Array where Element == TRTask {
+    public func sortedByCreateDate() -> [TRTask] {
+        return self.sorted (by: { $0.createDate < $1.createDate })
+    }
+}
+
 
 
 public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {

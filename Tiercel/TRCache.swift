@@ -155,16 +155,17 @@ extension TRCache {
 
 // MARK: - retrieve
 extension TRCache {
-    public func retrieveTasks() -> [TRTask] {
-        guard let taskInfoArray = retrieveTaskInfos() else { return [TRTask]() }
-        return taskInfoArray.map { (info) -> TRDownloadTask in
-            let url = URL(string: info["URLString"] as! String)!
-            let task = TRDownloadTask(url, fileName: info["fileName"] as? String, cache: self, isCacheInfo: true)
+    public func retrieveTasks() -> [String: TRTask] {
+        guard let taskInfoArray = retrieveTaskInfos() else { return [String: TRTask]() }
+        var tasks = [String: TRTask]()
+        for taskInfo in taskInfoArray {
+            let url = URL(string: taskInfo["URLString"] as! String)!
+            let task = TRDownloadTask(url, fileName: taskInfo["fileName"] as? String, cache: self, isCacheInfo: true)
 
-            task.setValuesForKeys(info)
+            task.setValuesForKeys(taskInfo)
 
-            task.status = TRStatus(rawValue: info["status"] as! String)!
-            task.progress.totalUnitCount = info["totalBytes"] as! Int64
+            task.status = TRStatus(rawValue: taskInfo["status"] as! String)!
+            task.progress.totalUnitCount = taskInfo["totalBytes"] as! Int64
             if task.status == .completed {
                 task.progress.completedUnitCount = task.progress.totalUnitCount
             } else {
@@ -178,8 +179,11 @@ extension TRCache {
             if task.status == .running {
                 task.status = .suspend
             }
-            return task
+            let id = task.URLString.tr.md5
+            tasks[id] = task
         }
+        return tasks
+
     }
     
     public func retrieveTaskInfos() -> [[String: Any]]? {
@@ -209,6 +213,7 @@ extension TRCache {
             let info: [String : Any] = ["fileName": task.fileName,
                                         "startDate": task.startDate,
                                         "endDate": task.endDate,
+                                        "createDate": task.createDate,
                                         "totalBytes": task.progress.totalUnitCount,
                                         "completedBytes": task.progress.completedUnitCount,
                                         "status": task.status.rawValue,
@@ -291,7 +296,6 @@ extension TRCache {
     ///
     /// - Parameter task:
     public func removeTmpFile(_ task: TRDownloadTask) {
-        objc_sync_enter(self)
         ioQueue.async {
             if task.fileName.isEmpty { return }
             let path = (self.downloadTmpPath as NSString).appendingPathComponent(task.fileName)
@@ -299,7 +303,6 @@ extension TRCache {
                 try? self.fileManager.removeItem(atPath: path)
             }
         }
-        objc_sync_exit(self)
     }
 }
 

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Tiercel
 
 class ViewController2: BaseViewController {
 
@@ -37,8 +38,7 @@ class ViewController2: BaseViewController {
             strongSelf.tableView.reloadData()
             strongSelf.updateUI()
         }
-
-
+        
         let tasks = downloadManager.tasks
         tasks.forEach { downloadURLStrings.append($0.URLString)}
         updateUI()

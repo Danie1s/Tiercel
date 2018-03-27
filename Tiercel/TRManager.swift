@@ -57,18 +57,22 @@ public class TRManager {
 
     public var status: TRStatus = .waiting
 
-    private var internalTasks: [TRTask] = []
-    public var tasks: [TRTask] {
+    private var internalTasksDict = [String: TRTask]()
+    private var tasksDict: [String: TRTask] {
         get {
             return queue.sync {
-                internalTasks
+                internalTasksDict
             }
         }
         set {
             return queue.sync {
-                internalTasks = newValue
+                internalTasksDict = newValue
             }
         }
+    }
+
+    public var tasks: [TRTask] {
+        return tasksDict.map({ $1 }).sortedByCreateDate()
     }
 
 
@@ -112,8 +116,8 @@ public class TRManager {
 
     private let internalProgress = Progress()
     public var progress: Progress {
-        internalProgress.completedUnitCount = tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
-        internalProgress.totalUnitCount = tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
+        internalProgress.completedUnitCount = tasksDict.reduce(0, { $0 + $1.value.progress.completedUnitCount })
+        internalProgress.totalUnitCount = tasksDict.reduce(0, { $0 + $1.value.progress.totalUnitCount })
         return internalProgress
     }
     
@@ -184,9 +188,9 @@ public class TRManager {
             self.maxConcurrentTasksLimit = max
         }
         if isStoreInfo {
-            tasks = cache.retrieveTasks()
-            tasks.forEach({ $0.manager = self })
-            TiercelLog("retrieveTasks tasks.count = \(tasks.count)")
+            tasksDict = cache.retrieveTasks()
+            tasksDict.forEach({ $1.manager = self })
+            TiercelLog("retrieveTasks tasks.count = \(tasksDict.count)")
         }
     }
 
@@ -240,7 +244,7 @@ extension TRManager {
             }
         } else {
             task = TRDownloadTask(url, fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
-            tasks.append(task!)
+            tasksDict[task!.URLString.tr.md5] = task!
         }
         if isStartDownloadImmediately {
             start(URLString)
@@ -285,10 +289,8 @@ extension TRManager {
         isSuspend = false
         isCompleted = false
 
-
         var temp = [TRDownloadTask]()
         for url in uniqueUrls {
-
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
                 task!.progressHandler = progressHandler
@@ -305,8 +307,9 @@ extension TRManager {
                 }
 
                 task = TRDownloadTask(url, fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
-                tasks.append(task!)
+                tasksDict[task!.URLString.tr.md5] = task!
             }
+
             temp.append(task!)
         }
 
@@ -324,24 +327,19 @@ extension TRManager {
 extension TRManager {
     
     public func totalStart() {
-        tasks.forEach { (task) in
-            start(task.URLString)
-        }
+        tasks.forEach( { start($0.URLString) })
     }
     
     
     public func totalSuspend() {
-        tasks.forEach { (task) in
-            suspend(task.URLString)
-        }
+        tasksDict.forEach( { suspend($1.URLString) })
         status = .suspend
 
     }
     
     public func totalCancel() {
-        tasks.forEach { (task) in
-            cancel(task.URLString)
-        }
+        tasksDict.forEach( { cancel($1.URLString) })
+
         if status == .running {
             status = .cancel
         } else {
@@ -353,10 +351,8 @@ extension TRManager {
     }
 
     public func totalRemove(completely: Bool = false) {
+        tasksDict.forEach( { remove($1.URLString, completely: completely) })
 
-        tasks.forEach { (task) in
-            remove(task.URLString, completely: completely)
-        }
         if status == .running {
             status = .remove
         } else {
@@ -369,7 +365,7 @@ extension TRManager {
     
 
     internal func completed() {
-        let isEnd = self.tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
+        let isEnd = tasksDict.filter { $1.status != .completed && $1.status != .failed }.isEmpty
 
         if isEnd {
             if !isCompleted {
@@ -389,7 +385,7 @@ extension TRManager {
                     return
                 }
 
-                let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
+                let isSuccess = tasksDict.filter { $1.status == .failed }.isEmpty
                 if isSuccess {
                     TiercelLog("[manager] all tasks completed and manager succeeded")
                     status = .completed
@@ -411,7 +407,7 @@ extension TRManager {
             return
         }
 
-        let waitingTasks = tasks.filter { $0.status == .waiting }
+        let waitingTasks = tasksDict.filter { $1.status == .waiting }
         if waitingTasks.isEmpty {
             if runningTasks.isEmpty {
                 if !isSuspend {
@@ -427,9 +423,8 @@ extension TRManager {
         }
 
         TiercelLog("[manager] start to download next task")
-        waitingTasks.forEach({ (task) in
-            self.start(task.URLString)
-        })
+        waitingTasks.map({ $1 }).sortedByCreateDate().forEach( { start($0.URLString) })
+
 
     }
     
@@ -445,9 +440,9 @@ extension TRManager {
 
 // MARK: - single task control
 extension TRManager {
-    
+
     public func fetchTask(_ URLString: String) -> TRTask? {
-        return tasks.first { $0.URLString == URLString }
+        return tasksDict[URLString.tr.md5]
     }
 
 
@@ -535,13 +530,13 @@ extension TRManager {
         if task.status == .remove {
             cache.remove(task, completely: isRemoveCompletely)
         }
-        guard let tasksIndex = tasks.index(where: { $0.URLString == task.URLString }) else { return  }
-        tasks.remove(at: tasksIndex)
+        guard let tasksIndex = tasksDict.index(where: { $1.URLString == task.URLString }) else { return  }
+        tasksDict.remove(at: tasksIndex)
 
         if status == .cancel || status == .remove {
             return
         }
-        if tasks.isEmpty {
+        if tasksDict.isEmpty {
             if status == .running {
                 status = task.status
             } else {
@@ -576,7 +571,7 @@ extension TRManager {
                     speed = Int64(Double(dataCount - lastData) / cost)
                     parseTime()
                 }
-                tasks.forEach({ (task) in
+                tasksDict.forEach({ (URLString, task) in
                     if let task = task as? TRDownloadTask {
                         task.parseSpeed(cost)
                     }
@@ -589,7 +584,7 @@ extension TRManager {
             speed = Int64(Double(dataCount - lastData) / cost)
             parseTime()
         }
-        tasks.forEach({ (task) in
+        tasksDict.forEach({ (URLString, task) in
             if let task = task as? TRDownloadTask {
                 task.parseSpeed(cost)
             }

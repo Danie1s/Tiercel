@@ -72,6 +72,8 @@ public class TRTask: NSObject {
     public internal(set) var progress: Progress = Progress()
 
 
+    @objc internal var createDate: Double = Date().timeIntervalSince1970
+
     private var internalStartDate: Double = 0
     @objc public internal(set) var startDate: Double {
         get {
