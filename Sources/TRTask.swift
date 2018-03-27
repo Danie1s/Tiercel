@@ -36,7 +36,7 @@ public class TRTask: NSObject {
     internal var successHandler: TRTaskHandler?
     internal var failureHandler: TRTaskHandler?
 
-    private let queue = DispatchQueue(label: "com.Daniels.Falcon.Task.queue")
+    private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
 
     internal var request: URLRequest?
 

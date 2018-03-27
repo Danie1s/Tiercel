@@ -41,7 +41,7 @@ public class TRManager {
 
     public static var logLevel: TRLogLevel = .none
 
-    private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Falcon.queue")
+    private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.queue")
 
     public var cache: TRCache
 
@@ -287,14 +287,17 @@ extension TRManager {
 
 
         var temp = [TRDownloadTask]()
-        for i in 0..<uniqueUrls.count {
-            let url = uniqueUrls[i]
+        for url in uniqueUrls {
 
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
                 task!.progressHandler = progressHandler
                 task!.successHandler = successHandler
                 task!.failureHandler = failureHandler
+                if let index = URLStrings.index(of: url.absoluteString),
+                    let fileName = fileNames?.safeObjectAtIndex(index)  {
+                    task!.fileName = fileName
+                }
             } else {
                 var fileName: String?
                 if let fileNames = fileNames, let index = URLStrings.index(of: url.absoluteString) {
@@ -306,12 +309,11 @@ extension TRManager {
             }
             temp.append(task!)
         }
-        tasks = temp
 
         if isStartDownloadImmediately {
             totalStart()
         }        
-        return tasks as! [TRDownloadTask]
+        return temp
     }
     
  

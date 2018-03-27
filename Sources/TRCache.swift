@@ -64,10 +64,10 @@ public class TRCache {
 
         self.isStoreInfo = isStoreInfo
         
-        let ioQueueName = "com.Daniels.Falcon.Cache.ioQueue.\(name)"
+        let ioQueueName = "com.Daniels.Tiercel.Cache.ioQueue.\(name)"
         ioQueue = DispatchQueue(label: ioQueueName)
         
-        let cacheName = "com.Daniels.Falcon.Cache.\(name)"
+        let cacheName = "com.Daniels.Tiercel.Cache.\(name)"
         
         let diskCachePath = TRCache.defaultDiskCachePathClosure(cacheName)
         
