@@ -116,7 +116,19 @@ public class TRTask: NSObject {
     }
 
     /// 默认为url最后一部分
-    @objc public internal(set) var fileName: String
+    private var internalFileName: String
+    @objc public internal(set) var fileName: String {
+        get {
+            return queue.sync {
+                internalFileName
+            }
+        }
+        set {
+            return queue.sync {
+                internalFileName = newValue
+            }
+        }
+    }
 
     private var internalTimeRemaining: Int64 = 0
     public internal(set) var timeRemaining: Int64 {
@@ -138,18 +150,15 @@ public class TRTask: NSObject {
 
 
     
-    public init(_ url: URL, cache: TRCache?, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+    public init(_ url: URL, cache: TRCache, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
         self.url = url
-        self.fileName = url.lastPathComponent
+        self.internalFileName = url.lastPathComponent
         self.progressHandler = progressHandler
         self.successHandler = successHandler
         self.failureHandler = failureHandler
         self.internalURLString = url.absoluteString
-        if let cache = cache {
-            self.cache = cache
-        } else {
-            self.cache = TRCache.default
-        }
+        self.cache = cache
+
         super.init()
     }
 
@@ -179,6 +188,11 @@ public class TRTask: NSObject {
         
     }
 
+    internal func remove() {
+
+
+    }
+
     internal func completed() {
 
 
@@ -186,7 +200,7 @@ public class TRTask: NSObject {
     
 }
 
-// MARK: - handler
+// MARK: - closure
 extension TRTask {
     @discardableResult
     public func progress(_ handler: @escaping TRTaskHandler) -> Self {

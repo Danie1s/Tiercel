@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Tiercel
 
 class ViewController1: UIViewController {
 
@@ -43,13 +44,32 @@ class ViewController1: UIViewController {
     }
     
     @IBAction func start(_ sender: UIButton) {
+
         downloadManager.download(URLString, fileName: "小黄人.mp4", progressHandler: { [weak self] (task) in
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)
-        }) { [weak self] (task) in
+            if task.status == .suspend {
+                // 下载任务暂停了
+            }
+
+            if task.status == .completed {
+                // 下载任务完成了
+            }
+        }, failureHandler: { [weak self] (task) in
             self?.updateUI(task)
-        }
+            if task.status == .failed {
+                // 下载任务失败了
+            }
+
+            if task.status == .cancel {
+                // 下载任务取消了
+            }
+
+            if task.status == .remove {
+                // 下载任务移除了
+            }
+        })
     }
 
     @IBAction func suspend(_ sender: UIButton) {

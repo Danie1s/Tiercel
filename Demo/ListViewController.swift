@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Tiercel
 
 class ListViewController: UITableViewController {
 
@@ -18,7 +19,12 @@ class ListViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        if #available(iOS 11, *) {
+        } else {
+            tableView.contentInset.top = 64
+            tableView.scrollIndicatorInsets.top = 64
+        }
+
     }
 
 

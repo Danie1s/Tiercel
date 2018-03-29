@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Tiercel
 
 class BaseViewController: UIViewController {
 
@@ -52,13 +53,48 @@ class BaseViewController: UIViewController {
 
     }
 
+    func setupManager() {
 
+        // 设置manager的回调
+        downloadManager?.progress { [weak self] (manager) in
+            guard let strongSelf = self else { return }
+            strongSelf.updateUI()
+
+            }.success{ [weak self] (manager) in
+                guard let strongSelf = self else { return }
+                strongSelf.updateUI()
+                if manager.status == .suspend {
+                    // manager 暂停了
+                }
+                if manager.status == .completed {
+                    // manager 完成了
+                }
+            }.failure { [weak self] (manager) in
+                guard let strongSelf = self,
+                    let downloadManager = strongSelf.downloadManager
+                    else { return }
+                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+                strongSelf.tableView.reloadData()
+                strongSelf.updateUI()
+
+                if manager.status == .failed {
+                    // manager 失败了
+                }
+                if manager.status == .cancel {
+                    // manager 取消了
+                }
+                if manager.status == .remove {
+                    // manager 移除了
+                }
+        }
+    }
 }
 
 extension BaseViewController {
     @IBAction func totalStart(_ sender: Any) {
         downloadManager?.isStartDownloadImmediately = true
         downloadManager?.totalStart()
+        tableView.reloadData()
     }
 
     @IBAction func totalSuspend(_ sender: Any) {
@@ -106,7 +142,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         switch task.status {
         case .running:
             image = #imageLiteral(resourceName: "resume")
-        case .suspend, .completed:
+        case .suspend, .completed, .waiting:
             image = #imageLiteral(resourceName: "suspend")
         default: break
         }
@@ -149,10 +185,26 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             .success({ [weak cell] (task) in
                 guard let cell = cell as? DownloadTaskCell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                if task.status == .suspend {
+                    // 下载任务暂停了
+                }
+                if task.status == .completed {
+                    // 下载任务完成了
+                }
             })
             .failure({ [weak cell] (task) in
                 guard let cell = cell as? DownloadTaskCell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+
+                if task.status == .failed {
+                    // 下载任务失败了
+                }
+                if task.status == .cancel {
+                    // 下载任务取消了
+                }
+                if task.status == .remove {
+                    // 下载任务移除了
+                }
             })
     }
 

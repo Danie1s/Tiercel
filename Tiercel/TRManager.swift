@@ -41,6 +41,8 @@ public class TRManager {
 
     public static var logLevel: TRLogLevel = .none
 
+    public static var isControlNetworkActivityIndicator = true
+
     private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.queue")
 
     public var cache: TRCache
@@ -49,16 +51,72 @@ public class TRManager {
 
     public var isStartDownloadImmediately = true
 
-    private var isRemoveCompletely = false
+    private var internalIsRemoveCompletely = false
+    private var isRemoveCompletely: Bool {
+        get {
+            return queue.sync {
+                internalIsRemoveCompletely
+            }
+        }
+        set {
+            return queue.sync {
+                internalIsRemoveCompletely = newValue
+            }
+        }
+    }
+
     
     private var shouldRun: Bool {
         return runningTasks.count < maxConcurrentTasksLimit
     }
 
-    public var status: TRStatus = .waiting
+
+    private var internalIsCompleted: Bool = false
+    private var isCompleted: Bool {
+        get {
+            return queue.sync {
+                internalIsCompleted
+            }
+        }
+        set {
+            return queue.sync {
+                internalIsCompleted = newValue
+            }
+        }
+    }
+
+    private var internalIsSuspend: Bool = true
+    private var isSuspend: Bool {
+        get {
+            return queue.sync {
+                internalIsSuspend
+            }
+        }
+        set {
+            return queue.sync {
+                internalIsSuspend = newValue
+            }
+        }
+    }
+
+
+    private var internalStatus: TRStatus = .waiting
+    public internal(set) var status: TRStatus {
+        get {
+            return queue.sync {
+                internalStatus
+            }
+        }
+        set {
+            return queue.sync {
+                internalStatus = newValue
+            }
+        }
+    }
+
 
     private var internalTasks: [TRTask] = []
-    public var tasks: [TRTask] {
+    public internal(set) var tasks: [TRTask] {
         get {
             return queue.sync {
                 internalTasks
@@ -79,36 +137,7 @@ public class TRManager {
     public var completedTasks: [TRTask] {
         return tasks.filter { $0.status == .completed }
     }
-    
 
-
-    private var internalIsCompleted: Bool = false
-    private var isCompleted: Bool {
-        get {
-            return queue.sync {
-                internalIsCompleted
-            }
-        }
-        set {
-            return queue.sync {
-                internalIsCompleted = newValue
-            }
-        }
-    }
-
-    private var internalIsSuspend: Bool = false
-    private var isSuspend: Bool {
-        get {
-            return queue.sync {
-                internalIsSuspend
-            }
-        }
-        set {
-            return queue.sync {
-                internalIsSuspend = newValue
-            }
-        }
-    }
 
     private let internalProgress = Progress()
     public var progress: Progress {
@@ -161,7 +190,7 @@ public class TRManager {
     ///  初始化方法
     ///
     /// - Parameters:
-    ///   - name: 设置FCManager对象的名字，区分不同的下载模块，每个模块中下载相关的文件会保存到对应的沙盒目录
+    ///   - name: 设置TRManager对象的名字，区分不同的下载模块，每个模块中下载相关的文件会保存到对应的沙盒目录
     ///   - MaximumRunning: 下载的最大并发数
     ///   - isStoreInfo: 是否把下载任务的相关信息持久化到沙盒，如果是，则初始化完成后自动恢复上次的任务
     public init(_ name: String? = nil, MaximumRunning: Int? = nil, isStoreInfo: Bool = false) {
@@ -187,6 +216,20 @@ public class TRManager {
             tasks = cache.retrieveTasks()
             tasks.forEach({ $0.manager = self })
             TiercelLog("retrieveTasks tasks.count = \(tasks.count)")
+
+            //  处理mananger状态
+            let isEnd = self.tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
+            if isEnd {
+                let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
+                if isSuccess {
+                    isCompleted = true
+                    status = .completed
+                } else {
+                    status = .failed
+                }
+            } else {
+                status = .suspend
+            }
         }
     }
 
@@ -197,6 +240,12 @@ public class TRManager {
         let sessionDelegate = TRSessionDelegate()
         sessionDelegate.manager = self
         return URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: nil)
+    }
+
+    /// 销毁manager
+    public func invalidate() {
+        totalSuspend()
+        session.invalidateAndCancel()
     }
 }
 
@@ -220,8 +269,6 @@ extension TRManager {
     /// - Returns: 如果URLString有效，则返回对应的task；如果URLString无效，则返回nil
     @discardableResult
     public func download(_ URLString: String, fileName: String? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> TRDownloadTask? {
-        isSuspend = false
-        isCompleted = false
         status = .waiting
 
         guard let url = URL(string: URLString) else {
@@ -229,6 +276,7 @@ extension TRManager {
             return nil
         }
 
+        isCompleted = false
 
         var task = fetchTask(URLString) as? TRDownloadTask
         if task != nil {
@@ -266,7 +314,7 @@ extension TRManager {
     public func multiDownload(_ URLStrings: [String], fileNames: [String]? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> [TRDownloadTask] {
         status = .waiting
 
-        // 去除重复, 去除无效的url
+        // 去掉重复, 无效的url
         var uniqueUrls = [URL]()
         URLStrings.forEach { (URLString) in
             if let uniqueUrl = URL(string: URLString) {
@@ -281,10 +329,8 @@ extension TRManager {
         if uniqueUrls.isEmpty {
             return [TRDownloadTask]()
         }
-        
-        isSuspend = false
-        isCompleted = false
 
+        isCompleted = false
 
         var temp = [TRDownloadTask]()
         for url in uniqueUrls {
@@ -316,131 +362,10 @@ extension TRManager {
         return temp
     }
     
- 
+
 }
 
 
-// MARK: - total tasks control
-extension TRManager {
-    
-    public func totalStart() {
-        tasks.forEach { (task) in
-            start(task.URLString)
-        }
-    }
-    
-    
-    public func totalSuspend() {
-        tasks.forEach { (task) in
-            suspend(task.URLString)
-        }
-        status = .suspend
-
-    }
-    
-    public func totalCancel() {
-        tasks.forEach { (task) in
-            cancel(task.URLString)
-        }
-        if status == .running {
-            status = .cancel
-        } else {
-            status = .cancel
-            DispatchQueue.main.tr.safeAsync {
-                self.failureHandler?(self)
-            }
-        }
-    }
-
-    public func totalRemove(completely: Bool = false) {
-
-        tasks.forEach { (task) in
-            remove(task.URLString, completely: completely)
-        }
-        if status == .running {
-            status = .remove
-        } else {
-            status = .remove
-            DispatchQueue.main.tr.safeAsync {
-                self.failureHandler?(self)
-            }
-        }
-    }
-    
-
-    internal func completed() {
-        let isEnd = self.tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
-
-        if isEnd {
-            if !isCompleted {
-                isCompleted = true
-
-                timeRemaining = 0
-
-                DispatchQueue.main.tr.safeAsync {
-                    self.progressHandler?(self)
-                }
-
-                if status == .remove || status == .cancel {
-                    TiercelLog("[manager] all tasks completed and manager failed because its status is \(status)")
-                    DispatchQueue.main.tr.safeAsync {
-                        self.failureHandler?(self)
-                    }
-                    return
-                }
-
-                let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
-                if isSuccess {
-                    TiercelLog("[manager] all tasks completed and manager succeeded")
-                    status = .completed
-                    DispatchQueue.main.tr.safeAsync {
-                        self.successHandler?(self)
-                    }
-                } else {
-                    TiercelLog("[manager] all tasks completed and manager failed")
-                    status = .failed
-                    DispatchQueue.main.tr.safeAsync {
-                        self.failureHandler?(self)
-                    }
-                }
-                return
-            }
-        }
-
-        if status == .remove || status == .cancel {
-            return
-        }
-
-        let waitingTasks = tasks.filter { $0.status == .waiting }
-        if waitingTasks.isEmpty {
-            if runningTasks.isEmpty {
-                if !isSuspend {
-                    isSuspend = true
-                    TiercelLog("[manager] manager did suspend")
-                    status = .suspend
-                    DispatchQueue.main.tr.safeAsync {
-                        self.successHandler?(self)
-                    }
-                }
-            }
-            return
-        }
-
-        TiercelLog("[manager] start to download next task")
-        waitingTasks.forEach({ (task) in
-            self.start(task.URLString)
-        })
-
-    }
-    
-    /// 销毁manager
-    public func invalidate() {
-        totalSuspend()
-        session.invalidateAndCancel()
-        session.finishTasksAndInvalidate()
-    }
-    
-}
 
 
 // MARK: - single task control
@@ -473,6 +398,8 @@ extension TRManager {
         case .waiting, .suspend, .failed:
 
             if shouldRun {
+                isSuspend = false
+
                 task.start()
                 if status != .running {
                     progress.setUserInfoObject(Date().timeIntervalSince1970, forKey: .estimatedTimeRemainingKey)
@@ -529,29 +456,185 @@ extension TRManager {
         task.remove()
     }
 
+}
+
+// MARK: - total tasks control
+extension TRManager {
+
+    public func totalStart() {
+        tasks.forEach { (task) in
+            start(task.URLString)
+        }
+    }
+
+
+    public func totalSuspend() {
+        guard status == .running || status == .waiting else { return }
+        status = .preSuspend
+        tasks.forEach { (task) in
+            suspend(task.URLString)
+        }
+
+    }
+
+    public func totalCancel() {
+        guard status != .completed && status != .cancel else { return }
+        status = .preCancel
+        tasks.forEach { (task) in
+            cancel(task.URLString)
+        }
+    }
+
+    public func totalRemove(completely: Bool = false) {
+        guard status != .remove else { return }
+        isCompleted = false
+        status = .preRemove
+        tasks.forEach { (task) in
+            remove(task.URLString, completely: completely)
+        }
+    }
+}
+
+// MARK: - status handle
+extension TRManager {
+
+
     internal func taskDidCancelOrRemove(_ URLString: String) {
         guard let task = fetchTask(URLString) as? TRDownloadTask else { return }
         cache.removeTaskInfo(task)
+
+        // 把预操作的状态改成完成操作的状态
+        if task.status == .preCancel {
+            task.status = .cancel
+        }
+
+        if task.status == .preRemove {
+            task.status = .remove
+        }
+
         if task.status == .remove {
             cache.remove(task, completely: isRemoveCompletely)
         }
         guard let tasksIndex = tasks.index(where: { $0.URLString == task.URLString }) else { return  }
         tasks.remove(at: tasksIndex)
 
-        if status == .cancel || status == .remove {
-            return
-        }
+
+        // 处理使用单个任务操作移除最后一个task时，manager状态
         if tasks.isEmpty {
-            if status == .running {
-                status = task.status
-            } else {
-                status = task.status
-                completed()
+            if task.status == .cancel {
+                status = .preCancel
+            }
+            if task.status == .remove {
+                status = .preRemove
             }
         }
     }
 
+    internal func completed() {
 
+        // 处理移除状态
+        if status == .preRemove {
+            if tasks.isEmpty {
+                status = .remove
+                TiercelLog("[manager] all tasks completed and manager failed because its status is \(status)")
+                DispatchQueue.main.tr.safeAsync {
+                    self.failureHandler?(self)
+                }
+                return
+            }
+            return
+        }
+
+        // 处理取消状态
+        if status == .preCancel {
+            let isCancel = tasks.filter { $0.status != .completed }.isEmpty
+            if isCancel {
+                status = .cancel
+                TiercelLog("[manager] all tasks completed and manager failed because its status is \(status)")
+                DispatchQueue.main.tr.safeAsync {
+                    self.failureHandler?(self)
+                }
+                return
+            }
+            return
+        }
+
+
+        // 处理所有任务结束后的状态
+        let isEnd = tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
+        if isEnd {
+            if isCompleted {
+                return
+            }
+            isCompleted = true
+            timeRemaining = 0
+            DispatchQueue.main.tr.safeAsync {
+                self.progressHandler?(self)
+            }
+
+            // 成功或者失败
+            let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
+            if isSuccess {
+                TiercelLog("[manager] all tasks completed and manager succeeded")
+                status = .completed
+                DispatchQueue.main.tr.safeAsync {
+                    self.successHandler?(self)
+                }
+            } else {
+                TiercelLog("[manager] all tasks completed and manager failed")
+                status = .failed
+                DispatchQueue.main.tr.safeAsync {
+                    self.failureHandler?(self)
+                }
+            }
+            return
+        }
+
+        // 处理暂停的状态
+        let isSuspend = tasks.reduce(into: true) { (isSuspend, task) in
+            if isSuspend {
+                if task.status == .suspend || task.status == .completed || task.status == .failed {
+                    isSuspend = true
+                } else {
+                    isSuspend = false
+                }
+            }
+        }
+
+        if isSuspend {
+            if self.isSuspend {
+                return
+            }
+            self.isSuspend = true
+            TiercelLog("[manager] manager did suspend")
+            status = .suspend
+            DispatchQueue.main.tr.safeAsync {
+                self.successHandler?(self)
+            }
+            return
+        }
+
+        if status == .preSuspend {
+            return
+        }
+
+        
+        // 运行下一个等待中的任务
+        let waitingTasks = tasks.filter { $0.status == .waiting }
+        if waitingTasks.isEmpty {
+            return
+        }
+
+        TiercelLog("[manager] start to download next task")
+        waitingTasks.forEach({ (task) in
+            self.start(task.URLString)
+        })
+    }
+}
+
+
+// MARK: - info
+extension TRManager {
     internal func parseSpeed() {
 
         // 当前已经完成的大小
@@ -618,7 +701,7 @@ extension TRManager {
 
 
 
-// MARK: - handler
+// MARK: - closure
 extension TRManager {
     @discardableResult
     public func progress(_ handler: @escaping TRManagerHandler) -> Self {

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Tiercel
 
 class ViewController3: BaseViewController {
 
@@ -23,28 +24,12 @@ class ViewController3: BaseViewController {
         
         guard let downloadManager = downloadManager else { return  }
 
-
-        // 设置manager的回调
-        downloadManager.progress { [weak self] (manager) in
-            guard let strongSelf = self else { return }
-            strongSelf.updateUI()
-            }.success{ [weak self] (manager) in
-                guard let strongSelf = self else { return }
-                strongSelf.updateUI()
-            }.failure { [weak self] (manager) in
-                guard let strongSelf = self,
-                let downloadManager = strongSelf.downloadManager
-                else { return }
-                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
-                strongSelf.tableView.reloadData()
-                strongSelf.updateUI()
-        }
+        setupManager()
 
         downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
 
         updateUI()
         tableView.reloadData()
-
     }
 
 

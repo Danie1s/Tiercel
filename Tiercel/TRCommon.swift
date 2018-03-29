@@ -34,6 +34,11 @@ public enum TRStatus: String {
     case failed
     case remove
     case completed
+
+    // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
+    case preSuspend
+    case preCancel
+    case preRemove
 }
 
 public enum TRLogLevel {

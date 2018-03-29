@@ -57,8 +57,8 @@ public class TRCache {
     /// 初始化方法
     ///
     /// - Parameters:
-    ///   - name: 设置FCCache对象的名字，一般由FCManager对象创建时传递
-    ///   - isStoreInfo: 是否把下载任务的相关信息持久化到沙盒，一般由FCManager对象创建时传递
+    ///   - name: 设置TRCache对象的名字，一般由TRManager对象创建时传递
+    ///   - isStoreInfo: 是否把下载任务的相关信息持久化到沙盒，一般由TRManager对象创建时传递
     public init(_ name: String, isStoreInfo: Bool = false) {
         self.name = name
 
@@ -159,7 +159,7 @@ extension TRCache {
         guard let taskInfoArray = retrieveTaskInfos() else { return [TRTask]() }
         return taskInfoArray.map { (info) -> TRDownloadTask in
             let url = URL(string: info["URLString"] as! String)!
-            let task = TRDownloadTask(url, fileName: info["fileName"] as? String, cache: self, isCacheInfo: true)
+            let task = TRDownloadTask(url, fileName: info["fileName"] as? String, cache: self, isCacheInfo: isStoreInfo)
 
             task.setValuesForKeys(info)
 
@@ -178,6 +178,12 @@ extension TRCache {
             if task.status == .running {
                 task.status = .suspend
             }
+
+            if task.status == .waiting {
+                task.status = .suspend
+            }
+            
+            storeTaskInfo(task)
             return task
         }
     }
@@ -245,7 +251,6 @@ extension TRCache {
             if self.fileManager.fileExists(atPath: path) {
                 let destination = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
                 try? self.fileManager.moveItem(atPath: path, toPath: destination)
-                
             }
         }
     }
