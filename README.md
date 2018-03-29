@@ -30,7 +30,7 @@ Tiercel是一个非常简单易用且功能丰富的纯Swift下载框架。最�
 - [x] 内置了下载速度等常见的下载信息，并且可以选择是否持久化下载任务信息
 - [x] 支持后台下载
 - [x] 链式语法调用
-- [x] 支持控制下载的最大并发数
+- [x] 支持控制下载任务的最大并发数
 - [x] 线程安全
 
 ## Requirements
@@ -98,7 +98,7 @@ downloadManager.download(URLString)
 
 ```swift
 downloadManager.download(URLString, fileName: "小黄人1.mp4", progressHandler: { (task) in
-    let progress = task.progress.fractionCompleted                                                                        
+    let progress = task.progress.fractionCompleted
     print("下载中, 进度：\(progress)")
 }, successHandler: { (task) in
     print("下载完成")
@@ -342,8 +342,8 @@ let task = downloadManager.fetchTask(URLString)
 // 回调闭包都是在主线程运行
 // progress 闭包：如果任务正在下载，就会触发
 // success 闭包：有两种情况会触发：
-//    1. 任务已经下载过了，或者任务下载完成，这时候task.status == .failed
-//    2. 这时候task.status == .failed
+//    1. 任务已经下载过了，或者任务下载完成，这时候task.status == .completed
+//    2. 暂停下载任务，这时候task.status == .suspend
 // failure 闭包：有三种情况会触发：
 //    1. 任务下载失败，这时候task.status == .failed
 //    2. 取消任务，这时候task.status == .cancel
