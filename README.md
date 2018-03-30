@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Platform](https://img.shields.io/cocoapods/p/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 
-Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的特点就是拥有强大的任务管理功能和可以直接获取下载速度常见的下载信息，只要加上一些简单的UI，就可以实现一个下载类APP的大部分功能。
+Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的特点就是拥有强大的任务管理功能和可以直接获取下载速度等常见的下载信息，只要加上一些简单的UI，就可以实现一个下载类APP的大部分功能。
 
 - [Features](#features)
 - [Requirements](#requirements)
