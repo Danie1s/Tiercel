@@ -310,7 +310,7 @@ public let downloadFilePath: String
 
 ### TRDownloadTask
 
-TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**Tiercel的设计理念是一个URLString对应一个下载任务，所有操作都必须通过TRManager实例进行，URLString作为下载任务的唯一标识。**所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
+TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**Tiercel的设计理念是一个URLString对应一个下载任务，所有操作都必须通过TRManager实例进行，URLString作为下载任务的唯一标识**。所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
 
 主要属性
 
