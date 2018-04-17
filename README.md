@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Platform](https://img.shields.io/cocoapods/p/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 
-Tiercel是一个非常简单易用且功能丰富的纯Swift下载框架。最大的特点就是拥有强大的任务管理功能和可以直接获取常见的下载信息，并且只要加上一些简单的UI，就可以实现一个下载类APP的大部分功能。
+Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的特点就是拥有强大的任务管理功能和可以直接获取下载速度等常见的下载信息，只要加上一些简单的UI，就可以实现一个下载类APP的大部分功能。
 
 - [Features](#features)
 - [Requirements](#requirements)
@@ -36,7 +36,7 @@ Tiercel是一个非常简单易用且功能丰富的纯Swift下载框架。最�
 
 - iOS 8.0+
 - Xcode 9.0+
-- Swift 4.0+​
+- Swift 4.0+
 
 ## Installation
 
@@ -309,7 +309,7 @@ public let downloadFilePath: String
 
 ### TRDownloadTask
 
-TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**Tiercel的设计理念是一个URLString对应一个下载任务，所有操作都必须通过TRManager实例进行，URLString作为下载任务的唯一标识。**所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
+TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**Tiercel的设计理念是一个URLString对应一个下载任务，所有操作都必须通过TRManager实例进行，URLString作为下载任务的唯一标识**。所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
 
 主要属性
 
