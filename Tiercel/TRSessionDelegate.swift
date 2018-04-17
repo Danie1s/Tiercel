@@ -38,7 +38,6 @@ extension TRSessionDelegate: URLSessionDataDelegate {
             let task = manager.fetchTask(URLString) as? TRDownloadTask,
             let response = response as? HTTPURLResponse
             else { return  }
-
         task.task(didReceive: response, completionHandler: completionHandler)
 
     }
@@ -48,7 +47,6 @@ extension TRSessionDelegate: URLSessionDataDelegate {
             let URLString = dataTask.originalRequest?.url?.absoluteString,
             let task = manager.fetchTask(URLString) as? TRDownloadTask
             else { return  }
-
         task.task(didReceive: data)
 
     }
@@ -60,6 +58,7 @@ extension TRSessionDelegate: URLSessionTaskDelegate {
             let URLString = task.originalRequest?.url?.absoluteString,
             let task = manager.fetchTask(URLString) as? TRDownloadTask
             else { return  }
+
 
         task.task(didCompleteWithError: error)
 

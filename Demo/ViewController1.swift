@@ -45,7 +45,7 @@ class ViewController1: UIViewController {
     
     @IBAction func start(_ sender: UIButton) {
 
-        downloadManager.download(URLString, fileName: "小黄人.mp4", progressHandler: { [weak self] (task) in
+        downloadManager.download(URLString, progressHandler: { [weak self] (task) in
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)

@@ -386,7 +386,7 @@ extension TRManager {
 
         if cache.fileExists(fileName: task.fileName) {
             TiercelLog("[manager] file is exists URLString: \(task.URLString)")
-            if let fileInfo = try? FileManager().attributesOfItem(atPath: task.destination), let length = fileInfo[.size] as? Int64 {
+            if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePtah(fileName: task.fileName)!), let length = fileInfo[.size] as? Int64 {
                 task.progress.totalUnitCount = length
             }
             task.completed()

@@ -30,8 +30,8 @@ public class TRDownloadTask: TRTask {
 
     private var task: URLSessionDataTask?
     private var outputStream: OutputStream?
-    public var destination: String = ""
-    
+//    public var destination: String = ""
+
     public init(_ url: URL, fileName: String? = nil, cache: TRCache, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
 
         super.init(url, cache: cache, isCacheInfo: isCacheInfo, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
@@ -40,7 +40,7 @@ public class TRDownloadTask: TRTask {
                 self.fileName = fileName
             }
         }
-        self.destination = (self.cache.downloadFilePath as NSString).appendingPathComponent(self.fileName)
+//        self.destination = (self.cache.downloadFilePath as NSString).appendingPathComponent(self.fileName)
         cache.storeTaskInfo(self)
     }
 
@@ -49,7 +49,6 @@ public class TRDownloadTask: TRTask {
 
         super.start()
         cache.createDirectory()
-
         // 读取缓存中已经下载了的大小
         let path = (cache.downloadTmpPath as NSString).appendingPathComponent(fileName)
         if FileManager().fileExists(atPath: path) {
@@ -211,7 +210,7 @@ extension TRDownloadTask {
             return
         }
 
-        let downloadTmpPath = (cache.downloadTmpPath as NSString).appendingPathComponent(self.fileName)
+        let downloadTmpPath = (cache.downloadTmpPath as NSString).appendingPathComponent(fileName)
         outputStream = OutputStream(toFileAtPath: downloadTmpPath, append: true)
         outputStream?.open()
 
