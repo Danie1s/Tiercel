@@ -142,9 +142,8 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         switch task.status {
         case .running:
             image = #imageLiteral(resourceName: "resume")
-        case .suspend, .completed, .waiting:
+        default:
             image = #imageLiteral(resourceName: "suspend")
-        default: break
         }
         cell.controlButton.setImage(image, for: .normal)
 

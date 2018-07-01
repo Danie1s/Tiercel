@@ -58,8 +58,6 @@ extension TRSessionDelegate: URLSessionTaskDelegate {
             let URLString = task.originalRequest?.url?.absoluteString,
             let task = manager.fetchTask(URLString) as? TRDownloadTask
             else { return  }
-
-
         task.task(didCompleteWithError: error)
 
     }
