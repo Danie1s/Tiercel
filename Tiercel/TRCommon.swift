@@ -59,7 +59,7 @@ public class Tiercel<Base> {
 }
 
 
-protocol TiercelCompatible {
+public protocol TiercelCompatible {
     associatedtype CompatibleType
     var tr: CompatibleType { get }
 }
@@ -74,7 +74,6 @@ extension TiercelCompatible {
 extension Int64: TiercelCompatible {}
 extension Double: TiercelCompatible {}
 extension UIDevice: TiercelCompatible {}
-extension UIView: TiercelCompatible {}
 extension DispatchQueue: TiercelCompatible {}
 
 
