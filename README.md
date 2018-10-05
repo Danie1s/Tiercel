@@ -35,8 +35,8 @@ Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的�
 ## Requirements
 
 - iOS 8.0+
-- Xcode 9.0+
-- Swift 4.0+
+- Xcode 10.0+
+- Swift 4.2+
 
 ## Installation
 
