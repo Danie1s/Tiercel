@@ -1,8 +1,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Tiercel'
-  s.version          = '1.1.1'
-  s.swift_version = '4.0'
+  s.version          = '1.2.0'
+  s.swift_version = '4.2'
   s.summary          = 'Tiercel is a lightweight, pure-Swift download framework.'
 
 
@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
 
   s.source_files = 'Tiercel/*.swift'
   s.requires_arc = true
-  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '4.0' }
+  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '4.2' }
 
 end
