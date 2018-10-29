@@ -178,6 +178,17 @@ extension TRDownloadTask {
 // MARK: - download callback
 extension TRDownloadTask {
     internal func task(didReceive response: HTTPURLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        guard response.statusCode == 200 else {
+            TiercelLog("[downloadTask] URLString 出错了：\(response)")
+            status = .failed
+            cache.storeTaskInfo(self)
+            DispatchQueue.main.tr.safeAsync {
+                self.failureHandler?(self)
+            }
+            completionHandler(.cancel)
+            return
+        }
+        
         if let bytesStr = response.allHeaderFields["Content-Length"] as? String, let totalBytes = Int64(bytesStr) {
             progress.totalUnitCount = totalBytes
         }
