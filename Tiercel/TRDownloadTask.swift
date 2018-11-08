@@ -178,7 +178,7 @@ extension TRDownloadTask {
 // MARK: - download callback
 extension TRDownloadTask {
     internal func task(didReceive response: HTTPURLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        guard response.statusCode == 200 else {
+        guard response.statusCode >= 200 && response.statusCode <= 209 else {
             TiercelLog("[downloadTask] URLString 出错了：\(response)")
             status = .failed
             cache.storeTaskInfo(self)
