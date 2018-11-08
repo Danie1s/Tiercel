@@ -105,13 +105,12 @@ extension Tiercel where Base == Int64 {
         let calender = Calendar.current
         let set: Set<Calendar.Component> = [.hour, .minute, .second]
         let dateCmp = calender.dateComponents(set, from: Date(), to: date)
-        if let hour = dateCmp.hour, let minute = dateCmp.minute {
+        if let hour = dateCmp.hour, let minute = dateCmp.minute, let second = dateCmp.second {
             if hour > 0 {
                 timeString = timeString + "\(String(format: "%02d", hour)):"
             }
             timeString = timeString + "\(String(format: "%02d", minute)):"
-            let second = time - Double(hour * 3600 + minute * 60)
-            timeString = timeString + "\(String(format: "%02d", Int(second)))"
+            timeString = timeString + "\(String(format: "%02d", second))"
         }
         return timeString
     }
@@ -140,7 +139,7 @@ extension Tiercel where Base == Double {
     ///
     /// - Returns:
     public func convertTimeToDateString() -> String {
-        let time = base + 3600 * 8
+        let time = base
         let date = Date(timeIntervalSince1970: time)
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
