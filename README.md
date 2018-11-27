@@ -87,7 +87,7 @@ To run the example project, clone the repo, and run `Tiercel.xcodeproj` .
 只需要简单的几行代码即可开启下载
 
 ```swift
-let URLString = "http://120.25.226.186:32812/resources/videos/minion_01.mp4"
+let URLString = "http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"
 let downloadManager = TRManager()
 // 创建下载任务并且开启下载
 downloadManager.download(URLString)
@@ -96,7 +96,7 @@ downloadManager.download(URLString)
 当然也可以对下载任务设置回调
 
 ```swift
-downloadManager.download(URLString, fileName: "小黄人1.mp4", progressHandler: { (task) in
+downloadManager.download(URLString, fileName: "视频.mp4", progressHandler: { (task) in
     let progress = task.progress.fractionCompleted
     print("下载中, 进度：\(progress)")
 }, successHandler: { (task) in
@@ -150,11 +150,11 @@ public init(_ name: String? = nil, MaximumRunning: Int? = nil, isStoreInfo: Bool
 开启下载任务，并且对其进行管理。**Tiercel的设计理念是一个URLString对应一个下载任务，所有操作都必须通过TRManager实例进行，URLString作为下载任务的唯一标识。**
 
 ```swift
-let URLString = "http://120.25.226.186:32812/resources/videos/minion_01.mp4"
+let URLString = "http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"
 let downloadManager = TRManager()
 
 // 如果URLString无效，则返回nil
-let task = downloadManager.download(URLString, fileName: "小黄人1.mp4", progressHandler: {  (task) in
+let task = downloadManager.download(URLString, fileName: "视频.mp4", progressHandler: {  (task) in
     let progress = task.progress.fractionCompleted                                                                        
     print("下载中, 进度：\(progress)")
 }, successHandler: { (task) in
