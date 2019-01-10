@@ -8,7 +8,6 @@
 
 import UIKit
 
-
 class ListViewCell: UITableViewCell {
 
     @IBOutlet weak var URLStringLabel: UILabel!

@@ -1,67 +1,53 @@
 //
 //  TRSessionDelegate.swift
-//  Tiercel
+//  BackgroundURLSession
 //
-//  Created by Daniels on 2018/3/16.
-//  Copyright © 2018年 Daniels. All rights reserved.
-//
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-//
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
+//  Created by Daniels Lau on 2019/1/3.
+//  Copyright © 2019 Daniels Lau. All rights reserved.
 //
 
 import UIKit
 
-public class TRSessionDelegate: NSObject {
-    public var manager: TRManager?
+internal class TRSessionDelegate: NSObject {
+    internal var manager: TRManager?
 
 }
 
-extension TRSessionDelegate: URLSessionDataDelegate {
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        guard let manager = manager,
-            let URLString = dataTask.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask,
-            let response = response as? HTTPURLResponse
-            else { return  }
 
-        task.task(didReceive: response, completionHandler: completionHandler)
-
+extension TRSessionDelegate: URLSessionDownloadDelegate {
+    public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+        manager?.manager(session, didBecomeInvalidWithError: error)
     }
-
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    
+    
+    public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        manager?.managerDidFinishEvents(forBackgroundURLSession: session)
+    }
+    
+    public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let manager = manager,
-            let URLString = dataTask.originalRequest?.url?.absoluteString,
+            let URLString = downloadTask.originalRequest?.url?.absoluteString,
             let task = manager.fetchTask(URLString) as? TRDownloadTask
             else { return  }
-
-        task.task(didReceive: data)
-
+        task.task(didWriteData: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
     }
-}
-
-extension TRSessionDelegate: URLSessionTaskDelegate {
+    
+    
+    public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        guard let manager = manager,
+            let URLString = downloadTask.originalRequest?.url?.absoluteString,
+            let task = manager.fetchTask(URLString) as? TRDownloadTask
+            else { return  }
+        task.task(didFinishDownloadingTo: location)
+    }
+    
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let manager = manager,
             let URLString = task.originalRequest?.url?.absoluteString,
             let task = manager.fetchTask(URLString) as? TRDownloadTask
             else { return  }
-
         task.task(didCompleteWithError: error)
-
     }
+    
+    
 }

@@ -7,126 +7,156 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E1C1DC5A206A931A003665A9 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1C1DC58206A931A003665A9 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E1C1DC67206A9330003665A9 /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC60206A9330003665A9 /* String+MD5.swift */; };
-		E1C1DC68206A9330003665A9 /* TRManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC61206A9330003665A9 /* TRManager.swift */; };
-		E1C1DC69206A9330003665A9 /* TRCommon.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC62206A9330003665A9 /* TRCommon.swift */; };
-		E1C1DC6A206A9330003665A9 /* TRCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC63206A9330003665A9 /* TRCache.swift */; };
-		E1C1DC6B206A9330003665A9 /* TRDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC64206A9330003665A9 /* TRDownloadTask.swift */; };
-		E1C1DC6C206A9330003665A9 /* TRSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC65206A9330003665A9 /* TRSessionDelegate.swift */; };
-		E1C1DC6D206A9330003665A9 /* TRTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC66206A9330003665A9 /* TRTask.swift */; };
-		E1C1DC75206A933D003665A9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC74206A933D003665A9 /* AppDelegate.swift */; };
-		E1C1DC7A206A933D003665A9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DC78206A933D003665A9 /* Main.storyboard */; };
-		E1C1DC7C206A933D003665A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DC7B206A933D003665A9 /* Assets.xcassets */; };
-		E1C1DC7F206A933D003665A9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DC7D206A933D003665A9 /* LaunchScreen.storyboard */; };
-		E1C1DC8D206A93B7003665A9 /* DownloadTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC84206A93B6003665A9 /* DownloadTaskCell.swift */; };
-		E1C1DC8E206A93B7003665A9 /* ViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC85206A93B6003665A9 /* ViewController1.swift */; };
-		E1C1DC8F206A93B7003665A9 /* ViewController3.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC86206A93B6003665A9 /* ViewController3.swift */; };
-		E1C1DC90206A93B7003665A9 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC87206A93B6003665A9 /* ListViewController.swift */; };
-		E1C1DC91206A93B7003665A9 /* ViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC88206A93B6003665A9 /* ViewController2.swift */; };
-		E1C1DC92206A93B7003665A9 /* DownloadTaskCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DC89206A93B6003665A9 /* DownloadTaskCell.xib */; };
-		E1C1DC93206A93B7003665A9 /* ListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC8A206A93B6003665A9 /* ListViewCell.swift */; };
-		E1C1DC94206A93B7003665A9 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC8B206A93B6003665A9 /* BaseViewController.swift */; };
-		E1C1DC95206A93B7003665A9 /* DownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DC8C206A93B6003665A9 /* DownloadViewController.swift */; };
+		E10B78A721E73C3E00DFF2B3 /* TRResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */; };
+		E10B78A821E73C3E00DFF2B3 /* TRConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */; };
+		E1C1DD3E206C91EF003665A9 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1C1DD3C206C91EF003665A9 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E1C1DD4A206C9241003665A9 /* TRDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */; };
+		E1C1DD4B206C9241003665A9 /* TRCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD45206C9241003665A9 /* TRCache.swift */; };
+		E1C1DD4C206C9241003665A9 /* TRCommon.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD46206C9241003665A9 /* TRCommon.swift */; };
+		E1C1DD4D206C9241003665A9 /* TRTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD47206C9241003665A9 /* TRTask.swift */; };
+		E1C1DD4E206C9241003665A9 /* TRManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD48206C9241003665A9 /* TRManager.swift */; };
+		E1C1DD4F206C9241003665A9 /* TRSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */; };
+		E1C1DD57206C92FE003665A9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD56206C92FE003665A9 /* AppDelegate.swift */; };
+		E1C1DD5C206C92FE003665A9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DD5A206C92FE003665A9 /* Main.storyboard */; };
+		E1C1DD5E206C92FE003665A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DD5D206C92FE003665A9 /* Assets.xcassets */; };
+		E1C1DD61206C92FE003665A9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DD5F206C92FE003665A9 /* LaunchScreen.storyboard */; };
+		E1C1DD6B206C937B003665A9 /* ViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD66206C937A003665A9 /* ViewController2.swift */; };
+		E1C1DD6C206C937B003665A9 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD67206C937B003665A9 /* ListViewController.swift */; };
+		E1C1DD6D206C937B003665A9 /* ViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD68206C937B003665A9 /* ViewController1.swift */; };
+		E1C1DD6E206C937B003665A9 /* ListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD69206C937B003665A9 /* ListViewCell.swift */; };
+		E1C1DD6F206C937B003665A9 /* ViewController3.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD6A206C937B003665A9 /* ViewController3.swift */; };
+		E1C1DD74206C9385003665A9 /* DownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD70206C9385003665A9 /* DownloadViewController.swift */; };
+		E1C1DD75206C9385003665A9 /* DownloadTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */; };
+		E1C1DD76206C9385003665A9 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD72206C9385003665A9 /* BaseViewController.swift */; };
+		E1C1DD77206C9385003665A9 /* DownloadTaskCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */; };
+		E1C1DD78206C93A6003665A9 /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; };
+		E1C1DD79206C93A6003665A9 /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E1C1DD7A206C93A6003665A9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1C1DD30206C91EF003665A9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E1C1DD38206C91EF003665A9;
+			remoteInfo = Tiercel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E1C1DD7C206C93A7003665A9 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E1C1DD79206C93A6003665A9 /* Tiercel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		E1C1DC55206A931A003665A9 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1C1DC58206A931A003665A9 /* Tiercel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tiercel.h; sourceTree = "<group>"; };
-		E1C1DC59206A931A003665A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E1C1DC60206A9330003665A9 /* String+MD5.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
-		E1C1DC61206A9330003665A9 /* TRManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRManager.swift; sourceTree = "<group>"; };
-		E1C1DC62206A9330003665A9 /* TRCommon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRCommon.swift; sourceTree = "<group>"; };
-		E1C1DC63206A9330003665A9 /* TRCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRCache.swift; sourceTree = "<group>"; };
-		E1C1DC64206A9330003665A9 /* TRDownloadTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRDownloadTask.swift; sourceTree = "<group>"; };
-		E1C1DC65206A9330003665A9 /* TRSessionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRSessionDelegate.swift; sourceTree = "<group>"; };
-		E1C1DC66206A9330003665A9 /* TRTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRTask.swift; sourceTree = "<group>"; };
-		E1C1DC72206A933D003665A9 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1C1DC74206A933D003665A9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		E1C1DC79206A933D003665A9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		E1C1DC7B206A933D003665A9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		E1C1DC7E206A933D003665A9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		E1C1DC80206A933D003665A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E1C1DC84206A93B6003665A9 /* DownloadTaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadTaskCell.swift; sourceTree = "<group>"; };
-		E1C1DC85206A93B6003665A9 /* ViewController1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController1.swift; sourceTree = "<group>"; };
-		E1C1DC86206A93B6003665A9 /* ViewController3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController3.swift; sourceTree = "<group>"; };
-		E1C1DC87206A93B6003665A9 /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
-		E1C1DC88206A93B6003665A9 /* ViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController2.swift; sourceTree = "<group>"; };
-		E1C1DC89206A93B6003665A9 /* DownloadTaskCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DownloadTaskCell.xib; sourceTree = "<group>"; };
-		E1C1DC8A206A93B6003665A9 /* ListViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewCell.swift; sourceTree = "<group>"; };
-		E1C1DC8B206A93B6003665A9 /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
-		E1C1DC8C206A93B6003665A9 /* DownloadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
+		E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRResumeDataHelper.swift; sourceTree = "<group>"; };
+		E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRConfiguration.swift; sourceTree = "<group>"; };
+		E1C1DD39206C91EF003665A9 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1C1DD3C206C91EF003665A9 /* Tiercel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tiercel.h; sourceTree = "<group>"; };
+		E1C1DD3D206C91EF003665A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRDownloadTask.swift; sourceTree = "<group>"; };
+		E1C1DD45206C9241003665A9 /* TRCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRCache.swift; sourceTree = "<group>"; };
+		E1C1DD46206C9241003665A9 /* TRCommon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRCommon.swift; sourceTree = "<group>"; };
+		E1C1DD47206C9241003665A9 /* TRTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRTask.swift; sourceTree = "<group>"; };
+		E1C1DD48206C9241003665A9 /* TRManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRManager.swift; sourceTree = "<group>"; };
+		E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRSessionDelegate.swift; sourceTree = "<group>"; };
+		E1C1DD54206C92FE003665A9 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1C1DD56206C92FE003665A9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E1C1DD5B206C92FE003665A9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		E1C1DD5D206C92FE003665A9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E1C1DD60206C92FE003665A9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E1C1DD62206C92FE003665A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E1C1DD66206C937A003665A9 /* ViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController2.swift; sourceTree = "<group>"; };
+		E1C1DD67206C937B003665A9 /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
+		E1C1DD68206C937B003665A9 /* ViewController1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController1.swift; sourceTree = "<group>"; };
+		E1C1DD69206C937B003665A9 /* ListViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewCell.swift; sourceTree = "<group>"; };
+		E1C1DD6A206C937B003665A9 /* ViewController3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController3.swift; sourceTree = "<group>"; };
+		E1C1DD70206C9385003665A9 /* DownloadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
+		E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadTaskCell.swift; sourceTree = "<group>"; };
+		E1C1DD72206C9385003665A9 /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
+		E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DownloadTaskCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		E1C1DC51206A931A003665A9 /* Frameworks */ = {
+		E1C1DD35206C91EF003665A9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E1C1DC6F206A933D003665A9 /* Frameworks */ = {
+		E1C1DD51206C92FE003665A9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1C1DD78206C93A6003665A9 /* Tiercel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		E1C1DC4B206A931A003665A9 = {
+		E1C1DD2F206C91EF003665A9 = {
 			isa = PBXGroup;
 			children = (
-				E1C1DC57206A931A003665A9 /* Tiercel */,
-				E1C1DC73206A933D003665A9 /* Demo */,
-				E1C1DC56206A931A003665A9 /* Products */,
+				E1C1DD3B206C91EF003665A9 /* Tiercel */,
+				E1C1DD55206C92FE003665A9 /* Demo */,
+				E1C1DD3A206C91EF003665A9 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		E1C1DC56206A931A003665A9 /* Products */ = {
+		E1C1DD3A206C91EF003665A9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E1C1DC55206A931A003665A9 /* Tiercel.framework */,
-				E1C1DC72206A933D003665A9 /* Demo.app */,
+				E1C1DD39206C91EF003665A9 /* Tiercel.framework */,
+				E1C1DD54206C92FE003665A9 /* Demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		E1C1DC57206A931A003665A9 /* Tiercel */ = {
+		E1C1DD3B206C91EF003665A9 /* Tiercel */ = {
 			isa = PBXGroup;
 			children = (
-				E1C1DC58206A931A003665A9 /* Tiercel.h */,
-				E1C1DC59206A931A003665A9 /* Info.plist */,
-				E1C1DC60206A9330003665A9 /* String+MD5.swift */,
-				E1C1DC62206A9330003665A9 /* TRCommon.swift */,
-				E1C1DC63206A9330003665A9 /* TRCache.swift */,
-				E1C1DC66206A9330003665A9 /* TRTask.swift */,
-				E1C1DC64206A9330003665A9 /* TRDownloadTask.swift */,
-				E1C1DC61206A9330003665A9 /* TRManager.swift */,
-				E1C1DC65206A9330003665A9 /* TRSessionDelegate.swift */,
+				E1C1DD3C206C91EF003665A9 /* Tiercel.h */,
+				E1C1DD46206C9241003665A9 /* TRCommon.swift */,
+				E1C1DD45206C9241003665A9 /* TRCache.swift */,
+				E1C1DD47206C9241003665A9 /* TRTask.swift */,
+				E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */,
+				E1C1DD48206C9241003665A9 /* TRManager.swift */,
+				E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */,
+				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
+				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
+				E1C1DD3D206C91EF003665A9 /* Info.plist */,
 			);
 			path = Tiercel;
 			sourceTree = "<group>";
 		};
-		E1C1DC73206A933D003665A9 /* Demo */ = {
+		E1C1DD55206C92FE003665A9 /* Demo */ = {
 			isa = PBXGroup;
 			children = (
-				E1C1DC74206A933D003665A9 /* AppDelegate.swift */,
-				E1C1DC8B206A93B6003665A9 /* BaseViewController.swift */,
-				E1C1DC85206A93B6003665A9 /* ViewController1.swift */,
-				E1C1DC88206A93B6003665A9 /* ViewController2.swift */,
-				E1C1DC86206A93B6003665A9 /* ViewController3.swift */,
-				E1C1DC84206A93B6003665A9 /* DownloadTaskCell.swift */,
-				E1C1DC89206A93B6003665A9 /* DownloadTaskCell.xib */,
-				E1C1DC87206A93B6003665A9 /* ListViewController.swift */,
-				E1C1DC8A206A93B6003665A9 /* ListViewCell.swift */,
-				E1C1DC8C206A93B6003665A9 /* DownloadViewController.swift */,
-				E1C1DC78206A933D003665A9 /* Main.storyboard */,
-				E1C1DC7B206A933D003665A9 /* Assets.xcassets */,
-				E1C1DC7D206A933D003665A9 /* LaunchScreen.storyboard */,
-				E1C1DC80206A933D003665A9 /* Info.plist */,
+				E1C1DD56206C92FE003665A9 /* AppDelegate.swift */,
+				E1C1DD72206C9385003665A9 /* BaseViewController.swift */,
+				E1C1DD68206C937B003665A9 /* ViewController1.swift */,
+				E1C1DD66206C937A003665A9 /* ViewController2.swift */,
+				E1C1DD6A206C937B003665A9 /* ViewController3.swift */,
+				E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */,
+				E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */,
+				E1C1DD67206C937B003665A9 /* ListViewController.swift */,
+				E1C1DD69206C937B003665A9 /* ListViewCell.swift */,
+				E1C1DD70206C9385003665A9 /* DownloadViewController.swift */,
+				E1C1DD5A206C92FE003665A9 /* Main.storyboard */,
+				E1C1DD5D206C92FE003665A9 /* Assets.xcassets */,
+				E1C1DD5F206C92FE003665A9 /* LaunchScreen.storyboard */,
+				E1C1DD62206C92FE003665A9 /* Info.plist */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -134,25 +164,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		E1C1DC52206A931A003665A9 /* Headers */ = {
+		E1C1DD36206C91EF003665A9 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1C1DC5A206A931A003665A9 /* Tiercel.h in Headers */,
+				E1C1DD3E206C91EF003665A9 /* Tiercel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		E1C1DC54206A931A003665A9 /* Tiercel */ = {
+		E1C1DD38206C91EF003665A9 /* Tiercel */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1C1DC5D206A931A003665A9 /* Build configuration list for PBXNativeTarget "Tiercel" */;
+			buildConfigurationList = E1C1DD41206C91EF003665A9 /* Build configuration list for PBXNativeTarget "Tiercel" */;
 			buildPhases = (
-				E1C1DC50206A931A003665A9 /* Sources */,
-				E1C1DC51206A931A003665A9 /* Frameworks */,
-				E1C1DC52206A931A003665A9 /* Headers */,
-				E1C1DC53206A931A003665A9 /* Resources */,
+				E1C1DD34206C91EF003665A9 /* Sources */,
+				E1C1DD35206C91EF003665A9 /* Frameworks */,
+				E1C1DD36206C91EF003665A9 /* Headers */,
+				E1C1DD37206C91EF003665A9 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -160,48 +190,51 @@
 			);
 			name = Tiercel;
 			productName = Tiercel;
-			productReference = E1C1DC55206A931A003665A9 /* Tiercel.framework */;
+			productReference = E1C1DD39206C91EF003665A9 /* Tiercel.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		E1C1DC71206A933D003665A9 /* Demo */ = {
+		E1C1DD53206C92FE003665A9 /* Demo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1C1DC81206A933D003665A9 /* Build configuration list for PBXNativeTarget "Demo" */;
+			buildConfigurationList = E1C1DD63206C92FE003665A9 /* Build configuration list for PBXNativeTarget "Demo" */;
 			buildPhases = (
-				E1C1DC6E206A933D003665A9 /* Sources */,
-				E1C1DC6F206A933D003665A9 /* Frameworks */,
-				E1C1DC70206A933D003665A9 /* Resources */,
+				E1C1DD50206C92FE003665A9 /* Sources */,
+				E1C1DD51206C92FE003665A9 /* Frameworks */,
+				E1C1DD52206C92FE003665A9 /* Resources */,
+				E1C1DD7C206C93A7003665A9 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E1C1DD7B206C93A6003665A9 /* PBXTargetDependency */,
 			);
 			name = Demo;
 			productName = Demo;
-			productReference = E1C1DC72206A933D003665A9 /* Demo.app */;
+			productReference = E1C1DD54206C92FE003665A9 /* Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		E1C1DC4C206A931A003665A9 /* Project object */ = {
+		E1C1DD30206C91EF003665A9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = Daniels;
 				TargetAttributes = {
-					E1C1DC54206A931A003665A9 = {
+					E1C1DD38206C91EF003665A9 = {
 						CreatedOnToolsVersion = 9.2;
-						LastSwiftMigration = 0920;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 					};
-					E1C1DC71206A933D003665A9 = {
+					E1C1DD53206C92FE003665A9 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = E1C1DC4F206A931A003665A9 /* Build configuration list for PBXProject "Tiercel" */;
+			buildConfigurationList = E1C1DD33206C91EF003665A9 /* Build configuration list for PBXProject "Tiercel" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -209,84 +242,93 @@
 				en,
 				Base,
 			);
-			mainGroup = E1C1DC4B206A931A003665A9;
-			productRefGroup = E1C1DC56206A931A003665A9 /* Products */;
+			mainGroup = E1C1DD2F206C91EF003665A9;
+			productRefGroup = E1C1DD3A206C91EF003665A9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E1C1DC54206A931A003665A9 /* Tiercel */,
-				E1C1DC71206A933D003665A9 /* Demo */,
+				E1C1DD38206C91EF003665A9 /* Tiercel */,
+				E1C1DD53206C92FE003665A9 /* Demo */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		E1C1DC53206A931A003665A9 /* Resources */ = {
+		E1C1DD37206C91EF003665A9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E1C1DC70206A933D003665A9 /* Resources */ = {
+		E1C1DD52206C92FE003665A9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1C1DC92206A93B7003665A9 /* DownloadTaskCell.xib in Resources */,
-				E1C1DC7F206A933D003665A9 /* LaunchScreen.storyboard in Resources */,
-				E1C1DC7C206A933D003665A9 /* Assets.xcassets in Resources */,
-				E1C1DC7A206A933D003665A9 /* Main.storyboard in Resources */,
+				E1C1DD77206C9385003665A9 /* DownloadTaskCell.xib in Resources */,
+				E1C1DD61206C92FE003665A9 /* LaunchScreen.storyboard in Resources */,
+				E1C1DD5E206C92FE003665A9 /* Assets.xcassets in Resources */,
+				E1C1DD5C206C92FE003665A9 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		E1C1DC50206A931A003665A9 /* Sources */ = {
+		E1C1DD34206C91EF003665A9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1C1DC69206A9330003665A9 /* TRCommon.swift in Sources */,
-				E1C1DC6B206A9330003665A9 /* TRDownloadTask.swift in Sources */,
-				E1C1DC67206A9330003665A9 /* String+MD5.swift in Sources */,
-				E1C1DC6A206A9330003665A9 /* TRCache.swift in Sources */,
-				E1C1DC6D206A9330003665A9 /* TRTask.swift in Sources */,
-				E1C1DC68206A9330003665A9 /* TRManager.swift in Sources */,
-				E1C1DC6C206A9330003665A9 /* TRSessionDelegate.swift in Sources */,
+				E1C1DD4D206C9241003665A9 /* TRTask.swift in Sources */,
+				E10B78A721E73C3E00DFF2B3 /* TRResumeDataHelper.swift in Sources */,
+				E1C1DD4E206C9241003665A9 /* TRManager.swift in Sources */,
+				E1C1DD4C206C9241003665A9 /* TRCommon.swift in Sources */,
+				E1C1DD4B206C9241003665A9 /* TRCache.swift in Sources */,
+				E1C1DD4A206C9241003665A9 /* TRDownloadTask.swift in Sources */,
+				E10B78A821E73C3E00DFF2B3 /* TRConfiguration.swift in Sources */,
+				E1C1DD4F206C9241003665A9 /* TRSessionDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E1C1DC6E206A933D003665A9 /* Sources */ = {
+		E1C1DD50206C92FE003665A9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1C1DC8E206A93B7003665A9 /* ViewController1.swift in Sources */,
-				E1C1DC8D206A93B7003665A9 /* DownloadTaskCell.swift in Sources */,
-				E1C1DC8F206A93B7003665A9 /* ViewController3.swift in Sources */,
-				E1C1DC90206A93B7003665A9 /* ListViewController.swift in Sources */,
-				E1C1DC95206A93B7003665A9 /* DownloadViewController.swift in Sources */,
-				E1C1DC75206A933D003665A9 /* AppDelegate.swift in Sources */,
-				E1C1DC94206A93B7003665A9 /* BaseViewController.swift in Sources */,
-				E1C1DC91206A93B7003665A9 /* ViewController2.swift in Sources */,
-				E1C1DC93206A93B7003665A9 /* ListViewCell.swift in Sources */,
+				E1C1DD6D206C937B003665A9 /* ViewController1.swift in Sources */,
+				E1C1DD57206C92FE003665A9 /* AppDelegate.swift in Sources */,
+				E1C1DD6F206C937B003665A9 /* ViewController3.swift in Sources */,
+				E1C1DD74206C9385003665A9 /* DownloadViewController.swift in Sources */,
+				E1C1DD75206C9385003665A9 /* DownloadTaskCell.swift in Sources */,
+				E1C1DD76206C9385003665A9 /* BaseViewController.swift in Sources */,
+				E1C1DD6E206C937B003665A9 /* ListViewCell.swift in Sources */,
+				E1C1DD6B206C937B003665A9 /* ViewController2.swift in Sources */,
+				E1C1DD6C206C937B003665A9 /* ListViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E1C1DD7B206C93A6003665A9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E1C1DD38206C91EF003665A9 /* Tiercel */;
+			targetProxy = E1C1DD7A206C93A6003665A9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
-		E1C1DC78206A933D003665A9 /* Main.storyboard */ = {
+		E1C1DD5A206C92FE003665A9 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E1C1DC79206A933D003665A9 /* Base */,
+				E1C1DD5B206C92FE003665A9 /* Base */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		E1C1DC7D206A933D003665A9 /* LaunchScreen.storyboard */ = {
+		E1C1DD5F206C92FE003665A9 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E1C1DC7E206A933D003665A9 /* Base */,
+				E1C1DD60206C92FE003665A9 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -294,7 +336,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		E1C1DC5B206A931A003665A9 /* Debug */ = {
+		E1C1DD3F206C91EF003665A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -354,7 +396,7 @@
 			};
 			name = Debug;
 		};
-		E1C1DC5C206A931A003665A9 /* Release */ = {
+		E1C1DD40206C91EF003665A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -407,7 +449,7 @@
 			};
 			name = Release;
 		};
-		E1C1DC5E206A931A003665A9 /* Debug */ = {
+		E1C1DD42206C91EF003665A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -425,12 +467,12 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		E1C1DC5F206A931A003665A9 /* Release */ = {
+		E1C1DD43206C91EF003665A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
@@ -447,37 +489,41 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
-		E1C1DC82206A933D003665A9 /* Debug */ = {
+		E1C1DD64206C92FE003665A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = LXWRN82SY3;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		E1C1DC83206A933D003665A9 /* Release */ = {
+		E1C1DD65206C92FE003665A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = LXWRN82SY3;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -485,34 +531,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		E1C1DC4F206A931A003665A9 /* Build configuration list for PBXProject "Tiercel" */ = {
+		E1C1DD33206C91EF003665A9 /* Build configuration list for PBXProject "Tiercel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E1C1DC5B206A931A003665A9 /* Debug */,
-				E1C1DC5C206A931A003665A9 /* Release */,
+				E1C1DD3F206C91EF003665A9 /* Debug */,
+				E1C1DD40206C91EF003665A9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E1C1DC5D206A931A003665A9 /* Build configuration list for PBXNativeTarget "Tiercel" */ = {
+		E1C1DD41206C91EF003665A9 /* Build configuration list for PBXNativeTarget "Tiercel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E1C1DC5E206A931A003665A9 /* Debug */,
-				E1C1DC5F206A931A003665A9 /* Release */,
+				E1C1DD42206C91EF003665A9 /* Debug */,
+				E1C1DD43206C91EF003665A9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E1C1DC81206A933D003665A9 /* Build configuration list for PBXNativeTarget "Demo" */ = {
+		E1C1DD63206C92FE003665A9 /* Build configuration list for PBXNativeTarget "Demo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E1C1DC82206A933D003665A9 /* Debug */,
-				E1C1DC83206A933D003665A9 /* Release */,
+				E1C1DD64206C92FE003665A9 /* Debug */,
+				E1C1DD65206C92FE003665A9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = E1C1DC4C206A931A003665A9 /* Project object */;
+	rootObject = E1C1DD30206C91EF003665A9 /* Project object */;
 }

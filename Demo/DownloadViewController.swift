@@ -13,28 +13,10 @@ class DownloadViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        downloadManager = ListViewController.downloadManager
 
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
+        downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager4
 
-        guard let downloadManager = downloadManager else { return  }
-
-        // 设置manager的回调
-        downloadManager.progress { [weak self] (manager) in
-            guard let strongSelf = self else { return }
-            strongSelf.updateUI()
-            }.success{ [weak self] (manager) in
-                guard let strongSelf = self else { return }
-                strongSelf.updateUI()
-            }.failure { [weak self] (manager) in
-                guard let strongSelf = self,
-                    let downloadManager = strongSelf.downloadManager
-                    else { return }
-                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
-                strongSelf.tableView.reloadData()
-                strongSelf.updateUI()
-        }
+        setupManager()
 
     }
 
@@ -55,13 +37,13 @@ extension DownloadViewController {
     @IBAction func deleteDownloadTask(_ sender: Any) {
         guard let downloadManager = downloadManager else { return  }
         let count = downloadManager.tasks.count
+        guard count > 0 else { return }
+
         let index = downloadManager.tasks.count - 1
-        if count > 0 {
-            let URLString = downloadURLStrings[index]
-            downloadURLStrings.remove(at: index)
-            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-            downloadManager.remove(URLString, completely: false)
-        }
+        let URLString = downloadURLStrings[index]
+        downloadURLStrings.remove(at: index)
+        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        downloadManager.remove(URLString, completely: false)
         updateUI()
     }
 

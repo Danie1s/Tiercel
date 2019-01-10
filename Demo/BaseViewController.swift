@@ -33,7 +33,7 @@ class BaseViewController: UIViewController {
         tableView.delegate = self
         tableView.tableFooterView = UIView()
         tableView.register(UINib(nibName: "DownloadTaskCell", bundle: nil), forCellReuseIdentifier: "cell")
-        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 164
 
         // 检查磁盘空间
@@ -53,13 +53,47 @@ class BaseViewController: UIViewController {
 
     }
 
+    func setupManager() {
 
+        // 设置manager的回调
+        downloadManager?.progress { [weak self] (manager) in
+            guard let strongSelf = self else { return }
+            strongSelf.updateUI()
+
+            }.success{ [weak self] (manager) in
+                guard let strongSelf = self else { return }
+                strongSelf.updateUI()
+                if manager.status == .suspended {
+                    // manager 暂停了
+                }
+                if manager.status == .completed {
+                    // manager 完成了
+                }
+            }.failure { [weak self] (manager) in
+                guard let strongSelf = self,
+                    let downloadManager = strongSelf.downloadManager
+                    else { return }
+                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+                strongSelf.tableView.reloadData()
+                strongSelf.updateUI()
+
+                if manager.status == .failed {
+                    // manager 失败了
+                }
+                if manager.status == .canceled {
+                    // manager 取消了
+                }
+                if manager.status == .removed {
+                    // manager 移除了
+                }
+        }
+    }
 }
 
 extension BaseViewController {
     @IBAction func totalStart(_ sender: Any) {
-        downloadManager?.isStartDownloadImmediately = true
         downloadManager?.totalStart()
+        tableView.reloadData()
     }
 
     @IBAction func totalSuspend(_ sender: Any) {
@@ -81,10 +115,10 @@ extension BaseViewController {
     }
 
     @IBAction func taskLimit(_ sender: Any) {
-        downloadManager?.maxConcurrentTasksLimit = 2
+        downloadManager?.configuration.maxConcurrentTasksLimit = 2
     }
     @IBAction func cancelTaskLimit(_ sender: Any) {
-        downloadManager?.maxConcurrentTasksLimit = Int.max
+        downloadManager?.configuration.maxConcurrentTasksLimit = Int.max
     }
 }
 
@@ -107,9 +141,8 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         switch task.status {
         case .running:
             image = #imageLiteral(resourceName: "resume")
-        case .suspend, .completed:
+        default:
             image = #imageLiteral(resourceName: "suspend")
-        default: break
         }
         cell.controlButton.setImage(image, for: .normal)
 
@@ -127,7 +160,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             case .running:
                 strongSelf.downloadManager?.suspend(URLString)
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
-            case .suspend:
+            case .suspended:
                 strongSelf.downloadManager?.start(URLString)
                 cell.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
             default: break
@@ -150,10 +183,26 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             .success({ [weak cell] (task) in
                 guard let cell = cell as? DownloadTaskCell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                if task.status == .suspended {
+                    // 下载任务暂停了
+                }
+                if task.status == .completed {
+                    // 下载任务完成了
+                }
             })
             .failure({ [weak cell] (task) in
                 guard let cell = cell as? DownloadTaskCell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+
+                if task.status == .failed {
+                    // 下载任务失败了
+                }
+                if task.status == .canceled {
+                    // 下载任务取消了
+                }
+                if task.status == .removed {
+                    // 下载任务移除了
+                }
             })
     }
 

@@ -28,45 +28,62 @@ import UIKit
 
 public class TRDownloadTask: TRTask {
 
-    private var task: URLSessionDataTask?
-    private var outputStream: OutputStream?
-    public var destination: String = ""
+    private var task: URLSessionDownloadTask?
     
-    public init(_ url: URL, fileName: String? = nil, cache: TRCache?, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+    internal var location: URL?
+    
+    var resumeData: Data? {
+        didSet {
+            guard let resumeData = resumeData else { return  }
+            tmpFileName = TRResumeDataHelper.getTmpFileName(resumeData)
+        }
+    }
+    
+    var tmpFileName: String?
 
-        super.init(url, cache: cache, isCacheInfo: isCacheInfo, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+    public init(_ url: URL, fileName: String? = nil, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+        super.init(url, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
         if let fileName = fileName {
             if !fileName.isEmpty {
                 self.fileName = fileName
             }
         }
-        self.destination = (self.cache.downloadFilePath as NSString).appendingPathComponent(self.fileName)
-
     }
-
+    
+    public override func encode(with aCoder: NSCoder) {
+        super.encode(with: aCoder)
+        aCoder.encode(resumeData, forKey: "resumeData")
+    }
+    
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        resumeData = aDecoder.decodeObject(forKey: "resumeData") as? Data
+    }
+    
     
     internal override func start() {
-
-        super.start()
         cache.createDirectory()
-
-        // 读取缓存中已经下载了的大小
-        let path = (cache.downloadTmpPath as NSString).appendingPathComponent(fileName)
-        if FileManager().fileExists(atPath: path) {
-            if let fileInfo = try? FileManager().attributesOfItem(atPath: path), let length = fileInfo[.size] as? Int64 {
-                progress.completedUnitCount = length
+        
+        if let resumeData = resumeData {
+            if #available(iOS 10.2, *) {
+                task = session?.downloadTask(withResumeData: resumeData)
+            } else if #available(iOS 10.0, *) {
+                task = session?.correctedDownloadTask(withResumeData: resumeData)
+            } else {
+                task = session?.downloadTask(withResumeData: resumeData)
             }
+        } else {
+            super.start()
+            guard let request = request else { return  }
+            task = session?.downloadTask(with: request)
         }
-
-        request?.setValue("bytes=\(progress.completedUnitCount)-", forHTTPHeaderField: "Range")
-        guard let request = request else { return  }
-        task = session?.dataTask(with: request)
-
         speed = 0
         progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
 
         task?.resume()
-        startDate = Date().timeIntervalSince1970
+        if startDate == 0 {
+            startDate = Date().timeIntervalSince1970
+        }
         status = .running
 
     }
@@ -76,38 +93,52 @@ public class TRDownloadTask: TRTask {
     internal override func suspend() {
         guard status == .running || status == .waiting else { return }
         TiercelLog("[downloadTask] did suspend \(self.URLString)")
-        status = .suspend
-        task?.cancel()
+
+        if status == .running {
+            status = .willSuspend
+            task?.cancel(byProducingResumeData: { _ in })
+        }
+
+        if status == .waiting {
+            status = .suspended
+            DispatchQueue.main.tr.safeAsync {
+                self.progressHandler?(self)
+                self.successHandler?(self)
+            }
+            manager?.completed()
+        }
     }
     
     internal override func cancel() {
         guard status != .completed else { return }
         TiercelLog("[downloadTask] did cancel \(self.URLString)")
         if status == .running {
-            status = .cancel
+            status = .willCancel
             task?.cancel()
         } else {
-            status = .cancel
+            status = .willCancel
             manager?.taskDidCancelOrRemove(URLString)
             DispatchQueue.main.tr.safeAsync {
                 self.failureHandler?(self)
             }
+            manager?.completed()
         }
         
     }
 
 
-    internal func remove() {
+    internal override func remove() {
         TiercelLog("[downloadTask] did remove \(self.URLString)")
         if status == .running {
-            status = .remove
+            status = .willRemove
             task?.cancel()
         } else {
-            status = .remove
+            status = .willRemove
             manager?.taskDidCancelOrRemove(URLString)
             DispatchQueue.main.tr.safeAsync {
                 self.failureHandler?(self)
             }
+            manager?.completed()
         }
     }
     
@@ -117,7 +148,6 @@ public class TRDownloadTask: TRTask {
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
-        cache.store(self)
         TiercelLog("[downloadTask] a task did complete URLString: \(URLString)")
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
@@ -126,14 +156,16 @@ public class TRDownloadTask: TRTask {
 
     }
 
+}
+
+// MARK: - info
+extension TRDownloadTask {
 
     internal func parseSpeed(_ cost: TimeInterval) {
 
         let dataCount = progress.completedUnitCount
-        var lastData: Int64 = 0
-        if progress.userInfo[.fileCompletedCountKey] != nil {
-            lastData = progress.userInfo[.fileCompletedCountKey] as! Int64
-        }
+        let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
+
         if dataCount > lastData {
             speed = Int64(Double(dataCount - lastData) / cost)
             parseTimeRemaining()
@@ -154,101 +186,71 @@ public class TRDownloadTask: TRTask {
             }
         }
     }
-
 }
 
+// MARK: - download callback
 extension TRDownloadTask {
-    internal func task(didReceive response: HTTPURLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        if let bytesStr = response.allHeaderFields["Content-Length"] as? String, let totalBytes = Int64(bytesStr) {
-            progress.totalUnitCount = totalBytes
-        }
-        if let contentRangeStr = response.allHeaderFields["content-range"] as? NSString {
-            if contentRangeStr.length > 0 {
-                progress.totalUnitCount = Int64(contentRangeStr.components(separatedBy: "/").last!)!
-            }
-        }
-        if let contentRangeStr = response.allHeaderFields["Content-Range"] as? NSString {
-            if contentRangeStr.length > 0 {
-                progress.totalUnitCount = Int64(contentRangeStr.components(separatedBy: "/").last!)!
-            }
-        }
-
-
-        if progress.completedUnitCount == progress.totalUnitCount {
-            cache.store(self)
-            completed()
-            manager?.completed()
-            completionHandler(.cancel)
-            return
-        }
-
-        if progress.completedUnitCount > progress.totalUnitCount {
-            cache.removeTmpFile(self)
-            completionHandler(.cancel)
-            // 重新下载
-            progress.completedUnitCount = 0
-            start()
-            return
-        }
-
-        let downloadTmpPath = (cache.downloadTmpPath as NSString).appendingPathComponent(self.fileName)
-        outputStream = OutputStream(toFileAtPath: downloadTmpPath, append: true)
-        outputStream?.open()
-
-        cache.storeTaskInfo(self)
-
-        completionHandler(.allow)
-
-        TiercelLog("[downloadTask] start to download URLString: \(URLString)")
-
-    }
-
-    internal func task(didReceive data: Data) {
-
-        progress.completedUnitCount += Int64((data as NSData).length)
-         _ = data.withUnsafeBytes { outputStream?.write($0, maxLength: data.count) }
+    public func task(didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        progress.completedUnitCount = totalBytesWritten
+        progress.totalUnitCount = totalBytesExpectedToWrite
         manager?.parseSpeed()
         DispatchQueue.main.tr.safeAsync {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            if TRManager.isControlNetworkActivityIndicator {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            }
             self.progressHandler?(self)
             guard let manager = self.manager else { return }
             manager.progressHandler?(manager)
         }
     }
-
-    internal func task(didCompleteWithError error: Error?) {
-        DispatchQueue.main.tr.safeAsync {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+    
+    
+    public func task(didFinishDownloadingTo location: URL) {
+        self.location = location
+        cache.storeFile(self)
+        completed()
+    }
+    
+    public func task(didCompleteWithError error: Error?) {
+        if TRManager.isControlNetworkActivityIndicator {
+            DispatchQueue.main.tr.safeAsync {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            }
         }
-
-        self.error = error as NSError?
+        
         session = nil
+        
 
-        outputStream?.close()
-        outputStream = nil
+        
+        if let error = error {
+            self.error = error
+            if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
+                self.resumeData = TRResumeDataHelper.handleResumeData(resumeData)
 
-        if let _ = error {
-
-            /// 如果不是手动暂停或者取消，那么就是失败
+            }
+            
             switch status {
-            case .suspend: break
-            case .cancel, .remove:
+            case .willSuspend:
+                status = .suspended
+                DispatchQueue.main.tr.safeAsync {
+                    self.progressHandler?(self)
+                    self.successHandler?(self)
+                }
+            case .willCancel, .willRemove:
                 manager?.taskDidCancelOrRemove(URLString)
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
                 }
             default:
                 status = .failed
-                cache.storeTaskInfo(self)
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
                 }
             }
-        } else {
-
-            completed()
         }
-
+        
         manager?.completed()
     }
 }
+
+

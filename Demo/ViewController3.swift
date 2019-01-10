@@ -15,43 +15,30 @@ class ViewController3: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = TRManager("ViewController3", isStoreInfo: true)
-        
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
+        downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager3
 
-        URLStrings = (1...5).map({ "http://120.25.226.186:32812/resources/videos/minion_0\($0).mp4" })
+
+
+        URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021048136875.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021436174669.mp4",
+                      "http://api.gfs100.cn/upload/20180131/201801311435101664.mp4",
+                      "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
+                      "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
         
         guard let downloadManager = downloadManager else { return  }
 
-
-        // 设置manager的回调
-        downloadManager.progress { [weak self] (manager) in
-            guard let strongSelf = self else { return }
-            strongSelf.updateUI()
-            }.success{ [weak self] (manager) in
-                guard let strongSelf = self else { return }
-                strongSelf.updateUI()
-            }.failure { [weak self] (manager) in
-                guard let strongSelf = self,
-                let downloadManager = strongSelf.downloadManager
-                else { return }
-                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
-                strongSelf.tableView.reloadData()
-                strongSelf.updateUI()
-        }
+        setupManager()
 
         downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
 
         updateUI()
         tableView.reloadData()
-
     }
 
 
-    deinit {
-        downloadManager?.invalidate()
-    }
+
 
 }
 
@@ -61,7 +48,6 @@ extension ViewController3 {
 
 
     @IBAction func multiDownload(_ sender: Any) {
-        downloadManager?.isStartDownloadImmediately = true
         downloadManager?.multiDownload(URLStrings)
         downloadURLStrings.append(contentsOf: URLStrings)
         updateUI()

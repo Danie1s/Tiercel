@@ -7,15 +7,25 @@
 //
 
 import UIKit
+import Tiercel
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    let downloadManager2 = TRManager("ViewController2")
+    
+    let downloadManager3 = TRManager("ViewController3")
+    
+    let downloadManager4 = TRManager("ViewController4")
 
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        print(TRManager.default)
+
         return true
     }
 
@@ -39,6 +49,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
+        
+        let downloadManagers = [TRManager.default, downloadManager2, downloadManager3, downloadManager4]
+        downloadManagers.forEach { (manager) in
+            if identifier == manager.identifier {
+                manager.completionHandler = completionHandler
+            }
+        }
+
     }
 
 

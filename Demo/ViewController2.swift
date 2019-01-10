@@ -14,41 +14,40 @@ class ViewController2: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = TRManager("ViewController2", isStoreInfo: true)
+        downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager2
         
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
 
-        URLStrings = (1...9).map({ "http://120.25.226.186:32812/resources/videos/minion_0\($0).mp4" })
+
+        URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021048136875.mp4",
+                      "http://api.gfs100.cn/upload/20180122/201801221619073224.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021048136875.mp4",
+                      "http://api.gfs100.cn/upload/20180126/201801261120124536.mp4",
+                      "http://api.gfs100.cn/upload/20180201/201802011423168057.mp4",
+                      "http://api.gfs100.cn/upload/20180126/201801261545095005.mp4",
+                      "http://api.gfs100.cn/upload/20171218/201712181643211975.mp4",
+                      "http://api.gfs100.cn/upload/20171219/201712191351314533.mp4",
+                      "http://api.gfs100.cn/upload/20180126/201801261644030991.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021322446621.mp4",
+                      "http://api.gfs100.cn/upload/20180201/201802011038548146.mp4",
+                      "http://api.gfs100.cn/upload/20180201/201802011545189269.mp4",
+                      "http://api.gfs100.cn/upload/20180202/201802021436174669.mp4",
+                      "http://api.gfs100.cn/upload/20180131/201801311435101664.mp4",
+                      "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
+                      "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
 
         guard let downloadManager = downloadManager else { return  }
 
-        // 设置manager的回调
-        downloadManager.progress { [weak self] (manager) in
-            guard let strongSelf = self else { return }
-            strongSelf.updateUI()
-        }.success{ [weak self] (manager) in
-            guard let strongSelf = self else { return }
-            strongSelf.updateUI()
-        }.failure { [weak self] (manager) in
-            guard let strongSelf = self,
-            let downloadManager = strongSelf.downloadManager
-            else { return }
-            strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
-            strongSelf.tableView.reloadData()
-            strongSelf.updateUI()
-        }
-        
-        let tasks = downloadManager.tasks
-        tasks.forEach { downloadURLStrings.append($0.URLString)}
+        setupManager()
+
+        downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+
         updateUI()
         tableView.reloadData()
 
     }
 
-    deinit {
-        downloadManager?.invalidate()
-    }
 
 }
 
@@ -59,28 +58,27 @@ extension ViewController2 {
 
     @IBAction func addDownloadTask(_ sender: Any) {
         guard let downloadManager = downloadManager else { return  }
-        downloadManager.isStartDownloadImmediately = true
-        let index = downloadURLStrings.count
-        if index < 9 {
-            guard let URLString = URLStrings.first(where: { !downloadURLStrings.contains($0) }) else { return }
-            downloadURLStrings.append(URLString)
-            let index = URLStrings.index(of: URLString)!
-            downloadManager.download(URLString, fileName: "小黄人\(index + 1).mp4")
-            tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        }
+        let count = downloadURLStrings.count
+        guard count < URLStrings.count else { return }
+
+        guard let URLString = URLStrings.first(where: { !downloadURLStrings.contains($0) }) else { return }
+        downloadURLStrings.append(URLString)
+        let index = URLStrings.index(of: URLString)!
+        downloadManager.download(URLString)
+        tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
         updateUI()
     }
 
     @IBAction func deleteDownloadTask(_ sender: Any) {
         guard let downloadManager = downloadManager else { return  }
         let count = downloadURLStrings.count
+        guard count > 0 else { return }
+        
         let index = count - 1
-        if count > 0 {
-            let URLString = downloadURLStrings[index]
-            downloadURLStrings.remove(at: index)
-            tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-            downloadManager.remove(URLString, completely: false)
-        }
+        let URLString = downloadURLStrings[index]
+        downloadURLStrings.remove(at: index)
+        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        downloadManager.remove(URLString, completely: false)
         updateUI()
     }
 }

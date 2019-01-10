@@ -19,7 +19,7 @@ class ViewController1: UIViewController {
     @IBOutlet weak var endDateLabel: UILabel!
 
 
-    lazy var downloadManager = TRManager()
+    let downloadManager = TRManager.default
 
     lazy var URLString = "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg"
 
@@ -28,9 +28,7 @@ class ViewController1: UIViewController {
         TRManager.logLevel = .high
     }
 
-    deinit {
-        downloadManager.invalidate()
-    }
+
 
 
     private func updateUI(_ task: TRTask) {
@@ -44,13 +42,32 @@ class ViewController1: UIViewController {
     }
     
     @IBAction func start(_ sender: UIButton) {
-        downloadManager.download(URLString, fileName: "小黄人.mp4", progressHandler: { [weak self] (task) in
+
+        downloadManager.download(URLString, progressHandler: { [weak self] (task) in
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)
-        }) { [weak self] (task) in
+            if task.status == .suspended {
+                // 下载任务暂停了
+            }
+
+            if task.status == .completed {
+                // 下载任务完成了
+            }
+        }, failureHandler: { [weak self] (task) in
             self?.updateUI(task)
-        }
+            if task.status == .failed {
+                // 下载任务失败了
+            }
+
+            if task.status == .canceled {
+                // 下载任务取消了
+            }
+
+            if task.status == .removed {
+                // 下载任务移除了
+            }
+        })
     }
 
     @IBAction func suspend(_ sender: UIButton) {

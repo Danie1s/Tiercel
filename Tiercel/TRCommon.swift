@@ -26,15 +26,24 @@
 
 import UIKit
 
+
+
 public enum TRStatus: String {
     case waiting
     case running
-    case suspend
-    case cancel
+    case suspended
+    case canceled
     case failed
-    case remove
+    case removed
     case completed
+
+    // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
+    case willSuspend
+    case willCancel
+    case willRemove
 }
+
+
 
 public enum TRLogLevel {
     case high
@@ -47,14 +56,14 @@ public typealias TRTaskHandler = (TRTask) -> ()
 public typealias TRManagerHandler = (TRManager) -> ()
 
 public class Tiercel<Base> {
-    internal let base: Base
+    private let base: Base
     init(_ base: Base) {
         self.base = base
     }
 }
 
 
-protocol TiercelCompatible {
+public protocol TiercelCompatible {
     associatedtype CompatibleType
     var tr: CompatibleType { get }
 }
@@ -69,8 +78,8 @@ extension TiercelCompatible {
 extension Int64: TiercelCompatible {}
 extension Double: TiercelCompatible {}
 extension UIDevice: TiercelCompatible {}
-extension UIView: TiercelCompatible {}
 extension DispatchQueue: TiercelCompatible {}
+
 
 extension Tiercel where Base == Int64 {
 
@@ -100,13 +109,12 @@ extension Tiercel where Base == Int64 {
         let calender = Calendar.current
         let set: Set<Calendar.Component> = [.hour, .minute, .second]
         let dateCmp = calender.dateComponents(set, from: Date(), to: date)
-        if let hour = dateCmp.hour, let minute = dateCmp.minute {
+        if let hour = dateCmp.hour, let minute = dateCmp.minute, let second = dateCmp.second {
             if hour > 0 {
                 timeString = timeString + "\(String(format: "%02d", hour)):"
             }
             timeString = timeString + "\(String(format: "%02d", minute)):"
-            let second = time - Double(hour * 3600 + minute * 60)
-            timeString = timeString + "\(String(format: "%02d", Int(second)))"
+            timeString = timeString + "\(String(format: "%02d", second))"
         }
         return timeString
     }
@@ -135,7 +143,7 @@ extension Tiercel where Base == Double {
     ///
     /// - Returns:
     public func convertTimeToDateString() -> String {
-        let time = base + 3600 * 8
+        let time = base
         let date = Date(timeIntervalSince1970: time)
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -165,13 +173,15 @@ extension Tiercel where Base: UIDevice {
 
 extension Tiercel where Base: DispatchQueue {
     internal func safeAsync(_ block: @escaping ()->()) {
-        if base === DispatchQueue.main && Thread.isMainThread {
+        if base == DispatchQueue.main && Thread.isMainThread {
             block()
         } else {
             base.async { block() }
         }
     }
 }
+
+
 
 
 extension Array {
@@ -183,13 +193,6 @@ extension Array {
         }
     }
 }
-
-extension Array where Element == TRTask {
-    public func sortedByCreateDate() -> [TRTask] {
-        return self.sorted (by: { $0.createDate < $1.createDate })
-    }
-}
-
 
 
 public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {
@@ -210,5 +213,4 @@ public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #
     case .none: break
     }
 }
-
 
