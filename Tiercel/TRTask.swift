@@ -54,26 +54,29 @@ public class TRTask: NSObject, NSCoding {
         }
     }
 
-
-    private var _URLString: String
-    @objc public var URLString: String {
+    public let url: URL
+    
+    public let URLString: String
+    
+    private var _currentURLString: String
+    internal var currentURLString: String {
         get {
             return queue.sync {
-                _URLString
+                _currentURLString
             }
         }
         set {
             return queue.sync {
-                _URLString = newValue
+                _currentURLString = newValue
             }
         }
     }
+    
 
-    public internal(set) var progress: Progress = Progress()
-
+    public let progress: Progress = Progress()
 
     private var _startDate: Double = 0
-    @objc public internal(set) var startDate: Double {
+    public internal(set) var startDate: Double {
         get {
             return queue.sync {
                 _startDate
@@ -87,7 +90,7 @@ public class TRTask: NSObject, NSCoding {
     }
 
     private var _endDate: Double = 0
-    @objc public internal(set) var endDate: Double {
+    public internal(set) var endDate: Double {
         get {
             return queue.sync {
                 _endDate
@@ -117,7 +120,7 @@ public class TRTask: NSObject, NSCoding {
 
     /// 默认为url最后一部分
     private var _fileName: String
-    @objc public internal(set) var fileName: String {
+    public internal(set) var fileName: String {
         get {
             return queue.sync {
                 _fileName
@@ -144,28 +147,28 @@ public class TRTask: NSObject, NSCoding {
         }
     }
 
-    public let url: URL
-    
-    public var error: Error?
+    public internal(set) var error: Error?
 
 
     public func encode(with aCoder: NSCoder) {
         aCoder.encode(URLString, forKey: "URLString")
+        aCoder.encode(currentURLString, forKey: "currentURLString")
         aCoder.encode(fileName, forKey: "fileName")
         aCoder.encode(startDate, forKey: "startDate")
         aCoder.encode(endDate, forKey: "endDate")
         aCoder.encode(progress.totalUnitCount, forKey: "totalBytes")
         aCoder.encode(progress.completedUnitCount, forKey: "completedBytes")
         aCoder.encode(status.rawValue, forKey: "status")
-        
+
     }
     
     public required init?(coder aDecoder: NSCoder) {
         cache = TRCache.default
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         let URLString = aDecoder.decodeObject(forKey: "URLString") as! String
-        _URLString = URLString
+        self.URLString = URLString
         self.url = URL(string: URLString)!
+        _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
         super.init()
         
         startDate = aDecoder.decodeDouble(forKey: "startDate")
@@ -181,7 +184,8 @@ public class TRTask: NSObject, NSCoding {
         self.cache = cache
         self.url = url
         _fileName = url.lastPathComponent
-        _URLString = url.absoluteString
+        self.URLString = url.absoluteString
+        _currentURLString = self.URLString
         super.init()
         self.progressHandler = progressHandler
         self.successHandler = successHandler

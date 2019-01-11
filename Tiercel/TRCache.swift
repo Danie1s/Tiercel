@@ -139,6 +139,9 @@ extension TRCache {
         let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [TRTask]
         tasks?.forEach({ (task) in
             task.session = session
+            if task.status == .waiting || task.status == .running {
+                task.status = .suspended
+            }
         })
         return tasks
     }

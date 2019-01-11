@@ -24,10 +24,11 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
         manager?.managerDidFinishEvents(forBackgroundURLSession: session)
     }
     
+    
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let manager = manager,
-            let URLString = downloadTask.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask
+            let URLString = downloadTask.currentRequest?.url?.absoluteString,
+            let task = manager.fetchTask(with: URLString) as? TRDownloadTask
             else { return  }
         task.task(didWriteData: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
     }
@@ -35,16 +36,16 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let manager = manager,
-            let URLString = downloadTask.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask
+            let URLString = downloadTask.currentRequest?.url?.absoluteString,
+            let task = manager.fetchTask(with: URLString) as? TRDownloadTask
             else { return  }
         task.task(didFinishDownloadingTo: location)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let manager = manager,
-            let URLString = task.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask
+            let URLString = task.currentRequest?.url?.absoluteString,
+            let task = manager.fetchTask(with: URLString) as? TRDownloadTask
             else { return  }
         task.task(didCompleteWithError: error)
     }

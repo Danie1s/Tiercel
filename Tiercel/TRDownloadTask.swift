@@ -79,7 +79,8 @@ public class TRDownloadTask: TRTask {
         }
         speed = 0
         progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
-
+        
+        task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         task?.resume()
         if startDate == 0 {
             startDate = Date().timeIntervalSince1970
@@ -87,6 +88,7 @@ public class TRDownloadTask: TRTask {
         status = .running
 
     }
+
 
 
     
@@ -158,6 +160,15 @@ public class TRDownloadTask: TRTask {
 
 }
 
+// MARK: - KVO
+extension TRDownloadTask {
+    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if let change = change, let newRequest = change[NSKeyValueChangeKey.oldKey] as? URLRequest, let url = newRequest.url {
+            currentURLString = url.absoluteString
+        }
+    }
+}
+
 // MARK: - info
 extension TRDownloadTask {
 
@@ -226,6 +237,9 @@ extension TRDownloadTask {
             self.error = error
             if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
                 self.resumeData = TRResumeDataHelper.handleResumeData(resumeData)
+                TiercelLog("获得resumeData")
+                let dict = TRResumeDataHelper.getResumeDictionary(self.resumeData!)
+                TiercelLog(dict)
 
             }
             

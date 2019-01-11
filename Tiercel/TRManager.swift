@@ -337,6 +337,10 @@ extension TRManager {
         return tasks.first { $0.URLString == URLString }
     }
     
+    internal func fetchTask(with currentURLString: String) -> TRTask? {
+        return tasks.first { $0.currentURLString == currentURLString }
+    }
+    
     
     /// 开启任务
     /// 会检查存放下载完成的文件中是否存在跟fileName一样的文件
