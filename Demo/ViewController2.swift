@@ -63,9 +63,8 @@ extension ViewController2 {
 
         guard let URLString = URLStrings.first(where: { !downloadURLStrings.contains($0) }) else { return }
         downloadURLStrings.append(URLString)
-        let index = URLStrings.index(of: URLString)!
         downloadManager.download(URLString)
-        tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        tableView.insertRows(at: [IndexPath(row: count, section: 0)], with: .automatic)
         updateUI()
     }
 

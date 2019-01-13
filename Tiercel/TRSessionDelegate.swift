@@ -16,12 +16,12 @@ internal class TRSessionDelegate: NSObject {
 
 extension TRSessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        manager?.manager(session, didBecomeInvalidWithError: error)
+        manager?.didBecomeInvalidWithError(error: error)
     }
     
     
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        manager?.managerDidFinishEvents(forBackgroundURLSession: session)
+        manager?.didFinishEvents(forBackgroundURLSession: session)
     }
     
     
@@ -30,7 +30,8 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let URLString = downloadTask.currentRequest?.url?.absoluteString,
             let task = manager.fetchTask(with: URLString) as? TRDownloadTask
             else { return  }
-        task.task(didWriteData: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
+        task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
+
     }
     
     
@@ -39,15 +40,15 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let URLString = downloadTask.currentRequest?.url?.absoluteString,
             let task = manager.fetchTask(with: URLString) as? TRDownloadTask
             else { return  }
-        task.task(didFinishDownloadingTo: location)
+        task.didFinishDownloadingTo(location: location)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let manager = manager,
             let URLString = task.currentRequest?.url?.absoluteString,
-            let task = manager.fetchTask(with: URLString) as? TRDownloadTask
+            let downloadTask = manager.fetchTask(with: URLString) as? TRDownloadTask
             else { return  }
-        task.task(didCompleteWithError: error)
+        downloadTask.didComplete(task: task, error: error)
     }
     
     

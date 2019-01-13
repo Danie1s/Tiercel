@@ -15,9 +15,7 @@ public class TRCache {
     private let ioQueue: DispatchQueue
     
     public let downloadPath: String
-    
-    public let downloadResumeDataPath: String
-    
+
     public let downloadTmpPath: String
     
     public let downloadFilePath: String
@@ -48,9 +46,7 @@ public class TRCache {
         let diskCachePath = TRCache.defaultDiskCachePathClosure(cacheName)
         
         downloadPath = (diskCachePath as NSString).appendingPathComponent("Downloads")
-        
-        downloadResumeDataPath = (downloadPath as NSString).appendingPathComponent("ResumeData")
-        
+
         downloadTmpPath = (downloadPath as NSString).appendingPathComponent("Tmp")
         
         downloadFilePath = (downloadPath as NSString).appendingPathComponent("File")
@@ -65,13 +61,7 @@ public class TRCache {
 // MARK: - file
 extension TRCache {
     internal func createDirectory() {
-        
-        if !fileManager.fileExists(atPath: downloadResumeDataPath) {
-            do {
-                try fileManager.createDirectory(atPath: downloadResumeDataPath, withIntermediateDirectories: true, attributes: nil)
-            } catch _ {}
-        }
-        
+
         if !fileManager.fileExists(atPath: downloadTmpPath) {
             do {
                 try fileManager.createDirectory(atPath: downloadTmpPath, withIntermediateDirectories: true, attributes: nil)
@@ -133,17 +123,40 @@ extension TRCache {
 
 // MARK: - retrieve
 extension TRCache {
-    internal func retrieveAllTasks(_ session: URLSession) -> [TRTask]? {
+    internal func retrieveAllTasks() -> [TRTask]? {
         let path = (self.downloadPath as NSString).appendingPathComponent("\(self.name)Tasks.plist")
         
         let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [TRTask]
         tasks?.forEach({ (task) in
-            task.session = session
+            task.cache = self
             if task.status == .waiting || task.status == .running {
                 task.status = .suspended
             }
         })
         return tasks
+    }
+
+    internal func retrievTmpFile(_ task: TRDownloadTask) {
+        ioQueue.sync {
+            guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
+            let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
+            let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
+            if self.fileManager.fileExists(atPath: path1) && !self.fileManager.fileExists(atPath: path2) {
+                try? self.fileManager.moveItem(atPath: path1, toPath: path2)
+            }
+        }
+    }
+
+    internal func retrievTmpFileSize(_ task: TRDownloadTask) {
+        ioQueue.sync {
+            guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
+            let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
+            if self.fileManager.fileExists(atPath: tmpPath) {
+                if let fileInfo = try? FileManager().attributesOfItem(atPath: tmpPath), let length = fileInfo[.size] as? Int64 {
+                    task.progress.completedUnitCount = length
+                }
+            }
+        }
     }
 }
 
@@ -174,8 +187,11 @@ extension TRCache {
         ioQueue.sync {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
+            let destination = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
+            if self.fileManager.fileExists(atPath: destination) {
+                try? self.fileManager.removeItem(atPath: destination)
+            }
             if self.fileManager.fileExists(atPath: tmpPath) {
-                let destination = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
                 try? self.fileManager.copyItem(atPath: tmpPath, toPath: destination)
             }
         }

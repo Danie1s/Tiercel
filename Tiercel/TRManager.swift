@@ -63,16 +63,16 @@ public class TRManager {
         }
     }
     
-    private var _isSuspend: Bool = true
-    private var isSuspend: Bool {
+    private var _isSuspended: Bool = true
+    private var isSuspended: Bool {
         get {
             return queue.sync {
-                _isSuspend
+                _isSuspended
             }
         }
         set {
             return queue.sync {
-                _isSuspend = newValue
+                _isSuspended = newValue
             }
         }
     }
@@ -171,40 +171,19 @@ public class TRManager {
             cache = TRCache(identifier)
         }
         shouldCreatSession = true
+        tasks = cache.retrieveAllTasks() ?? [TRTask]()
         createSession()
-        
-        tasks = cache.retrieveAllTasks(session) ?? [TRTask]()
-        tasks.forEach({ $0.manager = self })
-        TiercelLog("retrieveTasks tasks.count = \(tasks.count)")
-        
-        session.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-            guard let strongSelf = self else { return }
-            downloadTasks.forEach({ (downloadTask) in
-                strongSelf.tasks.forEach({ (task) in
-                    if let url = downloadTask.originalRequest?.url, task.url == url, downloadTask.state == .running {
-                        task.status = .running
-                    }
-                })
-            })
-            
-            //  处理mananger状态
-            let isEnd = strongSelf.tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
-            if isEnd {
-                let isSuccess = strongSelf.tasks.filter { $0.status == .failed }.isEmpty
-                if isSuccess {
-                    strongSelf.isCompleted = true
-                    strongSelf.status = .completed
-                } else {
-                    strongSelf.status = .failed
-                }
-            } else {
-                strongSelf.status = .suspended
-            }
-        }
 
+        tasks.forEach({
+            $0.manager = self
+            $0.session = session
+        })
+        TiercelLog("retrieveTasks tasks.count = \(tasks.count)")
+
+        matchStatus()
     }
-    
-    
+
+
     private func createSession() {
         if shouldCreatSession {
             shouldCreatSession = false
@@ -218,7 +197,45 @@ public class TRManager {
         }
     }
     
-    
+    private func matchStatus() {
+        session.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+            guard let strongSelf = self else { return }
+            strongSelf.tasks.forEach({ (task) in
+                if let task = task as? TRDownloadTask {
+                    downloadTasks.forEach({ (downloadTask) in
+                        if task.currentURLString == downloadTask.currentRequest?.url?.absoluteString,
+                            downloadTask.state == .running {
+                            task.status = .running
+                            task.task = downloadTask
+                        }
+                    })
+                    if task.status != .running {
+                        strongSelf.cache.retrievTmpFile(task)
+                    }
+                }
+            })
+
+            //  处理mananger状态
+            let isRunning = strongSelf.tasks.filter { $0.status == .running }.count > 0
+            if isRunning {
+                strongSelf.status = .running
+                return
+            }
+
+            let isEnd = strongSelf.tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
+            if isEnd {
+                let isSuccess = strongSelf.tasks.filter { $0.status == .failed }.isEmpty
+                if isSuccess {
+                    strongSelf.isCompleted = true
+                    strongSelf.status = .completed
+                } else {
+                    strongSelf.status = .failed
+                }
+            } else {
+                strongSelf.status = .suspended
+            }
+        }
+    }
 }
 
 
@@ -364,7 +381,7 @@ extension TRManager {
         case .waiting, .suspended, .failed:
             
             if shouldRun {
-                isSuspend = false
+                isSuspended = false
                 
                 task.start()
                 if status != .running {
@@ -555,7 +572,7 @@ extension TRManager {
         }
         
         // 处理暂停的状态
-        let isSuspend = tasks.reduce(into: true) { (isSuspend, task) in
+        let isSuspended = tasks.reduce(into: true) { (isSuspend, task) in
             if isSuspend {
                 if task.status == .suspended || task.status == .completed || task.status == .failed {
                     isSuspend = true
@@ -565,11 +582,11 @@ extension TRManager {
             }
         }
         
-        if isSuspend {
-            if self.isSuspend {
+        if isSuspended {
+            if self.isSuspended {
                 return
             }
-            self.isSuspend = true
+            self.isSuspended = true
             TiercelLog("[manager] manager did suspend")
             status = .suspended
             DispatchQueue.main.tr.safeAsync {
@@ -681,11 +698,11 @@ extension TRManager {
 
 // MARK: - call back
 extension TRManager {
-    internal func manager(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+    internal func didBecomeInvalidWithError(error: Error?) {
         createSession()
     }
     
-    internal func managerDidFinishEvents(forBackgroundURLSession session: URLSession) {
+    internal func didFinishEvents(forBackgroundURLSession session: URLSession) {
         DispatchQueue.main.tr.safeAsync {
             self.completionHandler?()
             self.completionHandler = nil

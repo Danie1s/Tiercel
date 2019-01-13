@@ -14,6 +14,8 @@ internal let NSURLSessionResumeOriginalRequest = "NSURLSessionResumeOriginalRequ
 internal let NSURLSessionResumeByteRange = "NSURLSessionResumeByteRange"
 internal let NSURLSessionResumeInfoTempFileName = "NSURLSessionResumeInfoTempFileName"
 internal let NSURLSessionResumeInfoLocalPath = "NSURLSessionResumeInfoLocalPath"
+internal let NSURLSessionResumeBytesReceived = "NSURLSessionResumeBytesReceived"
+
 
 internal class TRResumeDataHelper {
     

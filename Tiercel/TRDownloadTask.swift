@@ -28,7 +28,7 @@ import UIKit
 
 public class TRDownloadTask: TRTask {
 
-    private var task: URLSessionDownloadTask?
+    internal var task: URLSessionDownloadTask?
     
     internal var location: URL?
     
@@ -58,6 +58,8 @@ public class TRDownloadTask: TRTask {
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         resumeData = aDecoder.decodeObject(forKey: "resumeData") as? Data
+        guard let resumeData = resumeData else { return  }
+        tmpFileName = TRResumeDataHelper.getTmpFileName(resumeData)
     }
     
     
@@ -201,7 +203,7 @@ extension TRDownloadTask {
 
 // MARK: - download callback
 extension TRDownloadTask {
-    public func task(didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+    public func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
         manager?.parseSpeed()
@@ -216,34 +218,34 @@ extension TRDownloadTask {
     }
     
     
-    public func task(didFinishDownloadingTo location: URL) {
+    public func didFinishDownloadingTo(location: URL) {
         self.location = location
         cache.storeFile(self)
-        completed()
+        cache.removeTmpFile(self)
     }
     
-    public func task(didCompleteWithError error: Error?) {
+    public func didComplete(task: URLSessionTask, error: Error?) {
         if TRManager.isControlNetworkActivityIndicator {
             DispatchQueue.main.tr.safeAsync {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }
         }
-        
+
         session = nil
-        
+        self.progress.totalUnitCount = task.countOfBytesExpectedToReceive
 
         
         if let error = error {
             self.error = error
             if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
                 self.resumeData = TRResumeDataHelper.handleResumeData(resumeData)
-                TiercelLog("获得resumeData")
-                let dict = TRResumeDataHelper.getResumeDictionary(self.resumeData!)
-                TiercelLog(dict)
-
+                cache.retrievTmpFileSize(self)
+                cache.storeTmpFile(self)
             }
             
             switch status {
+            case .suspended:
+                status = .suspended
             case .willSuspend:
                 status = .suspended
                 DispatchQueue.main.tr.safeAsync {
@@ -261,6 +263,8 @@ extension TRDownloadTask {
                     self.failureHandler?(self)
                 }
             }
+        } else {
+            completed()
         }
         
         manager?.completed()
