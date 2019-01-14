@@ -178,7 +178,7 @@ public class TRManager {
             $0.manager = self
             $0.session = session
         })
-        TiercelLog("retrieveTasks tasks.count = \(tasks.count)")
+        TiercelLog("[manager] retrieveTasks, tasks.count = \(tasks.count), manager.identifier = \(self.identifier)")
 
         matchStatus()
     }
@@ -218,6 +218,7 @@ public class TRManager {
             //  处理mananger状态
             let isRunning = strongSelf.tasks.filter { $0.status == .running }.count > 0
             if isRunning {
+                TiercelLog("[manager] running, manager.identifier = \(strongSelf.identifier)")
                 strongSelf.status = .running
                 return
             }
@@ -259,7 +260,7 @@ extension TRManager {
         status = .waiting
         
         guard let url = URL(string: URLString) else {
-            TiercelLog("[manager] 下载无效的URLString：\(URLString)")
+            TiercelLog("[manager] 下载无效的URLString：\(URLString), manager.identifier = \(identifier)")
             return nil
         }
         
@@ -307,7 +308,7 @@ extension TRManager {
                     uniqueUrls.append(uniqueUrl)
                 }
             } else {
-                TiercelLog("[manager] 下载无效的URLString：\(URLString)")
+                TiercelLog("[manager] 下载无效的URLString：\(URLString), manager.identifier = \(identifier)")
             }
         }
         
@@ -368,7 +369,8 @@ extension TRManager {
         task.session = session
         
         if cache.fileExists(fileName: task.fileName) {
-            TiercelLog("[manager] file is exists URLString: \(task.URLString)")
+            TiercelLog("[manager] file is exists URLString: \(task.URLString), manager.identifier = \(identifier)")
+
             if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePtah(fileName: task.fileName)!), let length = fileInfo[.size] as? Int64 {
                 task.progress.totalUnitCount = length
             }
@@ -386,6 +388,7 @@ extension TRManager {
                 task.start()
                 if status != .running {
                     progress.setUserInfoObject(Date().timeIntervalSince1970, forKey: .estimatedTimeRemainingKey)
+                    TiercelLog("[manager] running, manager.identifier = \(identifier)")
                 }
                 status = .running
             } else {
@@ -398,7 +401,7 @@ extension TRManager {
             task.completed()
             self.completed()
         case .running:
-            TiercelLog("[manager] task is running URLString: \(URLString)")
+            TiercelLog("[manager] task is running URLString: \(task.URLString), manager.identifier = \(identifier)")
         default: break
         }
         cache.storeTasks(tasks)
@@ -517,7 +520,7 @@ extension TRManager {
         if status == .willRemove {
             if tasks.isEmpty {
                 status = .removed
-                TiercelLog("[manager] all tasks completed and manager failed because its status is \(status)")
+                TiercelLog("[manager] all tasks completed and manager failed because its status is \(status), manager.identifier = \(identifier)")
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
                 }
@@ -531,7 +534,7 @@ extension TRManager {
             let isCancel = tasks.filter { $0.status != .completed }.isEmpty
             if isCancel {
                 status = .canceled
-                TiercelLog("[manager] all tasks completed and manager failed because its status is \(status)")
+                TiercelLog("[manager] all tasks completed and manager failed because its status is \(status), manager.identifier = \(identifier)")
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
                 }
@@ -556,13 +559,13 @@ extension TRManager {
             // 成功或者失败
             let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
             if isSuccess {
-                TiercelLog("[manager] all tasks completed and manager succeeded")
+                TiercelLog("[manager] all tasks completed and manager succeeded, manager.identifier = \(identifier)")
                 status = .completed
                 DispatchQueue.main.tr.safeAsync {
                     self.successHandler?(self)
                 }
             } else {
-                TiercelLog("[manager] all tasks completed and manager failed")
+                TiercelLog("[manager] all tasks completed and manager failed, manager.identifier = \(identifier)")
                 status = .failed
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
@@ -587,7 +590,7 @@ extension TRManager {
                 return
             }
             self.isSuspended = true
-            TiercelLog("[manager] manager did suspend")
+            TiercelLog("[manager] did suspend, manager.identifier = \(identifier)")
             status = .suspended
             DispatchQueue.main.tr.safeAsync {
                 self.successHandler?(self)
@@ -605,8 +608,7 @@ extension TRManager {
         if waitingTasks.isEmpty {
             return
         }
-        
-        TiercelLog("[manager] start to download the next task")
+        TiercelLog("[manager] start to download the next task, manager.identifier = \(identifier)")
         waitingTasks.forEach({ (task) in
             self.start(task.URLString)
         })

@@ -129,12 +129,12 @@
 				E1C1DD3C206C91EF003665A9 /* Tiercel.h */,
 				E1C1DD46206C9241003665A9 /* TRCommon.swift */,
 				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
+				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
 				E1C1DD45206C9241003665A9 /* TRCache.swift */,
 				E1C1DD47206C9241003665A9 /* TRTask.swift */,
 				E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */,
 				E1C1DD48206C9241003665A9 /* TRManager.swift */,
 				E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */,
-				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
 				E1C1DD3D206C91EF003665A9 /* Info.plist */,
 			);
 			path = Tiercel;
@@ -453,9 +453,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = Y3437T5EGX;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -479,6 +480,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = Y3437T5EGX;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";

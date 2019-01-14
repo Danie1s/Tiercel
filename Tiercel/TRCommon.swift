@@ -203,9 +203,8 @@ public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #
         print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
 
-        print("File    :  \((file as NSString).lastPathComponent)\n" +
+        print("source  :  \((file as NSString).lastPathComponent)[\(line)]\n" +
             "Thread  :  \(threadNum)\n" +
-            "line    :  \(line)\n" +
             "Info    :  \(message)"
         )
         print("")

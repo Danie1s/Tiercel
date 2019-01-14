@@ -48,10 +48,13 @@ extension ViewController3 {
 
 
     @IBAction func multiDownload(_ sender: Any) {
-        downloadManager?.multiDownload(URLStrings)
-        downloadURLStrings.append(contentsOf: URLStrings)
-        updateUI()
-        tableView.reloadData()
+        if downloadURLStrings.isEmpty {
+            downloadURLStrings.append(contentsOf: URLStrings)
+            downloadManager?.multiDownload(URLStrings)
+            updateUI()
+            tableView.reloadData()
+        }
+
     }
 
 }

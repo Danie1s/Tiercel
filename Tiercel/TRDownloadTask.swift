@@ -111,7 +111,7 @@ public class TRDownloadTask: TRTask {
 
     internal override func suspend() {
         guard status == .running || status == .waiting else { return }
-        TiercelLog("[downloadTask] did suspend \(self.URLString)")
+        TiercelLog("[downloadTask] did suspend, manager.identifier = \(manager?.identifier ?? "")), URLString: \(URLString)")
 
         if status == .running {
             status = .willSuspend
@@ -130,7 +130,8 @@ public class TRDownloadTask: TRTask {
     
     internal override func cancel() {
         guard status != .completed else { return }
-        TiercelLog("[downloadTask] did cancel \(self.URLString)")
+        TiercelLog("[downloadTask] did cancel, manager.identifier = \(manager?.identifier ?? "")), URLString: \(URLString)")
+
         if status == .running {
             status = .willCancel
             task?.cancel()
@@ -147,7 +148,8 @@ public class TRDownloadTask: TRTask {
 
 
     internal override func remove() {
-        TiercelLog("[downloadTask] did remove \(self.URLString)")
+        TiercelLog("[downloadTask] did remove, manager.identifier = \(manager?.identifier ?? "")), URLString: \(URLString)")
+
         if status == .running {
             status = .willRemove
             task?.cancel()
@@ -167,7 +169,8 @@ public class TRDownloadTask: TRTask {
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
-        TiercelLog("[downloadTask] a task did complete URLString: \(URLString)")
+        TiercelLog("[downloadTask] a task did complete, manager.identifier = \(manager?.identifier ?? "")), URLString: \(URLString)")
+
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
             self.successHandler?(self)
@@ -256,6 +259,9 @@ extension TRDownloadTask {
                 self.resumeData = TRResumeDataHelper.handleResumeData(resumeData)
                 cache.retrievTmpFileSize(self)
                 cache.storeTmpFile(self)
+            }
+            if let urlError = error as? URLError, urlError.code.rawValue != NSURLErrorCancelled {
+                status = .failed
             }
             
             switch status {

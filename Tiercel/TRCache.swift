@@ -177,7 +177,6 @@ extension TRCache {
             do {
                 try self.fileManager.moveItem(at: location, to: URL(fileURLWithPath: destination))
             } catch {
-                TiercelLog(error)
                 // 错误处理
             }
         }
