@@ -128,13 +128,13 @@
 			children = (
 				E1C1DD3C206C91EF003665A9 /* Tiercel.h */,
 				E1C1DD46206C9241003665A9 /* TRCommon.swift */,
+				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
 				E1C1DD45206C9241003665A9 /* TRCache.swift */,
 				E1C1DD47206C9241003665A9 /* TRTask.swift */,
 				E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */,
 				E1C1DD48206C9241003665A9 /* TRManager.swift */,
 				E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */,
 				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
-				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
 				E1C1DD3D206C91EF003665A9 /* Info.plist */,
 			);
 			path = Tiercel;
@@ -148,11 +148,11 @@
 				E1C1DD68206C937B003665A9 /* ViewController1.swift */,
 				E1C1DD66206C937A003665A9 /* ViewController2.swift */,
 				E1C1DD6A206C937B003665A9 /* ViewController3.swift */,
-				E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */,
-				E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */,
 				E1C1DD67206C937B003665A9 /* ListViewController.swift */,
 				E1C1DD69206C937B003665A9 /* ListViewCell.swift */,
 				E1C1DD70206C9385003665A9 /* DownloadViewController.swift */,
+				E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */,
+				E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */,
 				E1C1DD5A206C92FE003665A9 /* Main.storyboard */,
 				E1C1DD5D206C92FE003665A9 /* Assets.xcassets */,
 				E1C1DD5F206C92FE003665A9 /* LaunchScreen.storyboard */,
@@ -499,13 +499,15 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LXWRN82SY3;
+				DEVELOPMENT_TEAM = Y3437T5EGX;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -516,13 +518,15 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LXWRN82SY3;
+				DEVELOPMENT_TEAM = Y3437T5EGX;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

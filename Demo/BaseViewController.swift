@@ -214,5 +214,9 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
 
         task.progress { _ in }.success({ _ in }).failure({ _ in})
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 
 }

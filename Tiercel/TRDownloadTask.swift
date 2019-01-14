@@ -28,7 +28,11 @@ import UIKit
 
 public class TRDownloadTask: TRTask {
 
-    internal var task: URLSessionDownloadTask?
+    public var task: URLSessionDownloadTask? {
+        didSet {
+            task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
+        }
+    }
     
     internal var location: URL?
     
@@ -43,11 +47,11 @@ public class TRDownloadTask: TRTask {
 
     public init(_ url: URL, fileName: String? = nil, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
         super.init(url, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
-        if let fileName = fileName {
-            if !fileName.isEmpty {
-                self.fileName = fileName
-            }
+        if let fileName = fileName,
+            !fileName.isEmpty {
+            self.fileName = fileName
         }
+        NotificationCenter.default.addObserver(self, selector: #selector(fixDelegateMethodError), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     public override func encode(with aCoder: NSCoder) {
@@ -62,11 +66,25 @@ public class TRDownloadTask: TRTask {
         tmpFileName = TRResumeDataHelper.getTmpFileName(resumeData)
     }
     
+    deinit {
+        task?.removeObserver(self, forKeyPath: "currentRequest")
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func fixDelegateMethodError() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.task?.suspend()
+            self.task?.resume()
+        }
+
+    }
+    
     
     internal override func start() {
         cache.createDirectory()
         
         if let resumeData = resumeData {
+            task?.removeObserver(self, forKeyPath: "currentRequest")
             if #available(iOS 10.2, *) {
                 task = session?.downloadTask(withResumeData: resumeData)
             } else if #available(iOS 10.0, *) {
@@ -82,7 +100,6 @@ public class TRDownloadTask: TRTask {
         speed = 0
         progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
         
-        task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         task?.resume()
         if startDate == 0 {
             startDate = Date().timeIntervalSince1970
@@ -92,8 +109,6 @@ public class TRDownloadTask: TRTask {
     }
 
 
-
-    
     internal override func suspend() {
         guard status == .running || status == .waiting else { return }
         TiercelLog("[downloadTask] did suspend \(self.URLString)")

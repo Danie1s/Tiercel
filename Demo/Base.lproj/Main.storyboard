@@ -479,8 +479,8 @@
                             <constraint firstItem="6RR-yd-RCD" firstAttribute="top" secondItem="Inf-bO-w9M" secondAttribute="bottom" id="CCF-d0-G2P"/>
                             <constraint firstItem="UJ6-RT-Vgd" firstAttribute="leading" secondItem="V4z-Af-sCC" secondAttribute="leading" id="Nbp-N8-dPv"/>
                             <constraint firstItem="6RR-yd-RCD" firstAttribute="leading" secondItem="V4z-Af-sCC" secondAttribute="leading" id="WCK-g1-PR9"/>
+                            <constraint firstAttribute="bottom" secondItem="UJ6-RT-Vgd" secondAttribute="bottom" id="aHd-8e-TCK"/>
                             <constraint firstAttribute="trailing" secondItem="UJ6-RT-Vgd" secondAttribute="trailing" id="eYP-Uv-ZIV"/>
-                            <constraint firstItem="cMq-08-pfT" firstAttribute="top" secondItem="UJ6-RT-Vgd" secondAttribute="bottom" id="gi3-1j-BkO"/>
                         </constraints>
                     </view>
                     <connections>
@@ -796,8 +796,8 @@
                             <constraint firstItem="BI5-Jh-R0c" firstAttribute="leading" secondItem="aXB-9c-ixG" secondAttribute="leading" id="Tan-QX-4s6"/>
                             <constraint firstItem="Bms-Qo-CB3" firstAttribute="top" secondItem="98g-RD-IbM" secondAttribute="bottom" id="U6K-NI-qCY"/>
                             <constraint firstAttribute="trailing" secondItem="Bms-Qo-CB3" secondAttribute="trailing" id="VPL-DQ-yoh"/>
-                            <constraint firstItem="6dG-As-YWr" firstAttribute="top" secondItem="BI5-Jh-R0c" secondAttribute="bottom" id="atg-jE-3KZ"/>
                             <constraint firstItem="Bms-Qo-CB3" firstAttribute="leading" secondItem="aXB-9c-ixG" secondAttribute="leading" id="v6h-jl-0au"/>
+                            <constraint firstItem="6dG-As-YWr" firstAttribute="top" secondItem="BI5-Jh-R0c" secondAttribute="bottom" id="xff-rX-dR2"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" systemItem="downloads" id="eQs-RL-Gx1"/>

@@ -285,7 +285,7 @@ extension TRManager {
     }
     
     /// 批量开启多个下载任务
-    /// 所有任务都会并发下载？？
+    /// 所有任务都会并发下载
     ///
     /// - Parameters:
     ///   - URLStrings: 需要下载的URLString数组

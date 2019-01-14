@@ -56,10 +56,14 @@ class ListViewController: UITableViewController {
         cell.URLStringLabel.text = "视频\(indexPath.row + 1).mp4"
         let URLStirng = URLStrings[indexPath.row]
         cell.downloadClosure = { cell in
-            (UIApplication.shared.delegate as! AppDelegate).downloadManager3.download(URLStirng, fileName: cell.URLStringLabel.text)
+            (UIApplication.shared.delegate as! AppDelegate).downloadManager4.download(URLStirng, fileName: cell.URLStringLabel.text)
         }
 
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 
 
