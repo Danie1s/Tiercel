@@ -172,12 +172,9 @@ public class TRManager {
         }
         shouldCreatSession = true
         tasks = cache.retrieveAllTasks() ?? [TRTask]()
+        tasks.forEach({ $0.manager = self })
         createSession()
 
-        tasks.forEach({
-            $0.manager = self
-            $0.session = session
-        })
         TiercelLog("[manager] retrieveTasks, tasks.count = \(tasks.count), manager.identifier = \(self.identifier)")
 
         matchStatus()
@@ -194,6 +191,7 @@ public class TRManager {
             let sessionDelegate = TRSessionDelegate()
             sessionDelegate.manager = self
             session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
+            tasks.forEach({ $0.session = session })
         }
     }
     
@@ -203,15 +201,13 @@ public class TRManager {
             strongSelf.tasks.forEach({ (task) in
                 if let task = task as? TRDownloadTask {
                     downloadTasks.forEach({ (downloadTask) in
-                        if task.currentURLString == downloadTask.currentRequest?.url?.absoluteString,
-                            downloadTask.state == .running {
-                            task.status = .running
+                        if task.currentURLString == downloadTask.currentRequest?.url?.absoluteString {
                             task.task = downloadTask
+                            if downloadTask.state == .running {
+                                task.status = .running
+                            }
                         }
                     })
-                    if task.status != .running {
-                        strongSelf.cache.retrievTmpFile(task)
-                    }
                 }
             })
 

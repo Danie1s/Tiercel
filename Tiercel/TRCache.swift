@@ -147,17 +147,7 @@ extension TRCache {
         }
     }
 
-    internal func retrievTmpFileSize(_ task: TRDownloadTask) {
-        ioQueue.sync {
-            guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
-            let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
-            if self.fileManager.fileExists(atPath: tmpPath) {
-                if let fileInfo = try? FileManager().attributesOfItem(atPath: tmpPath), let length = fileInfo[.size] as? Int64 {
-                    task.progress.completedUnitCount = length
-                }
-            }
-        }
-    }
+
 }
 
 
@@ -232,7 +222,7 @@ extension TRCache {
             if self.fileManager.fileExists(atPath: path1) {
                 try? self.fileManager.removeItem(atPath: path1)
             }
-            
+
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             if self.fileManager.fileExists(atPath: path2) {
                 try? self.fileManager.removeItem(atPath: path2)
