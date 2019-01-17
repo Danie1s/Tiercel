@@ -164,11 +164,10 @@ public class TRTask: NSObject, NSCoding {
     
     public required init?(coder aDecoder: NSCoder) {
         cache = TRCache.default
-        _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
-        let URLString = aDecoder.decodeObject(forKey: "URLString") as! String
-        self.URLString = URLString
-        self.url = URL(string: URLString)!
+        URLString = aDecoder.decodeObject(forKey: "URLString") as! String
+        url = URL(string: URLString)!
         _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
+        _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         super.init()
         
         startDate = aDecoder.decodeDouble(forKey: "startDate")
@@ -183,9 +182,9 @@ public class TRTask: NSObject, NSCoding {
     public init(_ url: URL, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
         self.cache = cache
         self.url = url
-        _fileName = url.lastPathComponent
         self.URLString = url.absoluteString
-        _currentURLString = self.URLString
+        _currentURLString = url.absoluteString
+        _fileName = url.lastPathComponent
         super.init()
         self.progressHandler = progressHandler
         self.successHandler = successHandler

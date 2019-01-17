@@ -28,14 +28,18 @@ import UIKit
 
 public class TRDownloadTask: TRTask {
 
-    public var task: URLSessionDownloadTask? {
+    internal var task: URLSessionDownloadTask? {
         didSet {
             task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         }
     }
+
+    public var filePath: String {
+        return cache.filePtah(fileName: fileName)!
+    }
     
     internal var location: URL?
-    
+
     var resumeData: Data? {
         didSet {
             guard let resumeData = resumeData else { return  }
