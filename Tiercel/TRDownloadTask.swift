@@ -93,7 +93,7 @@ public class TRDownloadTask: TRTask {
             } else {
                 task = session?.downloadTask(withResumeData: resumeData)
             }
-        } else if task == nil {
+        } else {
             super.start()
             guard let request = request else { return  }
             task = session?.downloadTask(with: request)
@@ -113,36 +113,20 @@ public class TRDownloadTask: TRTask {
     internal override func suspend() {
         guard status == .running || status == .waiting else { return }
         TiercelLog("[downloadTask] did suspend, manager.identifier = \(manager?.identifier ?? "")), URLString: \(URLString)")
-        
-        if TRManager.isControlNetworkActivityIndicator {
-            DispatchQueue.main.tr.safeAsync {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            }
-        }
-        
-        status = .suspended
-        if task?.state == .running {
-            task?.suspend()
-        }
-        DispatchQueue.main.tr.safeAsync {
-            self.progressHandler?(self)
-            self.successHandler?(self)
-        }
-        manager?.completed()
 
-//        if status == .running {
-//            status = .willSuspend
-//            task?.cancel(byProducingResumeData: { _ in })
-//        }
-//
-//        if status == .waiting {
-//            status = .suspended
-//            DispatchQueue.main.tr.safeAsync {
-//                self.progressHandler?(self)
-//                self.successHandler?(self)
-//            }
-//            manager?.completed()
-//        }
+        if status == .running {
+            status = .willSuspend
+            task?.cancel(byProducingResumeData: { _ in })
+        }
+
+        if status == .waiting {
+            status = .suspended
+            DispatchQueue.main.tr.safeAsync {
+                self.progressHandler?(self)
+                self.successHandler?(self)
+            }
+            manager?.completed()
+        }
     }
     
     internal override func cancel() {
@@ -270,30 +254,29 @@ extension TRDownloadTask {
         progress.totalUnitCount = task.countOfBytesExpectedToReceive
         progress.completedUnitCount = task.countOfBytesReceived
         
-        
         if let error = error {
             self.error = error
-            if let cancellation = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
-                print(cancellation)
-            }
-            
+        
             if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
                 self.resumeData = TRResumeDataHelper.handleResumeData(resumeData)
                 cache.storeTmpFile(self)
             }
-            if let urlError = error as? URLError, urlError.code.rawValue != NSURLErrorCancelled {
+            if let _ = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
+                status = .suspended
+            }
+            if let urlError = error as? URLError, urlError.code != URLError.cancelled {
                 status = .failed
             }
             
             switch status {
             case .suspended:
                 status = .suspended
-//            case .willSuspend:
-//                status = .suspended
-//                DispatchQueue.main.tr.safeAsync {
-//                    self.progressHandler?(self)
-//                    self.successHandler?(self)
-//                }
+            case .willSuspend:
+                status = .suspended
+                DispatchQueue.main.tr.safeAsync {
+                    self.progressHandler?(self)
+                    self.successHandler?(self)
+                }
             case .willCancel, .willRemove:
                 manager?.taskDidCancelOrRemove(URLString)
                 DispatchQueue.main.tr.safeAsync {

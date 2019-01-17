@@ -201,11 +201,10 @@ public class TRManager {
             strongSelf.tasks.forEach({ (task) in
                 if let task = task as? TRDownloadTask {
                     downloadTasks.forEach({ (downloadTask) in
-                        if task.currentURLString == downloadTask.currentRequest?.url?.absoluteString {
+                        if task.currentURLString == downloadTask.currentRequest?.url?.absoluteString,
+                            downloadTask.state == .running {
+                            task.status = .running
                             task.task = downloadTask
-                            if downloadTask.state == .running {
-                                task.status = .running
-                            }
                         }
                     })
                 }

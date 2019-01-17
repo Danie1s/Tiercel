@@ -189,28 +189,6 @@ extension URLSession {
     }
 }
 
-extension URLSessionDownloadTask {
-    /// 把有bug的resumeData修复，然后创建task
-    ///
-    /// - Parameter resumeData:
-    /// - Returns:
-    internal func correctedDownloadTask(withResumeData resumeData: Data) {
-        
-        // a compensation for inability to set task requests in CFNetwork.
-        // While you still get -[NSKeyedUnarchiver initForReadingWithData:]: data is NULL error,
-        // this section will set them to real objects
-        if let resumeDictionary = TRResumeDataHelper.getResumeDictionary(resumeData) {
-            if originalRequest == nil, let originalReqData = resumeDictionary[NSURLSessionResumeOriginalRequest] as? Data, let originalRequest = NSKeyedUnarchiver.unarchiveObject(with: originalReqData) as? NSURLRequest {
-                setValue(originalRequest, forKey: "originalRequest")
-            }
-            if currentRequest == nil, let currentReqData = resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data, let currentRequest = NSKeyedUnarchiver.unarchiveObject(with: currentReqData) as? NSURLRequest {
-                setValue(currentRequest, forKey: "currentRequest")
-            }
-        }
-    }
-}
-
-
 
 
 
