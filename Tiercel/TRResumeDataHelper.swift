@@ -1,9 +1,27 @@
 //
 //  TRResumeDataHelper.swift
-//  BackgroundURLSession
+//  Tiercel
 //
-//  Created by Daniels Lau on 2019/1/7.
-//  Copyright © 2019 Daniels Lau. All rights reserved.
+//  Created by Daniels on 2019/1/7.
+//  Copyright © 2018年 Daniels. All rights reserved.
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import UIKit
@@ -143,14 +161,7 @@ internal class TRResumeDataHelper {
                 archive["$objects"] = arr
             }
         }
-        /* I think we have no reason to keep this section in effect
-         for item in (archive["$objects"] as? NSMutableArray) ?? [] {
-         if let cls = item as? NSMutableDictionary, cls["$classname"] as? NSString == "NSURLRequest" {
-         cls["$classname"] = NSString(string: "NSMutableURLRequest")
-         (cls["$classes"] as? NSMutableArray)?.insert(NSString(string: "NSMutableURLRequest"), at: 0)
-         }
-         }*/
-        // Rectify weird "NSKeyedArchiveRootObjectKey" top key to NSKeyedArchiveRootObjectKey = "root"
+
         if let obj = (archive["$top"] as? NSMutableDictionary)?.object(forKey: "NSKeyedArchiveRootObjectKey") as AnyObject? {
             (archive["$top"] as? NSMutableDictionary)?.setObject(obj, forKey: NSKeyedArchiveRootObjectKey as NSString)
             (archive["$top"] as? NSMutableDictionary)?.removeObject(forKey: "NSKeyedArchiveRootObjectKey")
@@ -173,9 +184,6 @@ extension URLSession {
         
         let task = downloadTask(withResumeData: resumeData)
         
-        // a compensation for inability to set task requests in CFNetwork.
-        // While you still get -[NSKeyedUnarchiver initForReadingWithData:]: data is NULL error,
-        // this section will set them to real objects
         if let resumeDictionary = TRResumeDataHelper.getResumeDictionary(resumeData) {
             if task.originalRequest == nil, let originalReqData = resumeDictionary[NSURLSessionResumeOriginalRequest] as? Data, let originalRequest = NSKeyedUnarchiver.unarchiveObject(with: originalReqData) as? NSURLRequest {
                 task.setValue(originalRequest, forKey: "originalRequest")

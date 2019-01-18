@@ -1,9 +1,27 @@
 //
 //  TRCache.swift
-//  BackgroundURLSession
+//  Tiercel
 //
-//  Created by Daniels Lau on 2019/1/3.
-//  Copyright © 2019 Daniels Lau. All rights reserved.
+//  Created by Daniels on 2018/3/16.
+//  Copyright © 2018年 Daniels. All rights reserved.
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import UIKit
@@ -24,7 +42,7 @@ public class TRCache {
     
     private let fileManager = FileManager.default
     
-    public final class func defaultDiskCachePathClosure(_ cacheName: String) -> String {
+    private final class func defaultDiskCachePathClosure(_ cacheName: String) -> String {
         let dstPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
         return (dstPath as NSString).appendingPathComponent(cacheName)
     }
@@ -33,8 +51,7 @@ public class TRCache {
     /// 初始化方法
     ///
     /// - Parameters:
-    ///   - name: 设置TRCache对象的名字，一般由TRManager对象创建时传递
-    ///   - isStoreInfo: 是否把下载任务的相关信息持久化到沙盒，一般由TRManager对象创建时传递
+    ///   - name: 不同的name，代表不同的下载模块，对应的文件放在不同的地方
     public init(_ name: String) {
         self.name = name
         
@@ -65,30 +82,18 @@ extension TRCache {
         if !fileManager.fileExists(atPath: downloadTmpPath) {
             do {
                 try fileManager.createDirectory(atPath: downloadTmpPath, withIntermediateDirectories: true, attributes: nil)
-            } catch _ {}
+            } catch  {
+                TiercelLog("createDirectory error: \(error)")
+            }
         }
         
         if !fileManager.fileExists(atPath: downloadFilePath) {
             do {
                 try fileManager.createDirectory(atPath: downloadFilePath, withIntermediateDirectories: true, attributes: nil)
-            } catch _ {}
+            } catch {
+                TiercelLog("createDirectory error: \(error)")
+            }
         }
-    }
-    
-    
-    public func filePtah(URLString: String) -> String? {
-        guard let fileName = URL(string: URLString)?.lastPathComponent else { return nil }
-        return filePtah(fileName: fileName)
-    }
-    
-    public func fileURL(URLString: String) -> URL? {
-        guard let path = filePtah(URLString: URLString) else { return nil }
-        return URL(fileURLWithPath: path)
-    }
-    
-    public func fileExists(URLString: String) -> Bool {
-        guard let path = filePtah(URLString: URLString) else { return false }
-        return fileManager.fileExists(atPath: path)
     }
     
     
@@ -110,11 +115,33 @@ extension TRCache {
         return fileManager.fileExists(atPath: path)
     }
     
+    public func filePtah(URLString: String) -> String? {
+        guard let url = URL(string: URLString) else { return nil }
+        let fileName = url.tr.fileName
+        return filePtah(fileName: fileName)
+    }
+    
+    public func fileURL(URLString: String) -> URL? {
+        guard let path = filePtah(URLString: URLString) else { return nil }
+        return URL(fileURLWithPath: path)
+    }
+    
+    public func fileExists(URLString: String) -> Bool {
+        guard let path = filePtah(URLString: URLString) else { return false }
+        return fileManager.fileExists(atPath: path)
+    }
+    
+    
     
     public func clearDiskCache() {
         ioQueue.async {
             guard self.fileManager.fileExists(atPath: self.downloadPath) else { return }
-            try? self.fileManager.removeItem(atPath: self.downloadPath)
+            do {
+                try self.fileManager.removeItem(atPath: self.downloadPath)
+            } catch {
+                TiercelLog("removeItem error: \(error)")
+
+            }
             self.createDirectory()
         }
     }
@@ -142,7 +169,11 @@ extension TRCache {
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             if self.fileManager.fileExists(atPath: path1) && !self.fileManager.fileExists(atPath: path2) {
-                try? self.fileManager.moveItem(atPath: path1, toPath: path2)
+                do {
+                    try self.fileManager.moveItem(atPath: path1, toPath: path2)
+                } catch {
+                    TiercelLog("moveItem error: \(error)")
+                }
             }
         }
     }
@@ -162,12 +193,12 @@ extension TRCache {
     
     internal func storeFile(_ task: TRDownloadTask) {
         ioQueue.sync {
-            guard let location = task.location else { return }
+            guard let location = task.tmpFileURL else { return }
             let destination = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
             do {
                 try self.fileManager.moveItem(at: location, to: URL(fileURLWithPath: destination))
             } catch {
-                // 错误处理
+                TiercelLog("moveItem error: \(error)")
             }
         }
     }
@@ -178,10 +209,18 @@ extension TRCache {
             let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             let destination = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             if self.fileManager.fileExists(atPath: destination) {
-                try? self.fileManager.removeItem(atPath: destination)
+                do {
+                    try self.fileManager.removeItem(atPath: destination)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
             }
             if self.fileManager.fileExists(atPath: tmpPath) {
-                try? self.fileManager.copyItem(atPath: tmpPath, toPath: destination)
+                do {
+                    try self.fileManager.copyItem(atPath: tmpPath, toPath: destination)
+                } catch {
+                    TiercelLog("copyItem error: \(error)")
+                }
             }
         }
     }
@@ -205,7 +244,11 @@ extension TRCache {
             if task.fileName.isEmpty { return }
             let path = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
             if self.fileManager.fileExists(atPath: path) {
-                try? self.fileManager.removeItem(atPath: path)
+                do {
+                    try self.fileManager.removeItem(atPath: path)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
             }
         }
     }
@@ -220,12 +263,20 @@ extension TRCache {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             if self.fileManager.fileExists(atPath: path1) {
-                try? self.fileManager.removeItem(atPath: path1)
+                do {
+                    try self.fileManager.removeItem(atPath: path1)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
             }
 
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             if self.fileManager.fileExists(atPath: path2) {
-                try? self.fileManager.removeItem(atPath: path2)
+                do {
+                    try self.fileManager.removeItem(atPath: path2)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
             }
         }
     }

@@ -40,7 +40,7 @@ public class TRTask: NSObject, NSCoding {
 
     internal var request: URLRequest?
 
-    internal var _status: TRStatus = .waiting
+    private var _status: TRStatus = .waiting
     public var status: TRStatus {
         get {
             return queue.sync {
@@ -54,7 +54,7 @@ public class TRTask: NSObject, NSCoding {
         }
     }
 
-    public let url: URL
+    internal let url: URL
     
     public let URLString: String
     
@@ -118,7 +118,7 @@ public class TRTask: NSObject, NSCoding {
         }
     }
 
-    /// 默认为url最后一部分
+    /// 默认为url的md5加上文件扩展名
     private var _fileName: String
     public internal(set) var fileName: String {
         get {
@@ -184,7 +184,7 @@ public class TRTask: NSObject, NSCoding {
         self.url = url
         self.URLString = url.absoluteString
         _currentURLString = url.absoluteString
-        _fileName = url.lastPathComponent
+        _fileName = url.tr.fileName
         super.init()
         self.progressHandler = progressHandler
         self.successHandler = successHandler

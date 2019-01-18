@@ -25,8 +25,7 @@
 //
 
 import UIKit
-
-
+import CommonCrypto
 
 public enum TRStatus: String {
     case waiting
@@ -42,7 +41,6 @@ public enum TRStatus: String {
     case willCancel
     case willRemove
 }
-
 
 
 public enum TRLogLevel {
@@ -75,12 +73,8 @@ extension TiercelCompatible {
     }
 }
 
+
 extension Int64: TiercelCompatible {}
-extension Double: TiercelCompatible {}
-extension UIDevice: TiercelCompatible {}
-extension DispatchQueue: TiercelCompatible {}
-
-
 extension Tiercel where Base == Int64 {
 
     /// 返回下载速度的字符串，如：1MB/s
@@ -138,6 +132,7 @@ extension Tiercel where Base == Int64 {
 
 }
 
+extension Double: TiercelCompatible {}
 extension Tiercel where Base == Double {
     /// 返回 yyyy-MM-dd HH:mm:ss格式的字符串
     ///
@@ -152,6 +147,7 @@ extension Tiercel where Base == Double {
 
 }
 
+extension UIDevice: TiercelCompatible {}
 extension Tiercel where Base: UIDevice {
     public var freeDiskSpaceInBytes: Int64 {
         if #available(iOS 11.0, *) {
@@ -171,6 +167,7 @@ extension Tiercel where Base: UIDevice {
     }
 }
 
+extension DispatchQueue: TiercelCompatible {}
 extension Tiercel where Base: DispatchQueue {
     internal func safeAsync(_ block: @escaping ()->()) {
         if base == DispatchQueue.main && Thread.isMainThread {
@@ -181,7 +178,31 @@ extension Tiercel where Base: DispatchQueue {
     }
 }
 
+extension String: TiercelCompatible { }
+extension Tiercel where Base == String {
+    public var md5: String {
+        guard let data = base.data(using: .utf8) else {
+            return base
+        }
+        var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
+        _ = data.withUnsafeBytes { bytes in
+            return CC_MD5(bytes, CC_LONG(data.count), &digest)
+        }
+        
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+}
 
+extension URL: TiercelCompatible { }
+extension Tiercel where Base == URL {
+    public var fileName: String {
+        var fileName = base.absoluteString.tr.md5
+        if !base.pathExtension.isEmpty {
+            fileName += ".\(base.pathExtension)"
+        }
+        return fileName
+    }
+}
 
 
 extension Array {
