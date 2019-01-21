@@ -354,11 +354,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="UJ6-RT-Vgd">
-                                <rect key="frame" x="0.0" y="304" width="375" height="363"/>
+                                <rect key="frame" x="0.0" y="344" width="375" height="323"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6RR-yd-RCD">
-                                <rect key="frame" x="0.0" y="64" width="375" height="240"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="280"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总任务：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="S5q-nF-gsd">
                                         <rect key="frame" x="15" y="20" width="70.5" height="18"/>
@@ -414,20 +414,6 @@
                                             <action selector="clearDisk:" destination="WS1-bt-7kH" eventType="touchUpInside" id="OPo-24-bhL"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IxY-gV-f8e">
-                                        <rect key="frame" x="15" y="196" width="132" height="30"/>
-                                        <state key="normal" title="设置下载并发数为2"/>
-                                        <connections>
-                                            <action selector="taskLimit:" destination="WS1-bt-7kH" eventType="touchUpInside" id="tUz-fq-Qxf"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="08e-mn-JGF">
-                                        <rect key="frame" x="268" y="196" width="92" height="30"/>
-                                        <state key="normal" title="取消并发限制"/>
-                                        <connections>
-                                            <action selector="cancelTaskLimit:" destination="WS1-bt-7kH" eventType="touchUpInside" id="McR-XS-a1S"/>
-                                        </connections>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qdy-9T-ftu">
                                         <rect key="frame" x="268" y="76" width="92" height="30"/>
                                         <state key="normal" title="批量添加下载"/>
@@ -441,26 +427,55 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="vqJ-N3-mma">
+                                        <rect key="frame" x="15" y="227" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="taskLimit:" destination="WS1-bt-7kH" eventType="valueChanged" id="30n-RA-asX"/>
+                                            <action selector="taskLimit:" destination="wVe-jT-pWR" eventType="valueChanged" id="eu5-3L-5m7"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="下载并发数为2" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SIY-1G-gJT">
+                                        <rect key="frame" x="15" y="196" width="114" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="蜂窝网络下载" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="X1B-S1-z2t">
+                                        <rect key="frame" x="256" y="196" width="104" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="137-XH-Aih">
+                                        <rect key="frame" x="311" y="227" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="cellularAccess:" destination="WS1-bt-7kH" eventType="valueChanged" id="1gP-e6-rsz"/>
+                                            <action selector="cellularAccess:" destination="wVe-jT-pWR" eventType="valueChanged" id="WyH-q8-jIf"/>
+                                        </connections>
+                                    </switch>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
+                                    <constraint firstItem="X1B-S1-z2t" firstAttribute="centerY" secondItem="SIY-1G-gJT" secondAttribute="centerY" id="06a-hL-5iP"/>
                                     <constraint firstItem="pkR-GN-fMX" firstAttribute="centerY" secondItem="0Hb-0T-POU" secondAttribute="centerY" id="1Tk-YI-1rU"/>
                                     <constraint firstItem="dHr-Of-Kjy" firstAttribute="top" secondItem="S5q-nF-gsd" secondAttribute="bottom" constant="10" id="1iD-Mw-fq7"/>
-                                    <constraint firstAttribute="height" constant="240" id="66j-J2-nKz"/>
+                                    <constraint firstItem="vqJ-N3-mma" firstAttribute="leading" secondItem="SIY-1G-gJT" secondAttribute="leading" id="5QN-tZ-P52"/>
+                                    <constraint firstAttribute="height" constant="280" id="66j-J2-nKz"/>
                                     <constraint firstItem="m43-JT-8ko" firstAttribute="centerY" secondItem="18D-jn-Xo3" secondAttribute="centerY" id="8Zn-qv-xjs"/>
                                     <constraint firstItem="l0C-Sf-BAc" firstAttribute="leading" secondItem="S5q-nF-gsd" secondAttribute="leading" id="BCS-bF-J5Y"/>
                                     <constraint firstItem="S5q-nF-gsd" firstAttribute="leading" secondItem="6RR-yd-RCD" secondAttribute="leading" constant="15" id="EGb-4W-4ic"/>
                                     <constraint firstItem="pkR-GN-fMX" firstAttribute="leading" secondItem="m43-JT-8ko" secondAttribute="leading" id="FF5-yw-MNe"/>
-                                    <constraint firstItem="IxY-gV-f8e" firstAttribute="leading" secondItem="l0C-Sf-BAc" secondAttribute="leading" id="GkH-7c-kj9"/>
                                     <constraint firstAttribute="trailing" secondItem="0Fg-Eb-iGa" secondAttribute="trailing" constant="15" id="KUh-XY-6OH"/>
                                     <constraint firstItem="3Qe-dX-WeF" firstAttribute="centerY" secondItem="S5q-nF-gsd" secondAttribute="centerY" id="LgU-Xh-guf"/>
-                                    <constraint firstItem="08e-mn-JGF" firstAttribute="centerY" secondItem="IxY-gV-f8e" secondAttribute="centerY" id="Rcb-jQ-bMF"/>
+                                    <constraint firstItem="SIY-1G-gJT" firstAttribute="leading" secondItem="l0C-Sf-BAc" secondAttribute="leading" id="Vce-xL-98U"/>
+                                    <constraint firstItem="SIY-1G-gJT" firstAttribute="top" secondItem="l0C-Sf-BAc" secondAttribute="bottom" constant="10" id="WtW-2a-F7m"/>
                                     <constraint firstItem="l0C-Sf-BAc" firstAttribute="top" secondItem="0Hb-0T-POU" secondAttribute="bottom" constant="10" id="WuU-Gj-GaN"/>
+                                    <constraint firstItem="137-XH-Aih" firstAttribute="trailing" secondItem="X1B-S1-z2t" secondAttribute="trailing" id="XDk-In-vxT"/>
                                     <constraint firstItem="0Fg-Eb-iGa" firstAttribute="centerY" secondItem="dHr-Of-Kjy" secondAttribute="centerY" id="YuY-Bs-8au"/>
                                     <constraint firstItem="0Hb-0T-POU" firstAttribute="top" secondItem="18D-jn-Xo3" secondAttribute="bottom" constant="10" id="b2O-qq-IZ5"/>
                                     <constraint firstItem="dHr-Of-Kjy" firstAttribute="leading" secondItem="S5q-nF-gsd" secondAttribute="leading" id="bk4-zK-OHh"/>
+                                    <constraint firstItem="vqJ-N3-mma" firstAttribute="top" secondItem="SIY-1G-gJT" secondAttribute="bottom" constant="10" id="cBf-K6-Ofa"/>
                                     <constraint firstItem="18D-jn-Xo3" firstAttribute="leading" secondItem="S5q-nF-gsd" secondAttribute="leading" id="eIR-cS-1Ua"/>
-                                    <constraint firstItem="IxY-gV-f8e" firstAttribute="top" secondItem="l0C-Sf-BAc" secondAttribute="bottom" constant="10" id="fZr-Az-X5c"/>
                                     <constraint firstItem="Qdy-9T-ftu" firstAttribute="centerY" secondItem="18D-jn-Xo3" secondAttribute="centerY" id="fZv-Mv-7jH"/>
                                     <constraint firstItem="18D-jn-Xo3" firstAttribute="top" secondItem="dHr-Of-Kjy" secondAttribute="bottom" constant="10" id="hTB-hB-j6h"/>
                                     <constraint firstItem="0Hb-0T-POU" firstAttribute="leading" secondItem="S5q-nF-gsd" secondAttribute="leading" id="kdw-0q-VvJ"/>
@@ -468,7 +483,8 @@
                                     <constraint firstItem="3Qe-dX-WeF" firstAttribute="trailing" secondItem="0Fg-Eb-iGa" secondAttribute="trailing" id="oFS-2C-Olg"/>
                                     <constraint firstAttribute="trailing" secondItem="Qdy-9T-ftu" secondAttribute="trailing" constant="15" id="pBS-xE-do5"/>
                                     <constraint firstItem="m43-JT-8ko" firstAttribute="leading" secondItem="18D-jn-Xo3" secondAttribute="trailing" constant="20" id="sFo-c9-ZZt"/>
-                                    <constraint firstAttribute="trailing" secondItem="08e-mn-JGF" secondAttribute="trailing" constant="15" id="z3i-Q0-pMK"/>
+                                    <constraint firstItem="X1B-S1-z2t" firstAttribute="trailing" secondItem="Qdy-9T-ftu" secondAttribute="trailing" id="vnK-7A-aId"/>
+                                    <constraint firstItem="137-XH-Aih" firstAttribute="centerY" secondItem="vqJ-N3-mma" secondAttribute="centerY" id="x64-61-6pk"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -484,7 +500,9 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="cellularAccessSwitch" destination="137-XH-Aih" id="zjZ-YJ-biG"/>
                         <outlet property="tableView" destination="UJ6-RT-Vgd" id="0Ai-my-8UR"/>
+                        <outlet property="taskLimitSwitch" destination="vqJ-N3-mma" id="EQw-he-PCK"/>
                         <outlet property="timeRemainingLabel" destination="0Fg-Eb-iGa" id="jB4-zo-xaT"/>
                         <outlet property="totalProgressLabel" destination="3Qe-dX-WeF" id="o6L-Fx-Nx4"/>
                         <outlet property="totalSpeedLabel" destination="dHr-Of-Kjy" id="cn8-Zc-rJJ"/>
@@ -508,11 +526,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="QJ4-Fj-uru">
-                                <rect key="frame" x="0.0" y="304" width="375" height="363"/>
+                                <rect key="frame" x="0.0" y="344" width="375" height="323"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jFB-em-SdY">
-                                <rect key="frame" x="0.0" y="64" width="375" height="240"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="280"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总任务：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k1I-LH-Kv4">
                                         <rect key="frame" x="15" y="20" width="70.5" height="18"/>
@@ -582,32 +600,44 @@
                                             <action selector="clearDisk:" destination="wVe-jT-pWR" eventType="touchUpInside" id="vaS-dV-o9y"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LP7-oe-oAR">
-                                        <rect key="frame" x="15" y="196" width="132" height="30"/>
-                                        <state key="normal" title="设置下载并发数为2"/>
-                                        <connections>
-                                            <action selector="taskLimit:" destination="wVe-jT-pWR" eventType="touchUpInside" id="rvP-LB-CkV"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gmm-yy-PuR">
-                                        <rect key="frame" x="268" y="196" width="92" height="30"/>
-                                        <state key="normal" title="取消并发限制"/>
-                                        <connections>
-                                            <action selector="cancelTaskLimit:" destination="wVe-jT-pWR" eventType="touchUpInside" id="eB2-79-qQ8"/>
-                                        </connections>
-                                    </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总进度：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IDR-tQ-e2a">
                                         <rect key="frame" x="289.5" y="20" width="70.5" height="18"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="ZNH-2A-HD1">
+                                        <rect key="frame" x="15" y="227" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="taskLimit:" destination="wVe-jT-pWR" eventType="valueChanged" id="MNY-tC-XLJ"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="下载并发数为2" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nZh-LJ-VYQ">
+                                        <rect key="frame" x="15" y="196" width="114" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="蜂窝网络下载" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jCb-E5-2Sm">
+                                        <rect key="frame" x="256" y="196" width="104" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1bH-se-Pql">
+                                        <rect key="frame" x="311" y="227" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="cellularAccess:" destination="wVe-jT-pWR" eventType="valueChanged" id="FuE-uk-dq1"/>
+                                        </connections>
+                                    </switch>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="xJA-Bq-VVN" firstAttribute="centerY" secondItem="g7j-8G-b4t" secondAttribute="centerY" id="1Qp-cO-7Y3"/>
                                     <constraint firstAttribute="trailing" secondItem="Klq-Qu-PLM" secondAttribute="trailing" constant="15" id="2xy-5h-Y1C"/>
+                                    <constraint firstItem="nZh-LJ-VYQ" firstAttribute="top" secondItem="iad-QJ-EZD" secondAttribute="bottom" constant="10" id="96w-co-0EM"/>
                                     <constraint firstItem="Klq-Qu-PLM" firstAttribute="centerY" secondItem="2Ch-RH-mrD" secondAttribute="centerY" id="9I3-Up-ysD"/>
+                                    <constraint firstItem="1bH-se-Pql" firstAttribute="trailing" secondItem="jCb-E5-2Sm" secondAttribute="trailing" id="BLQ-bw-jzC"/>
                                     <constraint firstItem="iad-QJ-EZD" firstAttribute="top" secondItem="MVS-zE-nIi" secondAttribute="bottom" constant="10" id="CId-A6-qRi"/>
                                     <constraint firstItem="NRD-wJ-7mm" firstAttribute="centerY" secondItem="MVS-zE-nIi" secondAttribute="centerY" id="Crd-eT-Qn5"/>
                                     <constraint firstItem="MVS-zE-nIi" firstAttribute="top" secondItem="g7j-8G-b4t" secondAttribute="bottom" constant="10" id="DDm-bH-vaf"/>
@@ -615,21 +645,23 @@
                                     <constraint firstItem="MVS-zE-nIi" firstAttribute="leading" secondItem="k1I-LH-Kv4" secondAttribute="leading" id="EMi-Gi-8Zh"/>
                                     <constraint firstItem="2Ch-RH-mrD" firstAttribute="top" secondItem="k1I-LH-Kv4" secondAttribute="bottom" constant="10" id="EZC-Ye-tOy"/>
                                     <constraint firstItem="k1I-LH-Kv4" firstAttribute="top" secondItem="jFB-em-SdY" secondAttribute="top" constant="20" id="H0y-k8-k5k"/>
-                                    <constraint firstItem="Gmm-yy-PuR" firstAttribute="trailing" secondItem="xJA-Bq-VVN" secondAttribute="trailing" id="Ntp-ox-TA8"/>
-                                    <constraint firstItem="LP7-oe-oAR" firstAttribute="top" secondItem="iad-QJ-EZD" secondAttribute="bottom" constant="10" id="V6j-g1-DuG"/>
+                                    <constraint firstItem="ZNH-2A-HD1" firstAttribute="leading" secondItem="nZh-LJ-VYQ" secondAttribute="leading" id="Lz9-Mi-pZM"/>
+                                    <constraint firstItem="jCb-E5-2Sm" firstAttribute="trailing" secondItem="cS7-AK-KdI" secondAttribute="trailing" id="N4G-51-BmI"/>
+                                    <constraint firstItem="ZNH-2A-HD1" firstAttribute="top" secondItem="nZh-LJ-VYQ" secondAttribute="bottom" constant="10" id="RhC-ft-HAs"/>
                                     <constraint firstAttribute="trailing" secondItem="xJA-Bq-VVN" secondAttribute="trailing" constant="15" id="VM7-Q6-PCz"/>
                                     <constraint firstItem="cS7-AK-KdI" firstAttribute="centerY" secondItem="MVS-zE-nIi" secondAttribute="centerY" id="Z42-Y2-2rx"/>
                                     <constraint firstItem="iad-QJ-EZD" firstAttribute="leading" secondItem="k1I-LH-Kv4" secondAttribute="leading" id="b3u-wo-oF2"/>
                                     <constraint firstItem="IDR-tQ-e2a" firstAttribute="trailing" secondItem="Klq-Qu-PLM" secondAttribute="trailing" id="bGw-ah-GLf"/>
-                                    <constraint firstAttribute="height" constant="240" id="e0j-b6-l5i"/>
+                                    <constraint firstItem="nZh-LJ-VYQ" firstAttribute="leading" secondItem="iad-QJ-EZD" secondAttribute="leading" id="bpX-PK-Qqo"/>
+                                    <constraint firstItem="jCb-E5-2Sm" firstAttribute="centerY" secondItem="nZh-LJ-VYQ" secondAttribute="centerY" id="dPM-ju-sn7"/>
+                                    <constraint firstAttribute="height" constant="280" id="e0j-b6-l5i"/>
                                     <constraint firstItem="IYA-ar-lp6" firstAttribute="leading" secondItem="g7j-8G-b4t" secondAttribute="trailing" constant="20" id="hCW-hF-XOs"/>
                                     <constraint firstItem="IYA-ar-lp6" firstAttribute="centerY" secondItem="g7j-8G-b4t" secondAttribute="centerY" id="hMu-Yf-9Dw"/>
                                     <constraint firstItem="cS7-AK-KdI" firstAttribute="trailing" secondItem="xJA-Bq-VVN" secondAttribute="trailing" id="jZE-bs-YrI"/>
                                     <constraint firstItem="g7j-8G-b4t" firstAttribute="leading" secondItem="k1I-LH-Kv4" secondAttribute="leading" id="lvT-ed-Kba"/>
                                     <constraint firstItem="2Ch-RH-mrD" firstAttribute="leading" secondItem="k1I-LH-Kv4" secondAttribute="leading" id="ouN-s2-8To"/>
                                     <constraint firstItem="g7j-8G-b4t" firstAttribute="top" secondItem="2Ch-RH-mrD" secondAttribute="bottom" constant="10" id="p0M-A9-CHf"/>
-                                    <constraint firstItem="Gmm-yy-PuR" firstAttribute="centerY" secondItem="LP7-oe-oAR" secondAttribute="centerY" id="ueQ-Od-Lea"/>
-                                    <constraint firstItem="LP7-oe-oAR" firstAttribute="leading" secondItem="iad-QJ-EZD" secondAttribute="leading" id="vOe-2t-zoG"/>
+                                    <constraint firstItem="1bH-se-Pql" firstAttribute="centerY" secondItem="ZNH-2A-HD1" secondAttribute="centerY" id="qcx-a9-4jr"/>
                                     <constraint firstItem="k1I-LH-Kv4" firstAttribute="leading" secondItem="jFB-em-SdY" secondAttribute="leading" constant="15" id="vrl-CK-ar3"/>
                                     <constraint firstItem="IDR-tQ-e2a" firstAttribute="centerY" secondItem="k1I-LH-Kv4" secondAttribute="centerY" id="zW0-6M-XoI"/>
                                 </constraints>
@@ -647,7 +679,9 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="cellularAccessSwitch" destination="1bH-se-Pql" id="lSE-jj-lMQ"/>
                         <outlet property="tableView" destination="QJ4-Fj-uru" id="Lsw-YF-ry9"/>
+                        <outlet property="taskLimitSwitch" destination="ZNH-2A-HD1" id="J1W-mG-Wiq"/>
                         <outlet property="timeRemainingLabel" destination="Klq-Qu-PLM" id="Wqf-Qa-H5n"/>
                         <outlet property="totalProgressLabel" destination="IDR-tQ-e2a" id="z5C-9H-qTh"/>
                         <outlet property="totalSpeedLabel" destination="2Ch-RH-mrD" id="OWk-nQ-NT8"/>
@@ -671,11 +705,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="BI5-Jh-R0c">
-                                <rect key="frame" x="0.0" y="304" width="375" height="314"/>
+                                <rect key="frame" x="0.0" y="344" width="375" height="274"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bms-Qo-CB3">
-                                <rect key="frame" x="0.0" y="64" width="375" height="240"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="280"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总任务：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D3a-QU-YmO">
                                         <rect key="frame" x="15" y="20" width="70.5" height="18"/>
@@ -738,42 +772,56 @@
                                             <action selector="clearDisk:" destination="RE7-91-rUf" eventType="touchUpInside" id="H83-FI-NfH"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SR3-cB-QpI">
-                                        <rect key="frame" x="15" y="196" width="132" height="30"/>
-                                        <state key="normal" title="设置下载并发数为2"/>
-                                        <connections>
-                                            <action selector="taskLimit:" destination="RE7-91-rUf" eventType="touchUpInside" id="e7U-bX-wiF"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tod-kR-kwI">
-                                        <rect key="frame" x="268" y="196" width="92" height="30"/>
-                                        <state key="normal" title="取消并发限制"/>
-                                        <connections>
-                                            <action selector="cancelTaskLimit:" destination="RE7-91-rUf" eventType="touchUpInside" id="Zsj-4q-fPB"/>
-                                        </connections>
-                                    </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总进度：0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lP3-O8-d4k">
                                         <rect key="frame" x="289.5" y="20" width="70.5" height="18"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="1eg-2s-3P8">
+                                        <rect key="frame" x="15" y="227" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="taskLimit:" destination="RE7-91-rUf" eventType="valueChanged" id="xj9-Cn-GWh"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="下载并发数为2" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vp9-4v-p8b">
+                                        <rect key="frame" x="15" y="196" width="114" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="蜂窝网络下载" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aTz-GO-24T">
+                                        <rect key="frame" x="256" y="196" width="104" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FIs-yc-4U8">
+                                        <rect key="frame" x="311" y="227" width="51" height="31"/>
+                                        <connections>
+                                            <action selector="cellularAccess:" destination="RE7-91-rUf" eventType="valueChanged" id="HCm-yM-0eJ"/>
+                                        </connections>
+                                    </switch>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="cyd-F6-1FY" firstAttribute="top" secondItem="J44-Pt-OA0" secondAttribute="bottom" constant="10" id="3HA-UM-LvK"/>
+                                    <constraint firstItem="1eg-2s-3P8" firstAttribute="top" secondItem="vp9-4v-p8b" secondAttribute="bottom" constant="10" id="3sf-jC-6RM"/>
                                     <constraint firstItem="D3a-QU-YmO" firstAttribute="top" secondItem="Bms-Qo-CB3" secondAttribute="top" constant="20" id="4dl-uE-jBc"/>
-                                    <constraint firstAttribute="height" constant="240" id="8Rl-ce-pw9"/>
+                                    <constraint firstItem="vp9-4v-p8b" firstAttribute="leading" secondItem="cyd-F6-1FY" secondAttribute="leading" id="4rl-mh-gSz"/>
+                                    <constraint firstAttribute="height" constant="280" id="8Rl-ce-pw9"/>
                                     <constraint firstItem="lP3-O8-d4k" firstAttribute="trailing" secondItem="a48-an-FW1" secondAttribute="trailing" id="8cK-l2-WXz"/>
                                     <constraint firstItem="gjc-1o-OQq" firstAttribute="top" secondItem="Exf-kl-K6I" secondAttribute="bottom" constant="10" id="Gce-4u-A2Q"/>
-                                    <constraint firstItem="SR3-cB-QpI" firstAttribute="leading" secondItem="cyd-F6-1FY" secondAttribute="leading" id="Hr9-jY-Dsa"/>
-                                    <constraint firstItem="SR3-cB-QpI" firstAttribute="top" secondItem="cyd-F6-1FY" secondAttribute="bottom" constant="10" id="IP9-Uj-54s"/>
                                     <constraint firstAttribute="trailing" secondItem="a48-an-FW1" secondAttribute="trailing" constant="15" id="IW9-TZ-4kf"/>
-                                    <constraint firstItem="Tod-kR-kwI" firstAttribute="centerY" secondItem="SR3-cB-QpI" secondAttribute="centerY" id="Jzd-iB-85f"/>
+                                    <constraint firstItem="1eg-2s-3P8" firstAttribute="leading" secondItem="vp9-4v-p8b" secondAttribute="leading" id="JzR-V6-a7i"/>
                                     <constraint firstItem="lP3-O8-d4k" firstAttribute="centerY" secondItem="D3a-QU-YmO" secondAttribute="centerY" id="K7C-rt-7Xx"/>
+                                    <constraint firstItem="aTz-GO-24T" firstAttribute="centerY" secondItem="vp9-4v-p8b" secondAttribute="centerY" id="KUe-wH-Kuv"/>
+                                    <constraint firstItem="aTz-GO-24T" firstAttribute="trailing" secondItem="0AJ-RD-vtF" secondAttribute="trailing" id="Kut-xZ-zi7"/>
                                     <constraint firstItem="a48-an-FW1" firstAttribute="centerY" secondItem="Exf-kl-K6I" secondAttribute="centerY" id="R4m-8z-Bku"/>
-                                    <constraint firstItem="Tod-kR-kwI" firstAttribute="trailing" secondItem="0AJ-RD-vtF" secondAttribute="trailing" id="RKO-M4-8Au"/>
                                     <constraint firstItem="Exf-kl-K6I" firstAttribute="top" secondItem="D3a-QU-YmO" secondAttribute="bottom" constant="10" id="V9Y-RT-hqp"/>
+                                    <constraint firstItem="FIs-yc-4U8" firstAttribute="centerY" secondItem="1eg-2s-3P8" secondAttribute="centerY" id="W2J-SE-mho"/>
+                                    <constraint firstItem="vp9-4v-p8b" firstAttribute="top" secondItem="cyd-F6-1FY" secondAttribute="bottom" constant="10" id="Y5U-qc-xwq"/>
+                                    <constraint firstItem="FIs-yc-4U8" firstAttribute="trailing" secondItem="aTz-GO-24T" secondAttribute="trailing" id="a2Z-jz-aJS"/>
                                     <constraint firstItem="D3a-QU-YmO" firstAttribute="leading" secondItem="Bms-Qo-CB3" secondAttribute="leading" constant="15" id="aqr-g3-Ub7"/>
                                     <constraint firstItem="J44-Pt-OA0" firstAttribute="top" secondItem="gjc-1o-OQq" secondAttribute="bottom" constant="10" id="bAm-m8-ezE"/>
                                     <constraint firstItem="1yu-3B-K7s" firstAttribute="centerY" secondItem="gjc-1o-OQq" secondAttribute="centerY" id="bcu-gX-hOX"/>
@@ -802,7 +850,9 @@
                     </view>
                     <tabBarItem key="tabBarItem" systemItem="downloads" id="eQs-RL-Gx1"/>
                     <connections>
+                        <outlet property="cellularAccessSwitch" destination="FIs-yc-4U8" id="bc3-Ke-84H"/>
                         <outlet property="tableView" destination="BI5-Jh-R0c" id="VbC-tm-7Rl"/>
+                        <outlet property="taskLimitSwitch" destination="1eg-2s-3P8" id="7wT-EP-w5b"/>
                         <outlet property="timeRemainingLabel" destination="a48-an-FW1" id="cdv-zm-A5l"/>
                         <outlet property="totalProgressLabel" destination="lP3-O8-d4k" id="twh-Lc-lWh"/>
                         <outlet property="totalSpeedLabel" destination="Exf-kl-K6I" id="lv1-wl-bni"/>

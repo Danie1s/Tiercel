@@ -17,6 +17,10 @@ class BaseViewController: UIViewController {
     @IBOutlet weak var timeRemainingLabel: UILabel!
     @IBOutlet weak var totalProgressLabel: UILabel!
     
+    
+    @IBOutlet weak var taskLimitSwitch: UISwitch!
+    @IBOutlet weak var cellularAccessSwitch: UISwitch!
+    
     // 由于执行删除running的task，结果是异步回调的，所以最好是用downloadURLStrings作为数据源
     lazy var downloadURLStrings = [String]()
 
@@ -45,6 +49,9 @@ class BaseViewController: UIViewController {
 
     func updateUI() {
         guard let downloadManager = downloadManager else { return  }
+        taskLimitSwitch.isOn = downloadManager.configuration.maxConcurrentTasksLimit < 3
+        cellularAccessSwitch.isOn = downloadManager.configuration.allowsCellularAccess
+        
         totalTasksLabel.text = "总任务：\(downloadManager.completedTasks.count)/\(downloadManager.tasks.count)"
         totalSpeedLabel.text = "总速度：\(downloadManager.speed.tr.convertSpeedToString())"
         timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemaining.tr.convertTimeToString())"
@@ -113,12 +120,20 @@ extension BaseViewController {
         downloadManager.cache.clearDiskCache()
         updateUI()
     }
-
-    @IBAction func taskLimit(_ sender: Any) {
-        downloadManager?.configuration.maxConcurrentTasksLimit = 2
+    
+    
+    @IBAction func taskLimit(_ sender: UISwitch) {
+        let isTaskLimit = sender.isOn
+        if isTaskLimit {
+            downloadManager?.configuration.maxConcurrentTasksLimit = 2
+        } else {
+            downloadManager?.configuration.maxConcurrentTasksLimit = Int.max
+        }
+        
     }
-    @IBAction func cancelTaskLimit(_ sender: Any) {
-        downloadManager?.configuration.maxConcurrentTasksLimit = Int.max
+    
+    @IBAction func cellularAccess(_ sender: UISwitch) {
+        downloadManager?.configuration.allowsCellularAccess = sender.isOn
     }
 }
 

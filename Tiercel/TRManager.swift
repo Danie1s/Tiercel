@@ -49,10 +49,16 @@ public class TRManager {
     public var configuration = TRConfiguration() {
         didSet {
             if !shouldCreatSession {
-                runningTasks = tasks.filter({ $0.status == .running })
-                totalSuspend()
-                shouldCreatSession = true
-                session.invalidateAndCancel()
+                if status == .running {
+                    runningTasks = tasks.filter({ $0.status == .running })
+                    waitingTasks = tasks.filter({ $0.status == .waiting })
+                    shouldCreatSession = true
+                    totalSuspend()
+                } else {
+                    shouldCreatSession = true
+                    session.invalidateAndCancel()
+                }
+
             }
         }
     }
@@ -134,7 +140,10 @@ public class TRManager {
         }
     }
     
-    public var runningTasks = [TRTask]()
+    private var runningTasks = [TRTask]()
+    
+    private var waitingTasks = [TRTask]()
+
     
     public var completedTasks: [TRTask] {
         return tasks.filter { $0.status == .completed }
@@ -182,6 +191,8 @@ public class TRManager {
     
     private var progressHandler: TRManagerHandler?
     
+    private var controlHandler: TRManagerHandler?
+
     
     public init(_ identifier: String) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
@@ -212,9 +223,8 @@ public class TRManager {
             sessionDelegate.manager = self
             session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
             tasks.forEach({ $0.session = session })
-            completion?()
             shouldCreatSession = false
-            
+            completion?()
         }
     }
     
@@ -236,6 +246,11 @@ public class TRManager {
             })
 
             //  处理mananger状态
+            if strongSelf.tasks.isEmpty {
+                strongSelf.status = .waiting
+                return
+            }
+            
             let isRunning = strongSelf.tasks.filter { $0.status == .running }.count > 0
             if isRunning {
                 TiercelLog("[manager] running, manager.identifier: \(strongSelf.identifier)")
@@ -278,7 +293,6 @@ extension TRManager {
     /// - Returns: 如果URLString有效，则返回对应的task；如果URLString无效，则返回nil
     @discardableResult
     public func download(_ URLString: String, fileName: String? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> TRDownloadTask? {
-        status = .waiting
         
         guard let url = URL(string: URLString) else {
             TiercelLog("[manager] URLString错误：\(URLString), manager.identifier: \(identifier)")
@@ -319,7 +333,6 @@ extension TRManager {
     /// - Returns: 返回URLString数组中有效URString对应的task数组
     @discardableResult
     public func multiDownload(_ URLStrings: [String], fileNames: [String]? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> [TRDownloadTask] {
-        status = .waiting
         
         // 去掉重复, 无效的url
         var uniqueUrls = [URL]()
@@ -419,7 +432,7 @@ extension TRManager {
             }
         case .completed:
             task.completed()
-            self.completed()
+            completed()
         case .running:
             TiercelLog("[manager] task is running URLString: \(task.URLString), manager.identifier: \(identifier)")
         default: break
@@ -429,9 +442,9 @@ extension TRManager {
     }
     
     /// 暂停任务，会触发sessionDelegate的完成回调
-    public func suspend(_ URLString: String) {
+    public func suspend(_ URLString: String, _ handler: TRTaskHandler? = nil) {
         guard let task = fetchTask(URLString) else { return }
-        task.suspend()
+        task.suspend(handler)
     }
     
     /// 取消任务
@@ -439,9 +452,9 @@ extension TRManager {
     /// 其他状态的任务都可以被取消，被取消的任务会被移除
     /// 会删除还没有下载完成的缓存文件
     /// 会触发sessionDelegate的完成回调
-    public func cancel(_ URLString: String) {
+    public func cancel(_ URLString: String, _ handler: TRTaskHandler? = nil) {
         guard let task = fetchTask(URLString) else { return }
-        task.cancel()
+        task.cancel(handler)
     }
     
     
@@ -454,10 +467,10 @@ extension TRManager {
     /// - Parameters:
     ///   - URLString: URLString
     ///   - completely: 是否删除下载完成的文件
-    public func remove(_ URLString: String, completely: Bool = false) {
+    public func remove(_ URLString: String, completely: Bool = false, _ handler: TRTaskHandler? = nil) {
         guard let task = fetchTask(URLString) as? TRDownloadTask else { return }
         isRemoveCompletely = completely
-        task.remove()
+        task.remove(handler)
     }
     
 }
@@ -472,27 +485,30 @@ extension TRManager {
     }
     
     
-    public func totalSuspend() {
+    public func totalSuspend(_ handler: TRManagerHandler? = nil) {
         guard status == .running || status == .waiting else { return }
         status = .willSuspend
+        controlHandler = handler
         tasks.forEach { (task) in
             suspend(task.URLString)
         }
         
     }
     
-    public func totalCancel() {
+    public func totalCancel(_ handler: TRManagerHandler? = nil) {
         guard status != .completed && status != .canceled else { return }
         status = .willCancel
+        controlHandler = handler
         tasks.forEach { (task) in
             cancel(task.URLString)
         }
     }
     
-    public func totalRemove(completely: Bool = false) {
+    public func totalRemove(completely: Bool = false, _ handler: TRManagerHandler? = nil) {
         guard status != .removed else { return }
         isCompleted = false
         status = .willRemove
+        controlHandler = handler
         tasks.forEach { (task) in
             remove(task.URLString, completely: completely)
         }
@@ -544,6 +560,7 @@ extension TRManager {
                 status = .removed
                 TiercelLog("[manager] removed, manager.identifier: \(identifier)")
                 DispatchQueue.main.tr.safeAsync {
+                    self.controlHandler?(self)
                     self.failureHandler?(self)
                 }
                 return
@@ -558,6 +575,7 @@ extension TRManager {
                 status = .canceled
                 TiercelLog("[manager] canceled, manager.identifier: \(identifier)")
                 DispatchQueue.main.tr.safeAsync {
+                    self.controlHandler?(self)
                     self.failureHandler?(self)
                 }
                 return
@@ -615,7 +633,11 @@ extension TRManager {
             status = .suspended
             TiercelLog("[manager] did suspend, manager.identifier: \(identifier)")
             DispatchQueue.main.tr.safeAsync {
-                self.successHandler?(self)
+                self.controlHandler?(self)
+                self.failureHandler?(self)
+            }
+            if shouldCreatSession {
+                session.invalidateAndCancel()
             }
             return
         }
@@ -724,11 +746,11 @@ extension TRManager {
 extension TRManager {
     internal func didBecomeInvalidWithError(error: Error?) {
         createSession { [weak self] in
-//            guard let strongSelf = self else { return }
-//            strongSelf.runningTasks.forEach({ (task) in
-//                task.start()
-//            })
-//            strongSelf.runningTasks.removeAll()
+            guard let strongSelf = self else { return }
+            strongSelf.runningTasks.forEach({ strongSelf.download($0.URLString, fileName: $0.fileName, progressHandler: $0.progressHandler, successHandler: $0.successHandler, failureHandler: $0.failureHandler) })
+            strongSelf.runningTasks.removeAll()
+            strongSelf.waitingTasks.forEach({ strongSelf.download($0.URLString, fileName: $0.fileName, progressHandler: $0.progressHandler, successHandler: $0.successHandler, failureHandler: $0.failureHandler) })
+            strongSelf.waitingTasks.removeAll()
         }
     }
     

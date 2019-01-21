@@ -36,10 +36,6 @@ class ViewController3: BaseViewController {
         updateUI()
         tableView.reloadData()
     }
-
-
-
-
 }
 
 

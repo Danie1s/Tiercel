@@ -42,6 +42,11 @@ public enum TRStatus: String {
     case willRemove
 }
 
+public enum TRVerificationType: Int {
+    case md5
+    case sha1
+}
+
 
 public enum TRLogLevel {
     case high

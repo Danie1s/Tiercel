@@ -32,9 +32,14 @@ public class TRTask: NSObject, NSCoding {
     internal var cache: TRCache
     internal var session: URLSession?
 
+    internal var verificationCode: String?
+    internal var verificationType: TRVerificationType = .md5
+    
     internal var progressHandler: TRTaskHandler?
     internal var successHandler: TRTaskHandler?
     internal var failureHandler: TRTaskHandler?
+    internal var controlHandler: TRTaskHandler?
+
 
     private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
 
@@ -159,7 +164,7 @@ public class TRTask: NSObject, NSCoding {
         aCoder.encode(progress.totalUnitCount, forKey: "totalBytes")
         aCoder.encode(progress.completedUnitCount, forKey: "completedBytes")
         aCoder.encode(status.rawValue, forKey: "status")
-
+        
     }
     
     public required init?(coder aDecoder: NSCoder) {
@@ -176,6 +181,7 @@ public class TRTask: NSObject, NSCoding {
         progress.completedUnitCount = aDecoder.decodeInt64(forKey: "completedBytes")
         
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
+        
         self.status = TRStatus(rawValue: statusString)!
     }
     
@@ -199,17 +205,17 @@ public class TRTask: NSObject, NSCoding {
     
 
     
-    internal func suspend() {
+    internal func suspend(_ handler: TRTaskHandler? = nil) {
         
         
     }
     
-    internal func cancel() {
+    internal func cancel(_ handler: TRTaskHandler? = nil) {
         
         
     }
 
-    internal func remove() {
+    internal func remove(_ handler: TRTaskHandler? = nil) {
 
 
     }

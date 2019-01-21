@@ -114,8 +114,9 @@ public class TRDownloadTask: TRTask {
     }
 
 
-    internal override func suspend() {
+    internal override func suspend(_ handler: TRTaskHandler? = nil) {
         guard status == .running || status == .waiting else { return }
+        controlHandler = handler
 
         if status == .running {
             status = .willSuspend
@@ -127,15 +128,17 @@ public class TRDownloadTask: TRTask {
             TiercelLog("[downloadTask] did suspend, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
             DispatchQueue.main.tr.safeAsync {
                 self.progressHandler?(self)
-                self.successHandler?(self)
+                self.controlHandler?(self)
+                self.failureHandler?(self)
             }
             manager?.completed()
         }
     }
     
-    internal override func cancel() {
+    internal override func cancel(_ handler: TRTaskHandler? = nil) {
         guard status != .completed else { return }
-
+        controlHandler = handler
+        
         if status == .running {
             status = .willCancel
             task?.cancel()
@@ -145,6 +148,7 @@ public class TRDownloadTask: TRTask {
             TiercelLog("[downloadTask] did cancel, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
 
             DispatchQueue.main.tr.safeAsync {
+                self.controlHandler?(self)
                 self.failureHandler?(self)
             }
             manager?.completed()
@@ -153,7 +157,9 @@ public class TRDownloadTask: TRTask {
     }
 
 
-    internal override func remove() {
+    internal override func remove(_ handler: TRTaskHandler? = nil) {
+        controlHandler = handler
+
         if status == .running {
             status = .willRemove
             task?.cancel()
@@ -162,6 +168,7 @@ public class TRDownloadTask: TRTask {
             manager?.taskDidCancelOrRemove(URLString)
             TiercelLog("[downloadTask] did remove, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
             DispatchQueue.main.tr.safeAsync {
+                self.controlHandler?(self)
                 self.failureHandler?(self)
             }
             manager?.completed()
@@ -282,7 +289,8 @@ extension TRDownloadTask {
 
                 DispatchQueue.main.tr.safeAsync {
                     self.progressHandler?(self)
-                    self.successHandler?(self)
+                    self.controlHandler?(self)
+                    self.failureHandler?(self)
                 }
             case .willCancel, .willRemove:
                 manager?.taskDidCancelOrRemove(URLString)
@@ -293,6 +301,7 @@ extension TRDownloadTask {
                     TiercelLog("[downloadTask] did removed, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
                 }
                 DispatchQueue.main.tr.safeAsync {
+                    self.controlHandler?(self)
                     self.failureHandler?(self)
                 }
             default:

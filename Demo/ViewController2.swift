@@ -49,8 +49,6 @@ class ViewController2: BaseViewController {
         tableView.reloadData()
 
     }
-
-
 }
 
 
