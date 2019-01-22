@@ -35,11 +35,13 @@ public enum TRStatus: String {
     case failed
     case removed
     case completed
+    case validated
 
     // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
     case willSuspend
     case willCancel
     case willRemove
+    case willValidate
 }
 
 

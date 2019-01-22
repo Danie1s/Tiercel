@@ -34,29 +34,33 @@ public enum TRVerificationType: Int {
 }
 
 public class TRChecksumHelper {
-    public class func validateFile(filePath: String, verificationCode: String, verificationType: TRVerificationType) -> Bool {
-        guard FileManager.default.fileExists(atPath: filePath) else {
-            return false
-        }
-        let url = URL(fileURLWithPath: filePath)
-        
-        do {
-            let data = try Data(contentsOf: url, options: .mappedIfSafe)
-            var string: String
-            switch verificationType {
-            case .md5:
-                string = data.tr.md5
-            case .sha1:
-                string = data.tr.sha1
-            case .sha256:
-                string = data.tr.sha256
-            case .sha512:
-                string = data.tr.sha512
+    public class func validateFile(_ filePath: String, verificationCode: String, verificationType: TRVerificationType, completion: @escaping (Bool) -> ()) {
+        DispatchQueue.global().async {
+            guard FileManager.default.fileExists(atPath: filePath) else {
+                completion(false)
+                return
             }
-            return string.lowercased() == verificationCode.lowercased()
-        } catch {
-            TiercelLog("read data error: \(error)")
-            return false
+            let url = URL(fileURLWithPath: filePath)
+
+            do {
+                let data = try Data(contentsOf: url, options: .mappedIfSafe)
+                var string: String
+                switch verificationType {
+                case .md5:
+                    string = data.tr.md5
+                case .sha1:
+                    string = data.tr.sha1
+                case .sha256:
+                    string = data.tr.sha256
+                case .sha512:
+                    string = data.tr.sha512
+                }
+                let isCorrect = string.lowercased() == verificationCode.lowercased()
+                completion(isCorrect)
+            } catch {
+                TiercelLog("read data error: \(error)")
+                completion(false)
+            }
         }
     }
 }

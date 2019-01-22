@@ -49,8 +49,21 @@ public class TRDownloadTask: TRTask {
     
     internal var tmpFileName: String?
 
-    public init(_ url: URL, fileName: String? = nil, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
-        super.init(url, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+    public init(_ url: URL,
+                fileName: String? = nil,
+                cache: TRCache,
+                verificationCode: String? = nil,
+                verificationType: TRVerificationType = .md5,
+                progressHandler: TRTaskHandler? = nil,
+                successHandler: TRTaskHandler? = nil,
+                failureHandler: TRTaskHandler? = nil) {
+        super.init(url,
+                   cache: cache,
+                   verificationCode: verificationCode,
+                   verificationType: verificationType,
+                   progressHandler: progressHandler,
+                   successHandler: successHandler,
+                   failureHandler: failureHandler)
         if let fileName = fileName,
             !fileName.isEmpty {
             self.fileName = fileName
@@ -186,6 +199,23 @@ public class TRDownloadTask: TRTask {
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
             self.successHandler?(self)
+        }
+
+        if let verificationCode = verificationCode {
+            status = .willValidate
+            TRChecksumHelper.validateFile(filePath, verificationCode: verificationCode, verificationType: verificationType) { [weak self] (isCorrect) in
+                guard let strongSelf = self else { return }
+                strongSelf.status = .validated
+                if isCorrect {
+                    DispatchQueue.main.tr.safeAsync {
+                        strongSelf.successHandler?(strongSelf)
+                    }
+                } else {
+                    DispatchQueue.main.tr.safeAsync {
+                        strongSelf.failureHandler?(strongSelf)
+                    }
+                }
+            }
         }
 
     }

@@ -156,13 +156,21 @@ public class TRTask: NSObject, NSCoding {
 
 
 
-    public init(_ url: URL, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+    public init(_ url: URL,
+                cache: TRCache,
+                verificationCode: String? = nil,
+                verificationType: TRVerificationType = .md5,
+                progressHandler: TRTaskHandler? = nil,
+                successHandler: TRTaskHandler? = nil,
+                failureHandler: TRTaskHandler? = nil) {
         self.cache = cache
         self.url = url
         self.URLString = url.absoluteString
         _currentURLString = url.absoluteString
         _fileName = url.tr.fileName
         super.init()
+        self.verificationCode = verificationCode
+        self.verificationType = verificationType
         self.progressHandler = progressHandler
         self.successHandler = successHandler
         self.failureHandler = failureHandler
@@ -178,6 +186,9 @@ public class TRTask: NSObject, NSCoding {
         aCoder.encode(progress.totalUnitCount, forKey: "totalBytes")
         aCoder.encode(progress.completedUnitCount, forKey: "completedBytes")
         aCoder.encode(status.rawValue, forKey: "status")
+        aCoder.encode(verificationCode, forKey: "verificationCode")
+        aCoder.encode(verificationType.rawValue, forKey: "verificationType")
+
         
     }
     
@@ -193,11 +204,14 @@ public class TRTask: NSObject, NSCoding {
         endDate = aDecoder.decodeDouble(forKey: "endDate")
         progress.totalUnitCount = aDecoder.decodeInt64(forKey: "totalBytes")
         progress.completedUnitCount = aDecoder.decodeInt64(forKey: "completedBytes")
+        verificationCode = aDecoder.decodeObject(forKey: "verificationCode") as? String
         
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
-        
-        self.status = TRStatus(rawValue: statusString)!
+        status = TRStatus(rawValue: statusString)!
+        let verificationTypeInt = aDecoder.decodeObject(forKey: "verificationType") as! Int
+        verificationType = TRVerificationType(rawValue: verificationTypeInt)!
     }
+
 
 
     internal func start() {

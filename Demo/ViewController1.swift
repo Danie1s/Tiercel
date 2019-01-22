@@ -21,15 +21,14 @@ class ViewController1: UIViewController {
 
     let downloadManager = TRManager.default
 
-    lazy var URLString = "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg"
+//    lazy var URLString = "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg"
+    lazy var URLString = "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg"
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
         TRManager.logLevel = .high
     }
-
-
-
 
     private func updateUI(_ task: TRTask) {
         let per = task.progress.fractionCompleted
@@ -43,14 +42,16 @@ class ViewController1: UIViewController {
     
     @IBAction func start(_ sender: UIButton) {
 
-        downloadManager.download(URLString, progressHandler: { [weak self] (task) in
+        downloadManager.download(URLString, verificationCode: "9e2a3650530b563da297c9246acaad5c", verificationType: .md5, progressHandler: { [weak self] (task) in
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)
-
-
             if task.status == .completed {
                 // 下载任务完成了
+            }
+            if task.status == .validated {
+                // 文件正确
+                TiercelLog("文件正确")
             }
         }, failureHandler: { [weak self] (task) in
             self?.updateUI(task)
@@ -68,6 +69,10 @@ class ViewController1: UIViewController {
 
             if task.status == .removed {
                 // 下载任务移除了
+            }
+            if task.status == .validated {
+                // 文件不正确
+                TiercelLog("文件不正确")
             }
         })
     }
