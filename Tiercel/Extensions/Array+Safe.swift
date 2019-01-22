@@ -1,8 +1,8 @@
 //
-//  Tiercel.h
+//  Array+Safe.swift
 //  Tiercel
 //
-//  Created by Daniels on 2018/3/29.
+//  Created by Daniels on 2019/1/22.
 //  Copyright © 2018年 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,14 +24,15 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
-
-//! Project version number for Tiercel.
-FOUNDATION_EXPORT double TiercelVersionNumber;
-
-//! Project version string for Tiercel.
-FOUNDATION_EXPORT const unsigned char TiercelVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <Tiercel/PublicHeader.h>
+import Foundation
 
 
+extension Array {
+    public func safeObjectAtIndex(_ index: Int) -> Element? {
+        if index < self.count {
+            return self[index]
+        } else {
+            return nil
+        }
+    }
+}

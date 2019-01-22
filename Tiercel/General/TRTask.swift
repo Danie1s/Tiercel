@@ -155,6 +155,20 @@ public class TRTask: NSObject, NSCoding {
     public internal(set) var error: Error?
 
 
+
+    public init(_ url: URL, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+        self.cache = cache
+        self.url = url
+        self.URLString = url.absoluteString
+        _currentURLString = url.absoluteString
+        _fileName = url.tr.fileName
+        super.init()
+        self.progressHandler = progressHandler
+        self.successHandler = successHandler
+        self.failureHandler = failureHandler
+
+    }
+    
     public func encode(with aCoder: NSCoder) {
         aCoder.encode(URLString, forKey: "URLString")
         aCoder.encode(currentURLString, forKey: "currentURLString")
@@ -183,19 +197,6 @@ public class TRTask: NSObject, NSCoding {
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
         
         self.status = TRStatus(rawValue: statusString)!
-    }
-    
-    public init(_ url: URL, cache: TRCache, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
-        self.cache = cache
-        self.url = url
-        self.URLString = url.absoluteString
-        _currentURLString = url.absoluteString
-        _fileName = url.tr.fileName
-        super.init()
-        self.progressHandler = progressHandler
-        self.successHandler = successHandler
-        self.failureHandler = failureHandler
-
     }
 
 

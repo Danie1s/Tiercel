@@ -70,9 +70,7 @@ class BaseViewController: UIViewController {
             }.success{ [weak self] (manager) in
                 guard let strongSelf = self else { return }
                 strongSelf.updateUI()
-                if manager.status == .suspended {
-                    // manager 暂停了
-                }
+
                 if manager.status == .completed {
                     // manager 完成了
                 }
@@ -83,6 +81,10 @@ class BaseViewController: UIViewController {
                 strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
                 strongSelf.tableView.reloadData()
                 strongSelf.updateUI()
+                
+                if manager.status == .suspended {
+                    // manager 暂停了
+                }
 
                 if manager.status == .failed {
                     // manager 失败了
@@ -152,19 +154,6 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             let task = downloadManager.fetchTask(URLString)
             else { return cell }
 
-        var image: UIImage = #imageLiteral(resourceName: "resume")
-        switch task.status {
-        case .running:
-            image = #imageLiteral(resourceName: "resume")
-        default:
-            image = #imageLiteral(resourceName: "suspend")
-        }
-        cell.controlButton.setImage(image, for: .normal)
-
-        cell.titleLabel.text = task.fileName
-
-        cell.updateProgress(task: task)
-
 
         // task的闭包引用了cell，所以这里的task要用weak
         cell.tapClosure = { [weak self, weak task] cell in
@@ -190,24 +179,40 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         guard let URLString = downloadURLStrings.safeObjectAtIndex(indexPath.row),
             let task = downloadManager?.fetchTask(URLString)
             else { return }
+        
+        var image: UIImage = #imageLiteral(resourceName: "suspend")
+        switch task.status {
+        case .running:
+            image = #imageLiteral(resourceName: "resume")
+        default:
+            image = #imageLiteral(resourceName: "suspend")
+        }
+        
+        let cell = cell as! DownloadTaskCell
+
+        cell.controlButton.setImage(image, for: .normal)
+        
+        cell.titleLabel.text = task.fileName
+        
+        cell.updateProgress(task: task)
 
         task.progress { [weak cell] (task) in
-            guard let cell = cell as? DownloadTaskCell else { return }
+            guard let cell = cell else { return }
             cell.updateProgress(task: task)
             }
             .success({ [weak cell] (task) in
-                guard let cell = cell as? DownloadTaskCell else { return }
+                guard let cell = cell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
-                if task.status == .suspended {
-                    // 下载任务暂停了
-                }
                 if task.status == .completed {
                     // 下载任务完成了
                 }
             })
             .failure({ [weak cell] (task) in
-                guard let cell = cell as? DownloadTaskCell else { return }
+                guard let cell = cell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                if task.status == .suspended {
+                    // 下载任务暂停了
+                }
 
                 if task.status == .failed {
                     // 下载任务失败了

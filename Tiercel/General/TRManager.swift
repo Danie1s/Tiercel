@@ -231,17 +231,12 @@ public class TRManager {
     private func matchStatus() {
         session.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
             guard let strongSelf = self else { return }
-            strongSelf.tasks.forEach({ (task) in
-                if let task = task as? TRDownloadTask {
-                    downloadTasks.forEach({ (downloadTask) in
-                        if task.currentURLString == downloadTask.currentRequest?.url?.absoluteString,
-                            downloadTask.state == .running {
-                            task.status = .running
-                            task.task = downloadTask
-                            TiercelLog("[downloadTask] runing, manager.identifier: \(strongSelf.identifier), URLString: \(task.URLString)")
-
-                        }
-                    })
+            downloadTasks.forEach({ (downloadTask) in
+                if let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
+                    let task = strongSelf.fetchTask(currentURLString: currentURLString) as? TRDownloadTask {
+                    task.status = .running
+                    task.task = downloadTask
+                    TiercelLog("[downloadTask] runing, manager.identifier: \(strongSelf.identifier), URLString: \(task.URLString)")
                 }
             })
 
@@ -388,7 +383,7 @@ extension TRManager {
         return tasks.first { $0.URLString == URLString }
     }
     
-    internal func fetchTask(with currentURLString: String) -> TRTask? {
+    internal func fetchTask(currentURLString: String) -> TRTask? {
         return tasks.first { $0.currentURLString == currentURLString }
     }
     
@@ -403,7 +398,6 @@ extension TRManager {
         
         if cache.fileExists(fileName: task.fileName) {
             TiercelLog("[manager] 文件已经存在 URLString: \(task.URLString), manager.identifier: \(identifier)")
-
             if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePtah(fileName: task.fileName)!), let length = fileInfo[.size] as? Int64 {
                 task.progress.totalUnitCount = length
             }
@@ -665,19 +659,19 @@ extension TRManager {
     internal func updateSpeedAndTimeRemaining() {
         
         // 当前已经完成的大小
-        let dataCount = progress.completedUnitCount
+        let currentData = progress.completedUnitCount
         let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
         
-        let time = Date().timeIntervalSince1970
+        let currentTime = Date().timeIntervalSince1970
         let lastTime: Double = progress.userInfo[.estimatedTimeRemainingKey] as? Double ?? 0
 
-        let costTime = time - lastTime
+        let costTime = currentTime - lastTime
         
         // costTime作为速度刷新的频率，也作为计算实时速度的时间段
         if costTime <= 0.8 {
             if speed == 0 {
-                if dataCount > lastData {
-                    speed = Int64(Double(dataCount - lastData) / costTime)
+                if currentData > lastData {
+                    speed = Int64(Double(currentData - lastData) / costTime)
                     updateTimeRemaining()
                 }
                 tasks.forEach({ (task) in
@@ -689,8 +683,8 @@ extension TRManager {
             return
         }
         
-        if dataCount > lastData {
-            speed = Int64(Double(dataCount - lastData) / costTime)
+        if currentData > lastData {
+            speed = Int64(Double(currentData - lastData) / costTime)
             updateTimeRemaining()
         }
         tasks.forEach({ (task) in
@@ -700,7 +694,7 @@ extension TRManager {
         })
         
         // 把当前已经完成的大小保存在fileCompletedCountKey，作为下一次的lastData
-        progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
+        progress.setUserInfoObject(currentData, forKey: .fileCompletedCountKey)
         
         // 把当前的时间保存在estimatedTimeRemainingKey，作为下一次的lastTime
         progress.setUserInfoObject(time, forKey: .estimatedTimeRemainingKey)
@@ -747,9 +741,9 @@ extension TRManager {
     internal func didBecomeInvalidWithError(error: Error?) {
         createSession { [weak self] in
             guard let strongSelf = self else { return }
-            strongSelf.runningTasks.forEach({ strongSelf.download($0.URLString, fileName: $0.fileName, progressHandler: $0.progressHandler, successHandler: $0.successHandler, failureHandler: $0.failureHandler) })
+            strongSelf.runningTasks.forEach({ $0.start() })
             strongSelf.runningTasks.removeAll()
-            strongSelf.waitingTasks.forEach({ strongSelf.download($0.URLString, fileName: $0.fileName, progressHandler: $0.progressHandler, successHandler: $0.successHandler, failureHandler: $0.failureHandler) })
+            strongSelf.waitingTasks.forEach({ $0.start() })
             strongSelf.waitingTasks.removeAll()
         }
     }

@@ -140,7 +140,6 @@ extension TRCache {
                 try self.fileManager.removeItem(atPath: self.downloadPath)
             } catch {
                 TiercelLog("removeItem error: \(error)")
-
             }
             self.createDirectory()
         }
@@ -279,5 +278,16 @@ extension TRCache {
                 }
             }
         }
+    }
+}
+
+extension URL: TiercelCompatible { }
+extension Tiercel where Base == URL {
+    public var fileName: String {
+        var fileName = base.absoluteString.tr.md5
+        if !base.pathExtension.isEmpty {
+            fileName += ".\(base.pathExtension)"
+        }
+        return fileName
     }
 }

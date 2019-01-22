@@ -86,8 +86,8 @@ public class TRDownloadTask: TRTask {
     internal override func start() {
         cache.createDirectory()
         
+        task?.removeObserver(self, forKeyPath: "currentRequest")
         if let resumeData = resumeData {
-            task?.removeObserver(self, forKeyPath: "currentRequest")
             cache.retrievTmpFile(self)
             if #available(iOS 10.2, *) {
                 task = session?.downloadTask(withResumeData: resumeData)

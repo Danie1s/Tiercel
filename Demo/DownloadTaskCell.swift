@@ -34,7 +34,6 @@ class DownloadTaskCell: UITableViewCell {
         timeRemainingLabel.text = "剩余时间：\(task.timeRemaining.tr.convertTimeToString())"
         startDateLabel.text = "开始时间：\(task.startDate.tr.convertTimeToDateString())"
         endDateLabel.text = "结束时间：\(task.endDate.tr.convertTimeToDateString())"
-        controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
     }
 
 }

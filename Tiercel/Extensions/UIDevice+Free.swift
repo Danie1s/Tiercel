@@ -1,8 +1,8 @@
 //
-//  Tiercel.h
+//  UIDevice+Free.swift
 //  Tiercel
 //
-//  Created by Daniels on 2018/3/29.
+//  Created by Daniels on 2019/1/22.
 //  Copyright © 2018年 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,14 +24,25 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
-
-//! Project version number for Tiercel.
-FOUNDATION_EXPORT double TiercelVersionNumber;
-
-//! Project version string for Tiercel.
-FOUNDATION_EXPORT const unsigned char TiercelVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <Tiercel/PublicHeader.h>
+import Foundation
 
 
+extension UIDevice: TiercelCompatible {}
+extension Tiercel where Base: UIDevice {
+    public var freeDiskSpaceInBytes: Int64 {
+        if #available(iOS 11.0, *) {
+            if let space = try? URL(fileURLWithPath: NSHomeDirectory() as String).resourceValues(forKeys: [URLResourceKey.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage {
+                return space ?? 0
+            } else {
+                return 0
+            }
+        } else {
+            if let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory() as String),
+                let freeSpace = (systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber)?.int64Value {
+                return freeSpace
+            } else {
+                return 0
+            }
+        }
+    }
+}

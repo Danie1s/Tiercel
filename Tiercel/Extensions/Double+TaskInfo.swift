@@ -1,8 +1,8 @@
 //
-//  Tiercel.h
+//  Double+TaskInfo.swift
 //  Tiercel
 //
-//  Created by Daniels on 2018/3/29.
+//  Created by Daniels on 2019/1/22.
 //  Copyright © 2018年 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,14 +24,20 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
-
-//! Project version number for Tiercel.
-FOUNDATION_EXPORT double TiercelVersionNumber;
-
-//! Project version string for Tiercel.
-FOUNDATION_EXPORT const unsigned char TiercelVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <Tiercel/PublicHeader.h>
+import Foundation
 
 
+extension Double: TiercelCompatible {}
+extension Tiercel where Base == Double {
+    /// 返回 yyyy-MM-dd HH:mm:ss格式的字符串
+    ///
+    /// - Returns:
+    public func convertTimeToDateString() -> String {
+        let time = base
+        let date = Date(timeIntervalSince1970: time)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.string(from: date)
+    }
+    
+}

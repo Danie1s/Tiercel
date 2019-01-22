@@ -17,8 +17,6 @@ class ViewController3: BaseViewController {
 
         downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager3
 
-
-
         URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
                       "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
                       "http://api.gfs100.cn/upload/20180202/201802021048136875.mp4",

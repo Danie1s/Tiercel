@@ -1,8 +1,8 @@
 //
-//  Tiercel.h
+//  String+Hash.swift
 //  Tiercel
 //
-//  Created by Daniels on 2018/3/29.
+//  Created by Daniels on 2019/1/22.
 //  Copyright © 2018年 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,14 +24,36 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
-
-//! Project version number for Tiercel.
-FOUNDATION_EXPORT double TiercelVersionNumber;
-
-//! Project version string for Tiercel.
-FOUNDATION_EXPORT const unsigned char TiercelVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <Tiercel/PublicHeader.h>
+import Foundation
 
 
+extension String: TiercelCompatible { }
+extension Tiercel where Base == String {
+    public var md5: String {
+        guard let data = base.data(using: .utf8) else {
+            return base
+        }
+        return data.tr.md5
+    }
+    
+    public var sha1: String {
+        guard let data = base.data(using: .utf8) else {
+            return base
+        }
+        return data.tr.sha1
+    }
+    
+    public var sha256: String {
+        guard let data = base.data(using: .utf8) else {
+            return base
+        }
+        return data.tr.sha256
+    }
+    
+    public var sha512: String {
+        guard let data = base.data(using: .utf8) else {
+            return base
+        }
+        return data.tr.sha512
+    }
+}

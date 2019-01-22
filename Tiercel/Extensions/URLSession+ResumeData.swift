@@ -1,8 +1,8 @@
 //
-//  Tiercel.h
+//  URLSession+ResumeData.swift
 //  Tiercel
 //
-//  Created by Daniels on 2018/3/29.
+//  Created by Daniels on 2019/1/22.
 //  Copyright © 2018年 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,14 +24,27 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
+import Foundation
 
-//! Project version number for Tiercel.
-FOUNDATION_EXPORT double TiercelVersionNumber;
-
-//! Project version string for Tiercel.
-FOUNDATION_EXPORT const unsigned char TiercelVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <Tiercel/PublicHeader.h>
-
-
+extension URLSession {
+    
+    /// 把有bug的resumeData修复，然后创建task
+    ///
+    /// - Parameter resumeData:
+    /// - Returns:
+    internal func correctedDownloadTask(withResumeData resumeData: Data) -> URLSessionDownloadTask {
+        
+        let task = downloadTask(withResumeData: resumeData)
+        
+        if let resumeDictionary = TRResumeDataHelper.getResumeDictionary(resumeData) {
+            if task.originalRequest == nil, let originalReqData = resumeDictionary[NSURLSessionResumeOriginalRequest] as? Data, let originalRequest = NSKeyedUnarchiver.unarchiveObject(with: originalReqData) as? NSURLRequest {
+                task.setValue(originalRequest, forKey: "originalRequest")
+            }
+            if task.currentRequest == nil, let currentReqData = resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data, let currentRequest = NSKeyedUnarchiver.unarchiveObject(with: currentReqData) as? NSURLRequest {
+                task.setValue(currentRequest, forKey: "currentRequest")
+            }
+        }
+        
+        return task
+    }
+}

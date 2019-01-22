@@ -39,8 +39,9 @@ class ListViewController: UITableViewController {
         super.viewDidLoad()
         if #available(iOS 11, *) {
         } else {
-            tableView.contentInset.top = 64
-            tableView.scrollIndicatorInsets.top = 64
+            let topSafeArea = (navigationController?.navigationBar.frame.height ?? 0) + UIApplication.shared.statusBarFrame.size.height
+            tableView.contentInset.top = topSafeArea
+            tableView.scrollIndicatorInsets.top = topSafeArea
         }
 
     }

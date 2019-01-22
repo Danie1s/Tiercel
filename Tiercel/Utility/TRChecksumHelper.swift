@@ -1,8 +1,8 @@
 //
-//  Tiercel.h
+//  TRResumeDataHelper.swift
 //  Tiercel
 //
-//  Created by Daniels on 2018/3/29.
+//  Created by Daniels on 2019/1/22.
 //  Copyright © 2018年 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,14 +24,45 @@
 //  THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
+import Foundation
 
-//! Project version number for Tiercel.
-FOUNDATION_EXPORT double TiercelVersionNumber;
+public enum TRVerificationType: Int {
+    case md5
+    case sha1
+    case sha256
+    case sha512
+}
 
-//! Project version string for Tiercel.
-FOUNDATION_EXPORT const unsigned char TiercelVersionString[];
+public class TRChecksumHelper {
+    public class func validateFile(filePath: String, verificationCode: String, verificationType: TRVerificationType) -> Bool {
+        guard FileManager.default.fileExists(atPath: filePath) else {
+            return false
+        }
+        let url = URL(fileURLWithPath: filePath)
+        
+        do {
+            let data = try Data(contentsOf: url, options: .mappedIfSafe)
+            var string: String
+            switch verificationType {
+            case .md5:
+                string = data.tr.md5
+            case .sha1:
+                string = data.tr.sha1
+            case .sha256:
+                string = data.tr.sha256
+            case .sha512:
+                string = data.tr.sha512
+            }
+            return string.lowercased() == verificationCode.lowercased()
+        } catch {
+            TiercelLog("read data error: \(error)")
+            return false
+        }
+    }
+}
 
-// In this header, you should import all the public headers of your framework using statements like #import <Tiercel/PublicHeader.h>
+
+
+
 
 

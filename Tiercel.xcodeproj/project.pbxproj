@@ -31,6 +31,15 @@
 		E1C1DD77206C9385003665A9 /* DownloadTaskCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */; };
 		E1C1DD78206C93A6003665A9 /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; };
 		E1C1DD79206C93A6003665A9 /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E1D8EF9521F6B916004B70C5 /* TRChecksumHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9421F6B916004B70C5 /* TRChecksumHelper.swift */; };
+		E1D8EF9821F6CE53004B70C5 /* String+Hash.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9721F6CE53004B70C5 /* String+Hash.swift */; };
+		E1D8EF9A21F6CE5C004B70C5 /* Data+Hash.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9921F6CE5C004B70C5 /* Data+Hash.swift */; };
+		E1D8EF9C21F6CEFB004B70C5 /* URLSession+ResumeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9B21F6CEFB004B70C5 /* URLSession+ResumeData.swift */; };
+		E1D8EF9E21F6CF39004B70C5 /* Int64+TaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9D21F6CF39004B70C5 /* Int64+TaskInfo.swift */; };
+		E1D8EFA021F6CFC2004B70C5 /* Double+TaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9F21F6CFC2004B70C5 /* Double+TaskInfo.swift */; };
+		E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */; };
+		E1D8EFA421F6D2B3004B70C5 /* Array+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */; };
+		E1D8EFA621F6D328004B70C5 /* UIDevice+Free.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +93,15 @@
 		E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadTaskCell.swift; sourceTree = "<group>"; };
 		E1C1DD72206C9385003665A9 /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
 		E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DownloadTaskCell.xib; sourceTree = "<group>"; };
+		E1D8EF9421F6B916004B70C5 /* TRChecksumHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TRChecksumHelper.swift; sourceTree = "<group>"; };
+		E1D8EF9721F6CE53004B70C5 /* String+Hash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Hash.swift"; sourceTree = "<group>"; };
+		E1D8EF9921F6CE5C004B70C5 /* Data+Hash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Hash.swift"; sourceTree = "<group>"; };
+		E1D8EF9B21F6CEFB004B70C5 /* URLSession+ResumeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+ResumeData.swift"; sourceTree = "<group>"; };
+		E1D8EF9D21F6CF39004B70C5 /* Int64+TaskInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int64+TaskInfo.swift"; sourceTree = "<group>"; };
+		E1D8EF9F21F6CFC2004B70C5 /* Double+TaskInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+TaskInfo.swift"; sourceTree = "<group>"; };
+		E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
+		E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Safe.swift"; sourceTree = "<group>"; };
+		E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Free.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,15 +145,10 @@
 			isa = PBXGroup;
 			children = (
 				E1C1DD3C206C91EF003665A9 /* Tiercel.h */,
-				E1C1DD46206C9241003665A9 /* TRCommon.swift */,
-				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
-				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
-				E1C1DD45206C9241003665A9 /* TRCache.swift */,
-				E1C1DD47206C9241003665A9 /* TRTask.swift */,
-				E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */,
-				E1C1DD48206C9241003665A9 /* TRManager.swift */,
-				E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */,
 				E1C1DD3D206C91EF003665A9 /* Info.plist */,
+				E1D8EFA721F6D4F6004B70C5 /* General */,
+				E1D8EFA821F6D548004B70C5 /* Utility */,
+				E1D8EF9621F6CE33004B70C5 /* Extensions */,
 			);
 			path = Tiercel;
 			sourceTree = "<group>";
@@ -159,6 +172,44 @@
 				E1C1DD62206C92FE003665A9 /* Info.plist */,
 			);
 			path = Demo;
+			sourceTree = "<group>";
+		};
+		E1D8EF9621F6CE33004B70C5 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				E1D8EF9721F6CE53004B70C5 /* String+Hash.swift */,
+				E1D8EF9921F6CE5C004B70C5 /* Data+Hash.swift */,
+				E1D8EF9B21F6CEFB004B70C5 /* URLSession+ResumeData.swift */,
+				E1D8EF9D21F6CF39004B70C5 /* Int64+TaskInfo.swift */,
+				E1D8EF9F21F6CFC2004B70C5 /* Double+TaskInfo.swift */,
+				E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */,
+				E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */,
+				E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		E1D8EFA721F6D4F6004B70C5 /* General */ = {
+			isa = PBXGroup;
+			children = (
+				E1C1DD46206C9241003665A9 /* TRCommon.swift */,
+				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
+				E1C1DD45206C9241003665A9 /* TRCache.swift */,
+				E1C1DD47206C9241003665A9 /* TRTask.swift */,
+				E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */,
+				E1C1DD48206C9241003665A9 /* TRManager.swift */,
+				E1C1DD49206C9241003665A9 /* TRSessionDelegate.swift */,
+			);
+			path = General;
+			sourceTree = "<group>";
+		};
+		E1D8EFA821F6D548004B70C5 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				E1D8EF9421F6B916004B70C5 /* TRChecksumHelper.swift */,
+				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
+			);
+			path = Utility;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -279,14 +330,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1D8EF9821F6CE53004B70C5 /* String+Hash.swift in Sources */,
+				E1D8EFA621F6D328004B70C5 /* UIDevice+Free.swift in Sources */,
+				E1D8EFA021F6CFC2004B70C5 /* Double+TaskInfo.swift in Sources */,
 				E1C1DD4D206C9241003665A9 /* TRTask.swift in Sources */,
 				E10B78A721E73C3E00DFF2B3 /* TRResumeDataHelper.swift in Sources */,
+				E1D8EF9C21F6CEFB004B70C5 /* URLSession+ResumeData.swift in Sources */,
+				E1D8EFA421F6D2B3004B70C5 /* Array+Safe.swift in Sources */,
 				E1C1DD4E206C9241003665A9 /* TRManager.swift in Sources */,
+				E1D8EF9A21F6CE5C004B70C5 /* Data+Hash.swift in Sources */,
 				E1C1DD4C206C9241003665A9 /* TRCommon.swift in Sources */,
 				E1C1DD4B206C9241003665A9 /* TRCache.swift in Sources */,
+				E1D8EF9521F6B916004B70C5 /* TRChecksumHelper.swift in Sources */,
 				E1C1DD4A206C9241003665A9 /* TRDownloadTask.swift in Sources */,
+				E1D8EF9E21F6CF39004B70C5 /* Int64+TaskInfo.swift in Sources */,
 				E10B78A821E73C3E00DFF2B3 /* TRConfiguration.swift in Sources */,
 				E1C1DD4F206C9241003665A9 /* TRSessionDelegate.swift in Sources */,
+				E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

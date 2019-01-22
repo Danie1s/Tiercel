@@ -58,7 +58,7 @@ internal class TRResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    internal class func deleteResumeByteRange(_ data: Data) -> Data? {
+    private class func deleteResumeByteRange(_ data: Data) -> Data? {
         guard let resumeDictionary = getResumeDictionary(data) else { return nil }
         resumeDictionary.removeObject(forKey: NSURLSessionResumeByteRange)
         let result = try? PropertyListSerialization.data(fromPropertyList: resumeDictionary, format: PropertyListSerialization.PropertyListFormat.xml, options: PropertyListSerialization.WriteOptions())
@@ -70,7 +70,7 @@ internal class TRResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    internal class func correctResumeData(_ data: Data) -> Data? {
+    private class func correctResumeData(_ data: Data) -> Data? {
         guard let resumeDictionary = getResumeDictionary(data) else { return nil }
         
         resumeDictionary[NSURLSessionResumeCurrentRequest] = correct(requestData: resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data)
@@ -126,7 +126,7 @@ internal class TRResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    internal class func correct(requestData data: Data?) -> Data? {
+    private class func correct(requestData data: Data?) -> Data? {
         guard let data = data else {
             return nil
         }
@@ -174,28 +174,7 @@ internal class TRResumeDataHelper {
 }
 
 
-extension URLSession {
-    
-    /// 把有bug的resumeData修复，然后创建task
-    ///
-    /// - Parameter resumeData:
-    /// - Returns:
-    internal func correctedDownloadTask(withResumeData resumeData: Data) -> URLSessionDownloadTask {
-        
-        let task = downloadTask(withResumeData: resumeData)
-        
-        if let resumeDictionary = TRResumeDataHelper.getResumeDictionary(resumeData) {
-            if task.originalRequest == nil, let originalReqData = resumeDictionary[NSURLSessionResumeOriginalRequest] as? Data, let originalRequest = NSKeyedUnarchiver.unarchiveObject(with: originalReqData) as? NSURLRequest {
-                task.setValue(originalRequest, forKey: "originalRequest")
-            }
-            if task.currentRequest == nil, let currentReqData = resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data, let currentRequest = NSKeyedUnarchiver.unarchiveObject(with: currentReqData) as? NSURLRequest {
-                task.setValue(currentRequest, forKey: "currentRequest")
-            }
-        }
-        
-        return task
-    }
-}
+
 
 
 
