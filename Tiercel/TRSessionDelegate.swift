@@ -32,22 +32,33 @@ public class TRSessionDelegate: NSObject {
 }
 
 extension TRSessionDelegate: URLSessionDataDelegate {
+    public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        guard let manager = manager,
+            let URLString = task.originalRequest?.url?.absoluteString,
+            let downloadTask = manager.fetchTask(URLString) as? TRDownloadTask
+            else { return  }
+        if let currentURLString = request.url?.absoluteString {
+            downloadTask.currentURLString = currentURLString
+        }
+        completionHandler(request)
+    }
+
+    
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         guard let manager = manager,
-            let URLString = dataTask.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask,
+            let currentURLString = dataTask.currentRequest?.url?.absoluteString,
+            let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask,
             let response = response as? HTTPURLResponse
             else { return  }
-        task.task(didReceive: response, completionHandler: completionHandler)
-
+        task.didReceive(response: response, completionHandler: completionHandler)
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         guard let manager = manager,
-            let URLString = dataTask.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask
+            let currentURLString = dataTask.currentRequest?.url?.absoluteString,
+            let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        task.task(didReceive: data)
+        task.didReceive(data: data)
 
     }
 }
@@ -55,10 +66,11 @@ extension TRSessionDelegate: URLSessionDataDelegate {
 extension TRSessionDelegate: URLSessionTaskDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let manager = manager,
-            let URLString = task.originalRequest?.url?.absoluteString,
-            let task = manager.fetchTask(URLString) as? TRDownloadTask
+            let currentURLString = task.currentRequest?.url?.absoluteString,
+            let downloadTask = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        task.task(didCompleteWithError: error)
+        downloadTask.didComplete(task: task, error: error)
 
     }
 }
+

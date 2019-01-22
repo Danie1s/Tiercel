@@ -29,16 +29,16 @@ import UIKit
 public enum TRStatus: String {
     case waiting
     case running
-    case suspend
-    case cancel
+    case suspended
+    case canceled
     case failed
-    case remove
+    case removed
     case completed
 
     // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
-    case preSuspend
-    case preCancel
-    case preRemove
+    case willSuspend
+    case willCancel
+    case willRemove
 }
 
 public enum TRLogLevel {
@@ -52,8 +52,8 @@ public typealias TRTaskHandler = (TRTask) -> ()
 public typealias TRManagerHandler = (TRManager) -> ()
 
 public class Tiercel<Base> {
-    private let base: Base
-    init(_ base: Base) {
+    internal let base: Base
+    internal init(_ base: Base) {
         self.base = base
     }
 }
@@ -71,12 +71,9 @@ extension TiercelCompatible {
     }
 }
 
+
+
 extension Int64: TiercelCompatible {}
-extension Double: TiercelCompatible {}
-extension UIDevice: TiercelCompatible {}
-extension DispatchQueue: TiercelCompatible {}
-
-
 extension Tiercel where Base == Int64 {
 
     /// 返回下载速度的字符串，如：1MB/s
@@ -130,10 +127,9 @@ extension Tiercel where Base == Int64 {
             return "\(base)B"
         }
     }
-
-
 }
 
+extension Double: TiercelCompatible {}
 extension Tiercel where Base == Double {
     /// 返回 yyyy-MM-dd HH:mm:ss格式的字符串
     ///
@@ -148,6 +144,7 @@ extension Tiercel where Base == Double {
 
 }
 
+extension UIDevice: TiercelCompatible {}
 extension Tiercel where Base: UIDevice {
     public var freeDiskSpaceInBytes: Int64 {
         if #available(iOS 11.0, *) {
@@ -167,6 +164,7 @@ extension Tiercel where Base: UIDevice {
     }
 }
 
+extension DispatchQueue: TiercelCompatible {}
 extension Tiercel where Base: DispatchQueue {
     internal func safeAsync(_ block: @escaping ()->()) {
         if base === DispatchQueue.main && Thread.isMainThread {
@@ -192,16 +190,15 @@ extension Array {
 
 
 public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {
-
+    
     switch TRManager.logLevel {
     case .high:
         print("")
         print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
-
-        print("File    :  \((file as NSString).lastPathComponent)\n" +
+        
+        print("source  :  \((file as NSString).lastPathComponent)[\(line)]\n" +
             "Thread  :  \(threadNum)\n" +
-            "line    :  \(line)\n" +
             "Info    :  \(message)"
         )
         print("")

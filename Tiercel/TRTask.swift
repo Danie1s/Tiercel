@@ -40,126 +40,133 @@ public class TRTask: NSObject {
 
     internal var request: URLRequest?
 
-    private var internalStatus: TRStatus = .waiting
+    private var _Status: TRStatus = .waiting
     public var status: TRStatus {
         get {
             return queue.sync {
-                internalStatus
+                _Status
             }
         }
         set {
             return queue.sync {
-                internalStatus = newValue
+                _Status = newValue
             }
         }
     }
 
+    internal let url: URL
 
-    private var internalURLString: String
-    @objc public var URLString: String {
+    public let URLString: String
+    
+    private var _currentURLString: String
+    internal var currentURLString: String {
         get {
             return queue.sync {
-                internalURLString
+                _currentURLString
             }
         }
         set {
             return queue.sync {
-                internalURLString = newValue
+                _currentURLString = newValue
             }
         }
     }
 
-    public internal(set) var progress: Progress = Progress()
 
+    public let progress: Progress = Progress()
 
-    private var internalStartDate: Double = 0
+    private var _startDate: Double = 0
     @objc public internal(set) var startDate: Double {
         get {
             return queue.sync {
-                internalStartDate
+                _startDate
             }
         }
         set {
             return queue.sync {
-                internalStartDate = newValue
+                _startDate = newValue
             }
         }
     }
 
-    private var internalEndDate: Double = 0
+    private var _endDate: Double = 0
     @objc public internal(set) var endDate: Double {
         get {
             return queue.sync {
-                internalEndDate
+                _endDate
             }
         }
         set {
             return queue.sync {
-                internalEndDate = newValue
+                _endDate = newValue
             }
         }
     }
 
 
-    private var internalSpeed: Int64 = 0
+    private var _speed: Int64 = 0
     public internal(set) var speed: Int64 {
         get {
             return queue.sync {
-                internalSpeed
+                _speed
             }
         }
         set {
             return queue.sync {
-                internalSpeed = newValue
+                _speed = newValue
             }
         }
     }
 
     /// 默认为url最后一部分
-    private var internalFileName: String
+    private var _fileName: String
     @objc public internal(set) var fileName: String {
         get {
             return queue.sync {
-                internalFileName
+                _fileName
             }
         }
         set {
             return queue.sync {
-                internalFileName = newValue
+                _fileName = newValue
             }
         }
     }
 
-    private var internalTimeRemaining: Int64 = 0
+    private var _timeRemaining: Int64 = 0
     public internal(set) var timeRemaining: Int64 {
         get {
             return queue.sync {
-                internalTimeRemaining
+                _timeRemaining
             }
         }
         set {
             return queue.sync {
-                internalTimeRemaining = newValue
+                _timeRemaining = newValue
             }
         }
     }
 
-    public let url: URL
-    
-    public var error: NSError?
+
+    public internal(set) var error: Error?
 
 
     
-    public init(_ url: URL, cache: TRCache, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+    public init(_ url: URL,
+                cache: TRCache,
+                isCacheInfo: Bool = false,
+                progressHandler: TRTaskHandler? = nil,
+                successHandler: TRTaskHandler? = nil,
+                failureHandler: TRTaskHandler? = nil) {
+        self.cache = cache
         self.url = url
-        self.internalFileName = url.lastPathComponent
+        self.URLString = url.absoluteString
+        _currentURLString = url.absoluteString
+        _fileName = url.lastPathComponent
+        super.init()
         self.progressHandler = progressHandler
         self.successHandler = successHandler
         self.failureHandler = failureHandler
-        self.internalURLString = url.absoluteString
-        self.cache = cache
-
-        super.init()
     }
 
     
@@ -171,9 +178,7 @@ public class TRTask: NSObject {
 
 
     internal func start() {
-        let requestUrl = URL(string: URLString)!
-        let request = URLRequest(url: requestUrl, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
-        self.request = request
+        self.request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
     }
     
 

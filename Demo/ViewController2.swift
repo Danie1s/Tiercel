@@ -15,9 +15,6 @@ class ViewController2: BaseViewController {
         super.viewDidLoad()
 
         downloadManager = TRManager("ViewController2", isStoreInfo: true)
-        
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
 
         URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
                       "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
@@ -62,15 +59,13 @@ extension ViewController2 {
 
     @IBAction func addDownloadTask(_ sender: Any) {
         guard let downloadManager = downloadManager else { return  }
-        downloadManager.isStartDownloadImmediately = true
         let count = downloadURLStrings.count
         guard count < URLStrings.count else { return }
 
         guard let URLString = URLStrings.first(where: { !downloadURLStrings.contains($0) }) else { return }
         downloadURLStrings.append(URLString)
-        let index = URLStrings.index(of: URLString)!
         downloadManager.download(URLString)
-        tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        tableView.insertRows(at: [IndexPath(row: count, section: 0)], with: .automatic)
         updateUI()
     }
 

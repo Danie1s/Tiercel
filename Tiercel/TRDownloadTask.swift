@@ -29,26 +29,40 @@ import UIKit
 public class TRDownloadTask: TRTask {
 
     private var task: URLSessionDataTask?
+    
+    public var filePath: String {
+        return cache.filePtah(fileName: fileName)!
+    }
+    
     private var outputStream: OutputStream?
-//    public var destination: String = ""
 
-    public init(_ url: URL, fileName: String? = nil, cache: TRCache, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
+    public init(_ url: URL,
+                fileName: String? = nil,
+                cache: TRCache,
+                isCacheInfo: Bool = false,
+                progressHandler: TRTaskHandler? = nil,
+                successHandler: TRTaskHandler? = nil,
+                failureHandler: TRTaskHandler? = nil) {
 
-        super.init(url, cache: cache, isCacheInfo: isCacheInfo, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
-        if let fileName = fileName {
-            if !fileName.isEmpty {
-                self.fileName = fileName
-            }
+        super.init(url,
+                   cache: cache,
+                   isCacheInfo: isCacheInfo,
+                   progressHandler: progressHandler,
+                   successHandler: successHandler,
+                   failureHandler: failureHandler)
+        if let fileName = fileName,
+            !fileName.isEmpty {
+            self.fileName = fileName
         }
-//        self.destination = (self.cache.downloadFilePath as NSString).appendingPathComponent(self.fileName)
         cache.storeTaskInfo(self)
     }
+    
 
     
     internal override func start() {
-
         super.start()
         cache.createDirectory()
+        
         // 读取缓存中已经下载了的大小
         let path = (cache.downloadTmpPath as NSString).appendingPathComponent(fileName)
         if FileManager().fileExists(atPath: path) {
@@ -56,9 +70,9 @@ public class TRDownloadTask: TRTask {
                 progress.completedUnitCount = length
             }
         }
-
         request?.setValue("bytes=\(progress.completedUnitCount)-", forHTTPHeaderField: "Range")
-        guard let request = request else { return  }
+        guard let request = request else { return }
+        
         task = session?.dataTask(with: request)
 
         speed = 0
@@ -76,18 +90,18 @@ public class TRDownloadTask: TRTask {
     
     internal override func suspend() {
         guard status == .running || status == .waiting else { return }
-        TiercelLog("[downloadTask] did suspend \(self.URLString)")
 
         if status == .running {
-            status = .preSuspend
+            status = .willSuspend
             task?.cancel()
         }
 
         if status == .waiting {
-            status = .suspend
+            status = .suspended
+            TiercelLog("[downloadTask] did suspend, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
             DispatchQueue.main.tr.safeAsync {
                 self.progressHandler?(self)
-                self.successHandler?(self)
+                self.failureHandler?(self)
             }
             manager?.completed()
         }
@@ -95,13 +109,15 @@ public class TRDownloadTask: TRTask {
     
     internal override func cancel() {
         guard status != .completed else { return }
-        TiercelLog("[downloadTask] did cancel \(self.URLString)")
         if status == .running {
-            status = .preCancel
+            status = .willCancel
             task?.cancel()
         } else {
-            status = .preCancel
+            status = .willCancel
+            
             manager?.taskDidCancelOrRemove(URLString)
+            TiercelLog("[downloadTask] did cancel, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
+
             DispatchQueue.main.tr.safeAsync {
                 self.failureHandler?(self)
             }
@@ -112,13 +128,14 @@ public class TRDownloadTask: TRTask {
 
 
     internal override func remove() {
-        TiercelLog("[downloadTask] did remove \(self.URLString)")
         if status == .running {
-            status = .preRemove
+            status = .willRemove
             task?.cancel()
         } else {
-            status = .preRemove
+            status = .willRemove
             manager?.taskDidCancelOrRemove(URLString)
+            TiercelLog("[downloadTask] did remove, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
+
             DispatchQueue.main.tr.safeAsync {
                 self.failureHandler?(self)
             }
@@ -133,7 +150,7 @@ public class TRDownloadTask: TRTask {
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
         cache.store(self)
-        TiercelLog("[downloadTask] a task did complete URLString: \(URLString)")
+        TiercelLog("[downloadTask] completed, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
             self.successHandler?(self)
@@ -143,26 +160,32 @@ public class TRDownloadTask: TRTask {
 
 }
 
+// MARK: - KVO
+extension TRDownloadTask {
+    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if let change = change, let newRequest = change[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
+            currentURLString = url.absoluteString
+        }
+    }
+}
+
 // MARK: - info
 extension TRDownloadTask {
 
-    internal func parseSpeed(_ cost: TimeInterval) {
+    internal func updateSpeedAndTimeRemaining(_ cost: TimeInterval) {
 
         let dataCount = progress.completedUnitCount
-        var lastData: Int64 = 0
-        if progress.userInfo[.fileCompletedCountKey] != nil {
-            lastData = progress.userInfo[.fileCompletedCountKey] as! Int64
-        }
+        let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
+        
         if dataCount > lastData {
             speed = Int64(Double(dataCount - lastData) / cost)
-            parseTimeRemaining()
+            updateTimeRemaining()
         }
-
         progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
 
     }
 
-    private func parseTimeRemaining() {
+    private func updateTimeRemaining() {
         if speed == 0 {
             self.timeRemaining = 0
         } else {
@@ -177,9 +200,9 @@ extension TRDownloadTask {
 
 // MARK: - download callback
 extension TRDownloadTask {
-    internal func task(didReceive response: HTTPURLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+    internal func didReceive(response: HTTPURLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         guard response.statusCode >= 200 && response.statusCode <= 209 else {
-            TiercelLog("[downloadTask] URLString 出错了：\(response)")
+            TiercelLog("[downloadTask] failed, manager.name: \(manager?.name ?? ""), URLString: \(URLString), response: \(response)")
             status = .failed
             cache.storeTaskInfo(self)
             DispatchQueue.main.tr.safeAsync {
@@ -229,54 +252,63 @@ extension TRDownloadTask {
 
         completionHandler(.allow)
 
-        TiercelLog("[downloadTask] start to download URLString: \(URLString)")
+        TiercelLog("[downloadTask] runing, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
 
     }
 
-    internal func task(didReceive data: Data) {
+    internal func didReceive(data: Data) {
 
         progress.completedUnitCount += Int64((data as NSData).length)
          _ = data.withUnsafeBytes { outputStream?.write($0, maxLength: data.count) }
-        manager?.parseSpeed()
+        manager?.updateSpeedAndTimeRemaining()
         DispatchQueue.main.tr.safeAsync {
             if TRManager.isControlNetworkActivityIndicator {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
             self.progressHandler?(self)
-            guard let manager = self.manager else { return }
-            manager.progressHandler?(manager)
+            self.manager?.updateProgress()
         }
     }
 
-    internal func task(didCompleteWithError error: Error?) {
+    internal func didComplete(task: URLSessionTask, error: Error?) {
         if TRManager.isControlNetworkActivityIndicator {
             DispatchQueue.main.tr.safeAsync {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }
         }
 
-        self.error = error as NSError?
         session = nil
 
         outputStream?.close()
         outputStream = nil
 
-        if let _ = error {
+        if let error = error {
+            self.error = error
 
             switch status {
-            case .preSuspend:
-                status = .suspend
+            case .willSuspend:
+                status = .suspended
+                TiercelLog("[downloadTask] did suspend, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
+
                 DispatchQueue.main.tr.safeAsync {
                     self.progressHandler?(self)
-                    self.successHandler?(self)
+                    self.failureHandler?(self)
                 }
-            case .preCancel, .preRemove:
+            case .willCancel, .willRemove:
                 manager?.taskDidCancelOrRemove(URLString)
+                if status == .canceled {
+                    TiercelLog("[downloadTask] did cancel, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
+                }
+                if status == .removed {
+                    TiercelLog("[downloadTask] did removed, manager.name: \(manager?.name ?? ""), URLString: \(URLString)")
+                }
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
                 }
             default:
                 status = .failed
+                TiercelLog("[downloadTask] failed, manager.name: \(manager?.name ?? ""), URLString: \(URLString), error: \(error)")
+
                 cache.storeTaskInfo(self)
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)

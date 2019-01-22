@@ -16,9 +16,6 @@ class DownloadViewController: BaseViewController {
 
         downloadManager = ListViewController.downloadManager
 
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
-
         setupManager()
 
     }
@@ -42,7 +39,7 @@ extension DownloadViewController {
         let count = downloadManager.tasks.count
         guard count > 0 else { return }
 
-        let index = downloadManager.tasks.count - 1
+        let index = count - 1
         let URLString = downloadURLStrings[index]
         downloadURLStrings.remove(at: index)
         tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)

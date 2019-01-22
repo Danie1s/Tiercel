@@ -30,8 +30,6 @@ public class TRCache {
     
     public static let `default` = TRCache("default")
     
-    public typealias DiskCachePathClosure = (String?, String) -> String
-
     private let ioQueue: DispatchQueue
     
     public let downloadPath: String
@@ -46,7 +44,7 @@ public class TRCache {
     
     private let fileManager = FileManager.default
     
-    public final class func defaultDiskCachePathClosure(_ cacheName: String) -> String {
+    private final class func defaultDiskCachePathClosure(_ cacheName: String) -> String {
         let dstPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
         return (dstPath as NSString).appendingPathComponent(cacheName)
     }
@@ -57,7 +55,7 @@ public class TRCache {
     /// 初始化方法
     ///
     /// - Parameters:
-    ///   - name: 设置TRCache对象的名字，一般由TRManager对象创建时传递
+    ///   - name: 不同的name，代表不同的下载模块，对应的文件放在不同的地方
     ///   - isStoreInfo: 是否把下载任务的相关信息持久化到沙盒，一般由TRManager对象创建时传递
     public init(_ name: String, isStoreInfo: Bool = false) {
         self.name = name
@@ -86,44 +84,34 @@ public class TRCache {
 
 // MARK: - file
 extension TRCache {
-    public func createDirectory() {
+    internal func createDirectory() {
         
         if !fileManager.fileExists(atPath: downloadPath) {
             do {
                 try fileManager.createDirectory(atPath: downloadPath, withIntermediateDirectories: true, attributes: nil)
-            } catch _ {}
+            } catch  {
+                TiercelLog("createDirectory error: \(error)")
+            }
         }
         
         if !fileManager.fileExists(atPath: downloadTmpPath) {
             do {
                 try fileManager.createDirectory(atPath: downloadTmpPath, withIntermediateDirectories: true, attributes: nil)
-            } catch _ {}
+            } catch {
+                TiercelLog("createDirectory error: \(error)")
+            }
         }
         
         if !fileManager.fileExists(atPath: downloadFilePath) {
             do {
                 try fileManager.createDirectory(atPath: downloadFilePath, withIntermediateDirectories: true, attributes: nil)
-            } catch _ {}
+            } catch {
+                TiercelLog("createDirectory error: \(error)")
+            }
         }
     }
     
     
-    public func filePtah(URLString: String) -> String? {
-        guard let fileName = URL(string: URLString)?.lastPathComponent else { return nil }
-        return filePtah(fileName: fileName)
-    }
-
-    public func fileURL(URLString: String) -> URL? {
-        guard let path = filePtah(URLString: URLString) else { return nil }
-        return URL(fileURLWithPath: path)
-    }
-
-    public func fileExists(URLString: String) -> Bool {
-        guard let path = filePtah(URLString: URLString) else { return false }
-        return fileManager.fileExists(atPath: path)
-    }
-
-
     public func filePtah(fileName: String) -> String? {
         if fileName.isEmpty {
             return nil
@@ -142,11 +130,33 @@ extension TRCache {
         return fileManager.fileExists(atPath: path)
     }
     
+    public func filePtah(URLString: String) -> String? {
+        guard let fileName = URL(string: URLString)?.lastPathComponent else { return nil }
+        return filePtah(fileName: fileName)
+    }
+
+    public func fileURL(URLString: String) -> URL? {
+        guard let path = filePtah(URLString: URLString) else { return nil }
+        return URL(fileURLWithPath: path)
+    }
+
+    public func fileExists(URLString: String) -> Bool {
+        guard let path = filePtah(URLString: URLString) else { return false }
+        return fileManager.fileExists(atPath: path)
+    }
+
+
+
+    
     
     public func clearDiskCache() {
         ioQueue.async {
             guard self.fileManager.fileExists(atPath: self.downloadPath) else { return }
-            try? self.fileManager.removeItem(atPath: self.downloadPath)
+            do {
+                try self.fileManager.removeItem(atPath: self.downloadPath)
+            } catch {
+                TiercelLog("removeItem error: \(error)")
+            }
             self.createDirectory()
         }
     }
@@ -155,7 +165,7 @@ extension TRCache {
 
 // MARK: - retrieve
 extension TRCache {
-    public func retrieveTasks() -> [TRTask] {
+    internal func retrieveTasks() -> [TRTask] {
         guard let taskInfoArray = retrieveTaskInfos() else { return [TRTask]() }
         return taskInfoArray.map { (info) -> TRDownloadTask in
             let url = URL(string: info["URLString"] as! String)!
@@ -175,20 +185,15 @@ extension TRCache {
                     }
                 }
             }
-            if task.status == .running {
-                task.status = .suspend
+            if task.status == .running || task.status == .waiting {
+                task.status = .suspended
             }
-
-            if task.status == .waiting {
-                task.status = .suspend
-            }
-            
             storeTaskInfo(task)
             return task
         }
     }
     
-    public func retrieveTaskInfos() -> [[String: Any]]? {
+    internal func retrieveTaskInfos() -> [[String: Any]]? {
         let path = (downloadPath as NSString).appendingPathComponent(name + "Tasks.plist")
         if fileManager.fileExists(atPath: path) {
             guard let array = NSArray(contentsOfFile: path) as? [[String: Any]] else { return nil }
@@ -203,16 +208,16 @@ extension TRCache {
 
 // MARK: - store
 extension TRCache {
-    public func store(_ task: TRDownloadTask) {
+    internal func store(_ task: TRDownloadTask) {
         storeTaskInfo(task)
         storeTmpFile(task)
     }
     
     
-    public func storeTaskInfo(_ task: TRDownloadTask) {
+    internal func storeTaskInfo(_ task: TRDownloadTask) {
         ioQueue.async {
             guard self.isStoreInfo else { return }
-            let info: [String : Any] = ["fileName": task.fileName,
+            let info: [String: Any] = ["fileName": task.fileName,
                                         "startDate": task.startDate,
                                         "endDate": task.endDate,
                                         "totalBytes": task.progress.totalUnitCount,
@@ -244,13 +249,17 @@ extension TRCache {
 
     }
     
-    public func storeTmpFile(_ task: TRDownloadTask) {
+    internal func storeTmpFile(_ task: TRDownloadTask) {
         ioQueue.sync {
             if task.fileName.isEmpty { return }
             let path = (self.downloadTmpPath as NSString).appendingPathComponent(task.fileName)
             if self.fileManager.fileExists(atPath: path) {
                 let destination = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
-                try? self.fileManager.moveItem(atPath: path, toPath: destination)
+                do {
+                    try self.fileManager.moveItem(atPath: path, toPath: destination)
+                } catch {
+                    TiercelLog("moveItem error: \(error)")
+                }
             }
         }
     }
@@ -260,7 +269,7 @@ extension TRCache {
 
 // MARK: - remove
 extension TRCache {
-    public func remove(_ task: TRDownloadTask, completely: Bool) {
+    internal func remove(_ task: TRDownloadTask, completely: Bool) {
         removeTmpFile(task)
         removeTaskInfo(task)
 
@@ -269,17 +278,21 @@ extension TRCache {
         }
     }
     
-    public func removeFile(_ task: TRDownloadTask) {
+    internal func removeFile(_ task: TRDownloadTask) {
         ioQueue.async {
             if task.fileName.isEmpty { return }
             let path = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
             if self.fileManager.fileExists(atPath: path) {
-                try? self.fileManager.removeItem(atPath: path)
+                do {
+                    try self.fileManager.removeItem(atPath: path)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
             }
         }
     }
     
-    public func removeTaskInfo(_ task: TRDownloadTask) {
+    internal func removeTaskInfo(_ task: TRDownloadTask) {
         ioQueue.async {
             guard var taskInfoArray = self.retrieveTaskInfos() else { return }
             let path = (self.downloadPath as NSString).appendingPathComponent("\(self.name)Tasks.plist")
@@ -295,13 +308,17 @@ extension TRCache {
     /// 删除保留在本地的缓存文件
     ///
     /// - Parameter task:
-    public func removeTmpFile(_ task: TRDownloadTask) {
+    internal func removeTmpFile(_ task: TRDownloadTask) {
         objc_sync_enter(self)
         ioQueue.async {
             if task.fileName.isEmpty { return }
             let path = (self.downloadTmpPath as NSString).appendingPathComponent(task.fileName)
             if self.fileManager.fileExists(atPath: path) {
-                try? self.fileManager.removeItem(atPath: path)
+                do {
+                    try self.fileManager.removeItem(atPath: path)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
             }
         }
         objc_sync_exit(self)

@@ -16,9 +16,6 @@ class ViewController3: BaseViewController {
         super.viewDidLoad()
 
         downloadManager = TRManager("ViewController3", isStoreInfo: true)
-        
-        // 因为会读取缓存到沙盒的任务，所以第一次的时候，不要马上开始下载
-        downloadManager?.isStartDownloadImmediately = false
 
         URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
                       "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
@@ -51,7 +48,6 @@ extension ViewController3 {
 
 
     @IBAction func multiDownload(_ sender: Any) {
-        downloadManager?.isStartDownloadImmediately = true
         downloadManager?.multiDownload(URLStrings)
         downloadURLStrings.append(contentsOf: URLStrings)
         updateUI()

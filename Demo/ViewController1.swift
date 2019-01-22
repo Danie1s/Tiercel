@@ -49,24 +49,26 @@ class ViewController1: UIViewController {
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)
-            if task.status == .suspend {
-                // 下载任务暂停了
-            }
 
             if task.status == .completed {
                 // 下载任务完成了
             }
         }, failureHandler: { [weak self] (task) in
             self?.updateUI(task)
+            
+            if task.status == .suspended {
+                // 下载任务暂停了
+            }
+            
             if task.status == .failed {
                 // 下载任务失败了
             }
 
-            if task.status == .cancel {
+            if task.status == .canceled {
                 // 下载任务取消了
             }
 
-            if task.status == .remove {
+            if task.status == .removed {
                 // 下载任务移除了
             }
         })
