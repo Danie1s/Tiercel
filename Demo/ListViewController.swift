@@ -57,7 +57,7 @@ class ListViewController: UITableViewController {
         cell.URLStringLabel.text = "视频\(indexPath.row + 1).mp4"
         let URLStirng = URLStrings[indexPath.row]
         cell.downloadClosure = { cell in
-            (UIApplication.shared.delegate as! AppDelegate).downloadManager4.download(URLStirng, fileName: cell.URLStringLabel.text)
+            appDelegate.downloadManager4.download(URLStirng, fileName: cell.URLStringLabel.text)
         }
 
         return cell

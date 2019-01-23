@@ -30,7 +30,7 @@ public class TRManager {
     
     public static let `default` = TRManager("default")
     
-    public static var logLevel: TRLogLevel = .high
+    public static var logLevel: TRLogLevel = .detailed
     
     public static var isControlNetworkActivityIndicator = true
 
@@ -233,7 +233,8 @@ public class TRManager {
             guard let strongSelf = self else { return }
             downloadTasks.forEach({ (downloadTask) in
                 if let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-                    let task = strongSelf.fetchTask(currentURLString: currentURLString) as? TRDownloadTask {
+                    let task = strongSelf.fetchTask(currentURLString: currentURLString) as? TRDownloadTask,
+                    downloadTask.state == .running {
                     task.status = .running
                     task.task = downloadTask
                     TiercelLog("[downloadTask] runing, manager.identifier: \(strongSelf.identifier), URLString: \(task.URLString)")
@@ -289,8 +290,6 @@ extension TRManager {
     @discardableResult
     public func download(_ URLString: String,
                          fileName: String? = nil,
-                         verificationCode: String? = nil,
-                         verificationType: TRVerificationType = .md5,
                          progressHandler: TRTaskHandler? = nil,
                          successHandler: TRTaskHandler? = nil,
                          failureHandler: TRTaskHandler? = nil) -> TRDownloadTask? {
@@ -304,8 +303,6 @@ extension TRManager {
         
         var task = fetchTask(URLString) as? TRDownloadTask
         if task != nil {
-            task!.verificationCode = verificationCode
-            task!.verificationType = verificationType
             task!.progressHandler = progressHandler
             task!.successHandler = successHandler
             task!.failureHandler = failureHandler
@@ -316,8 +313,6 @@ extension TRManager {
             task = TRDownloadTask(url,
                                   fileName: fileName,
                                   cache: cache,
-                                  verificationCode: verificationCode,
-                                  verificationType: verificationType,
                                   progressHandler: progressHandler,
                                   successHandler: successHandler,
                                   failureHandler: failureHandler)
@@ -344,8 +339,6 @@ extension TRManager {
     @discardableResult
     public func multiDownload(_ URLStrings: [String],
                               fileNames: [String]? = nil,
-                              verificationCodes: [String]? = nil,
-                              verificationType: TRVerificationType = .md5,
                               progressHandler: TRTaskHandler? = nil,
                               successHandler: TRTaskHandler? = nil,
                               failureHandler: TRTaskHandler? = nil) -> [TRDownloadTask] {
@@ -372,30 +365,23 @@ extension TRManager {
         for url in uniqueUrls {
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
-                task!.verificationType = verificationType
                 task!.progressHandler = progressHandler
                 task!.successHandler = successHandler
                 task!.failureHandler = failureHandler
-                if let index = URLStrings.index(of: url.absoluteString) {
-                    task!.verificationCode = verificationCodes?.safeObjectAtIndex(index)
-                    if let fileName = fileNames?.safeObjectAtIndex(index) {
-                        task!.fileName = fileName
-                    }
+                if let index = URLStrings.index(of: url.absoluteString),
+                    let fileName = fileNames?.safeObjectAtIndex(index) {
+                    task?.fileName = fileName
                 }
             } else {
                 task = TRDownloadTask(url,
                                       fileName: nil,
                                       cache: cache,
-                                      verificationCode: nil,
-                                      verificationType: verificationType,
                                       progressHandler: progressHandler,
                                       successHandler: successHandler,
                                       failureHandler: failureHandler)
-                if let index = URLStrings.index(of: url.absoluteString) {
-                    task?.verificationCode = verificationCodes?.safeObjectAtIndex(index)
-                    if let fileName = fileNames?.safeObjectAtIndex(index) {
+                if let index = URLStrings.index(of: url.absoluteString),
+                    let fileName = fileNames?.safeObjectAtIndex(index) {
                         task?.fileName = fileName
-                    }
                 }
                 tasks.append(task!)
             }
@@ -448,12 +434,15 @@ extension TRManager {
                 task.start()
                 if status != .running {
                     progress.setUserInfoObject(Date().timeIntervalSince1970, forKey: .estimatedTimeRemainingKey)
+                    status = .running
                     TiercelLog("[manager] running, manager.identifier: \(identifier)")
+                    DispatchQueue.main.tr.safeAsync {
+                        self.progressHandler?(self)
+                    }
                 }
-                status = .running
             } else {
                 task.status = .waiting
-                TiercelLog("[manager] task is waiting URLString: \(task.URLString), manager.identifier: \(identifier)")
+                TiercelLog("[downloadTask] waiting, URLString: \(task.URLString), manager.identifier: \(identifier)")
                 DispatchQueue.main.tr.safeAsync {
                     task.progressHandler?(task)
                 }
@@ -462,7 +451,7 @@ extension TRManager {
             task.completed()
             completed()
         case .running:
-            TiercelLog("[manager] task is running URLString: \(task.URLString), manager.identifier: \(identifier)")
+            TiercelLog("[downloadTask] running, URLString: \(task.URLString), manager.identifier: \(identifier)")
         default: break
         }
         cache.storeTasks(tasks)
@@ -772,12 +761,12 @@ extension TRManager {
 
 // MARK: - call back
 extension TRManager {
-    internal func didBecomeInvalidWithError(error: Error?) {
+    internal func didBecomeInvalidWithError(_ error: Error?) {
         createSession { [weak self] in
             guard let strongSelf = self else { return }
-            strongSelf.runningTasks.forEach({ $0.start() })
+            strongSelf.runningTasks.forEach({ strongSelf.start($0.URLString) })
             strongSelf.runningTasks.removeAll()
-            strongSelf.waitingTasks.forEach({ $0.start() })
+            strongSelf.waitingTasks.forEach({ strongSelf.start($0.URLString) })
             strongSelf.waitingTasks.removeAll()
         }
     }

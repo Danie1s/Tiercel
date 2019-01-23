@@ -34,7 +34,7 @@ internal class TRSessionDelegate: NSObject {
 
 extension TRSessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        manager?.didBecomeInvalidWithError(error: error)
+        manager?.didBecomeInvalidWithError(error)
     }
     
     
@@ -48,8 +48,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
             let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
-
+        task.didWriteData(bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
     }
     
     
@@ -58,7 +57,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
             let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        task.didFinishDownloadingTo(location: location)
+        task.didFinishDownloadingTo(location)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -66,7 +65,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let currentURLString = task.currentRequest?.url?.absoluteString,
             let downloadTask = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        downloadTask.didComplete(task: task, error: error)
+        downloadTask.didComplete(task, error: error)
     }
     
     

@@ -27,7 +27,7 @@ class ViewController1: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        TRManager.logLevel = .high
+        TRManager.logLevel = .detailed
     }
 
     private func updateUI(_ task: TRTask) {
@@ -42,16 +42,13 @@ class ViewController1: UIViewController {
     
     @IBAction func start(_ sender: UIButton) {
 
-        downloadManager.download(URLString, verificationCode: "9e2a3650530b563da297c9246acaad5c", verificationType: .md5, progressHandler: { [weak self] (task) in
+        downloadManager.download(URLString, progressHandler: { [weak self] (task) in
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)
             if task.status == .completed {
                 // 下载任务完成了
-            }
-            if task.status == .validated {
-                // 文件正确
-                TiercelLog("文件正确")
+
             }
         }, failureHandler: { [weak self] (task) in
             self?.updateUI(task)
@@ -70,9 +67,11 @@ class ViewController1: UIViewController {
             if task.status == .removed {
                 // 下载任务移除了
             }
-            if task.status == .validated {
-                // 文件不正确
-                TiercelLog("文件不正确")
+        })?.validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { (task) in
+            if task.validation == .correct {
+                TiercelLog("文件正确")
+            } else {
+                TiercelLog("文件错误")
             }
         })
     }

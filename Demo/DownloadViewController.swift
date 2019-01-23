@@ -14,7 +14,7 @@ class DownloadViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager4
+        downloadManager = appDelegate.downloadManager4
 
         setupManager()
 
@@ -39,7 +39,7 @@ extension DownloadViewController {
         let count = downloadManager.tasks.count
         guard count > 0 else { return }
 
-        let index = downloadManager.tasks.count - 1
+        let index = count - 1
         let URLString = downloadURLStrings[index]
         downloadURLStrings.remove(at: index)
         tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)

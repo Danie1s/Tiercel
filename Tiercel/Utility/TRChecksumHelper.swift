@@ -26,7 +26,7 @@
 
 import Foundation
 
-public enum TRVerificationType: Int {
+public enum TRVerificationType : Int {
     case md5
     case sha1
     case sha256
@@ -35,6 +35,10 @@ public enum TRVerificationType: Int {
 
 public class TRChecksumHelper {
     public class func validateFile(_ filePath: String, verificationCode: String, verificationType: TRVerificationType, completion: @escaping (Bool) -> ()) {
+        if verificationCode.isEmpty {
+            completion(false)
+            return
+        }
         DispatchQueue.global().async {
             guard FileManager.default.fileExists(atPath: filePath) else {
                 completion(false)

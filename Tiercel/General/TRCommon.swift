@@ -35,21 +35,19 @@ public enum TRStatus: String {
     case failed
     case removed
     case completed
-    case validated
 
     // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
     case willSuspend
     case willCancel
     case willRemove
-    case willValidate
 }
 
 
 
 
 public enum TRLogLevel {
-    case high
-    case low
+    case detailed
+    case simple
     case none
 }
 
@@ -81,7 +79,7 @@ extension TiercelCompatible {
 public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {
 
     switch TRManager.logLevel {
-    case .high:
+    case .detailed:
         print("")
         print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
@@ -91,7 +89,7 @@ public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #
             "Info    :  \(message)"
         )
         print("")
-    case .low: print(message)
+    case .simple: print(message)
     case .none: break
     }
 }

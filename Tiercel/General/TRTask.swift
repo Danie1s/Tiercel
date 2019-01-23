@@ -39,6 +39,7 @@ public class TRTask: NSObject, NSCoding {
     internal var successHandler: TRTaskHandler?
     internal var failureHandler: TRTaskHandler?
     internal var controlHandler: TRTaskHandler?
+    internal var validateHandler: TRTaskHandler?
 
 
     private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
@@ -55,6 +56,20 @@ public class TRTask: NSObject, NSCoding {
         set {
             return queue.sync {
                 _status = newValue
+            }
+        }
+    }
+    
+    private var _validation: TRValidation = .unkown
+    public var validation: TRValidation {
+        get {
+            return queue.sync {
+                _validation
+            }
+        }
+        set {
+            return queue.sync {
+                _validation = newValue
             }
         }
     }
@@ -158,8 +173,6 @@ public class TRTask: NSObject, NSCoding {
 
     public init(_ url: URL,
                 cache: TRCache,
-                verificationCode: String? = nil,
-                verificationType: TRVerificationType = .md5,
                 progressHandler: TRTaskHandler? = nil,
                 successHandler: TRTaskHandler? = nil,
                 failureHandler: TRTaskHandler? = nil) {
@@ -169,12 +182,9 @@ public class TRTask: NSObject, NSCoding {
         _currentURLString = url.absoluteString
         _fileName = url.tr.fileName
         super.init()
-        self.verificationCode = verificationCode
-        self.verificationType = verificationType
         self.progressHandler = progressHandler
         self.successHandler = successHandler
         self.failureHandler = failureHandler
-
     }
     
     public func encode(with aCoder: NSCoder) {
@@ -188,8 +198,7 @@ public class TRTask: NSObject, NSCoding {
         aCoder.encode(status.rawValue, forKey: "status")
         aCoder.encode(verificationCode, forKey: "verificationCode")
         aCoder.encode(verificationType.rawValue, forKey: "verificationType")
-
-        
+        aCoder.encode(validation.rawValue, forKey: "validation")
     }
     
     public required init?(coder aDecoder: NSCoder) {
@@ -208,8 +217,11 @@ public class TRTask: NSObject, NSCoding {
         
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
         status = TRStatus(rawValue: statusString)!
-        let verificationTypeInt = aDecoder.decodeObject(forKey: "verificationType") as! Int
+        let verificationTypeInt = aDecoder.decodeInteger(forKey: "verificationType")
         verificationType = TRVerificationType(rawValue: verificationTypeInt)!
+        
+        let validationType = aDecoder.decodeInteger(forKey: "validation")
+        validation = TRValidation(rawValue: validationType)!
     }
 
 
@@ -260,5 +272,14 @@ extension TRTask {
     public func failure(_ handler: @escaping TRTaskHandler) -> Self {
         failureHandler = handler
         return self
+    }
+}
+
+
+extension TRTask {
+    public enum TRValidation: Int {
+        case unkown
+        case correct
+        case incorrect
     }
 }

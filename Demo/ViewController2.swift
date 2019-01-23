@@ -14,7 +14,7 @@ class ViewController2: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager2
+        downloadManager = appDelegate.downloadManager2
 
 
         URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg",

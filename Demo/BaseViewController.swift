@@ -44,7 +44,7 @@ class BaseViewController: UIViewController {
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
 
-        TRManager.logLevel = .high
+        TRManager.logLevel = .detailed
     }
 
     func updateUI() {
@@ -198,6 +198,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
 
         task.progress { [weak cell] (task) in
             guard let cell = cell else { return }
+            cell.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
             cell.updateProgress(task: task)
             }
             .success({ [weak cell] (task) in

@@ -15,7 +15,7 @@ class ViewController3: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = (UIApplication.shared.delegate as! AppDelegate).downloadManager3
+        downloadManager = appDelegate.downloadManager3
 
         URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
                       "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
@@ -48,7 +48,6 @@ extension ViewController3 {
             updateUI()
             tableView.reloadData()
         }
-
     }
 
 }
