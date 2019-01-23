@@ -3,7 +3,7 @@
 //  Example
 //
 //  Created by Daniels on 2018/3/20.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2018 Daniels. All rights reserved.
 //
 
 import UIKit
@@ -71,8 +71,8 @@ class BaseViewController: UIViewController {
                 guard let strongSelf = self else { return }
                 strongSelf.updateUI()
 
-                if manager.status == .completed {
-                    // manager 完成了
+                if manager.status == .succeeded {
+                    // manager 成功了
                 }
             }.failure { [weak self] (manager) in
                 guard let strongSelf = self,
@@ -85,7 +85,6 @@ class BaseViewController: UIViewController {
                 if manager.status == .suspended {
                     // manager 暂停了
                 }
-
                 if manager.status == .failed {
                     // manager 失败了
                 }
@@ -204,8 +203,8 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             .success({ [weak cell] (task) in
                 guard let cell = cell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
-                if task.status == .completed {
-                    // 下载任务完成了
+                if task.status == .succeeded {
+                    // 下载任务成功了
                 }
             })
             .failure({ [weak cell] (task) in

@@ -206,8 +206,8 @@
 		E1D8EFA821F6D548004B70C5 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				E1D8EF9421F6B916004B70C5 /* TRChecksumHelper.swift */,
 				E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */,
+				E1D8EF9421F6B916004B70C5 /* TRChecksumHelper.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";

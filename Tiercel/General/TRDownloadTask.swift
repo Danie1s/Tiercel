@@ -3,7 +3,7 @@
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2018 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -152,7 +152,7 @@ public class TRDownloadTask: TRTask {
     }
     
     internal override func cancel(_ handler: TRTaskHandler? = nil) {
-        guard status != .completed else { return }
+        guard status != .succeeded else { return }
         controlHandler = handler
         
         if status == .running {
@@ -191,8 +191,8 @@ public class TRDownloadTask: TRTask {
     }
     
     internal override func completed() {
-        guard status != .completed else { return }
-        status = .completed
+        guard status != .succeeded else { return }
+        status = .succeeded
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
@@ -205,9 +205,16 @@ public class TRDownloadTask: TRTask {
     }
     
 
-    
+
     fileprivate func validateFile() {
-        guard let verificationCode = verificationCode, validation == .unkown else { return }
+        if validation != .unkown {
+            DispatchQueue.main.tr.safeAsync {
+                self.validateHandler?(self)
+            }
+            return
+        }
+
+        guard let verificationCode = verificationCode else { return }
         TRChecksumHelper.validateFile(filePath, verificationCode: verificationCode, verificationType: verificationType) { [weak self] (isCorrect) in
             guard let strongSelf = self else { return }
             strongSelf.validation = isCorrect ? .correct : .incorrect
@@ -231,7 +238,7 @@ extension TRDownloadTask {
         if let manager = manager {
             manager.cache.storeTasks(manager.tasks)
         }
-        if status == .completed {
+        if status == .succeeded {
             validateFile()
         }
         return self
@@ -369,15 +376,19 @@ extension TRDownloadTask {
 
 
 extension Array where Element == TRDownloadTask {
-    public func validateFile(_ verificationCodes: [String], verificationType: TRVerificationType, validateHandler: @escaping TRTaskHandler) {
+    public func validateFile(_ verificationCodes: [String], verificationType: TRVerificationType, validateHandler: @escaping TRTaskHandler) -> [TRDownloadTask] {
         for (index, task) in self.enumerated() {
             task.verificationCode = verificationCodes.safeObjectAtIndex(index)
             task.verificationType = verificationType
             task.validateHandler = validateHandler
-            if task.status == .completed {
+            if let manager = task.manager {
+                manager.cache.storeTasks(manager.tasks)
+            }
+            if task.status == .succeeded {
                 task.validateFile()
             }
         }
+        return self
     }
 }
 

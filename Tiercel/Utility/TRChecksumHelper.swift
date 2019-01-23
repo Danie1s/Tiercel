@@ -3,7 +3,7 @@
 //  Tiercel
 //
 //  Created by Daniels on 2019/1/22.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2019 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,11 +36,13 @@ public enum TRVerificationType : Int {
 public class TRChecksumHelper {
     public class func validateFile(_ filePath: String, verificationCode: String, verificationType: TRVerificationType, completion: @escaping (Bool) -> ()) {
         if verificationCode.isEmpty {
+            TiercelLog("verification code is empty")
             completion(false)
             return
         }
         DispatchQueue.global().async {
             guard FileManager.default.fileExists(atPath: filePath) else {
+                TiercelLog("file does not exist, filePath: \(filePath)")
                 completion(false)
                 return
             }
@@ -62,7 +64,7 @@ public class TRChecksumHelper {
                 let isCorrect = string.lowercased() == verificationCode.lowercased()
                 completion(isCorrect)
             } catch {
-                TiercelLog("read data error: \(error)")
+                TiercelLog("can't read data, error: \(error)")
                 completion(false)
             }
         }

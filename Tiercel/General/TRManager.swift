@@ -3,7 +3,7 @@
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2018 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -146,7 +146,7 @@ public class TRManager {
 
     
     public var completedTasks: [TRTask] {
-        return tasks.filter { $0.status == .completed }
+        return tasks.filter { $0.status == .succeeded }
     }
     
     private let _progress = Progress()
@@ -255,12 +255,12 @@ public class TRManager {
                 return
             }
 
-            let isEnd = strongSelf.tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
+            let isEnd = strongSelf.tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
             if isEnd {
                 let isSuccess = strongSelf.tasks.filter { $0.status == .failed }.isEmpty
                 if isSuccess {
                     strongSelf.isCompleted = true
-                    strongSelf.status = .completed
+                    strongSelf.status = .succeeded
                 } else {
                     strongSelf.status = .failed
                 }
@@ -447,7 +447,7 @@ extension TRManager {
                     task.progressHandler?(task)
                 }
             }
-        case .completed:
+        case .succeeded:
             task.completed()
             completed()
         case .running:
@@ -513,7 +513,7 @@ extension TRManager {
     }
     
     public func totalCancel(_ handler: TRManagerHandler? = nil) {
-        guard status != .completed && status != .canceled else { return }
+        guard status != .succeeded && status != .canceled else { return }
         status = .willCancel
         controlHandler = handler
         tasks.forEach { (task) in
@@ -587,7 +587,7 @@ extension TRManager {
         
         // 处理取消状态
         if status == .willCancel {
-            let isCancel = tasks.filter { $0.status != .completed }.isEmpty
+            let isCancel = tasks.filter { $0.status != .succeeded }.isEmpty
             if isCancel {
                 status = .canceled
                 TiercelLog("[manager] canceled, manager.identifier: \(identifier)")
@@ -602,21 +602,21 @@ extension TRManager {
         
         
         // 处理所有任务结束后的状态
-        let isEnd = tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
-        if isEnd {
-            if isCompleted {
+        let isCompleted = tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
+        if isCompleted {
+            if self.isCompleted {
                 return
             }
-            isCompleted = true
+            self.isCompleted = true
             timeRemaining = 0
             DispatchQueue.main.tr.safeAsync {
                 self.progressHandler?(self)
             }
             
             // 成功或者失败
-            let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
-            if isSuccess {
-                status = .completed
+            let isSucceeded = tasks.filter { $0.status == .failed }.isEmpty
+            if isSucceeded {
+                status = .succeeded
                 TiercelLog("[manager] succeeded, manager.identifier: \(identifier)")
                 DispatchQueue.main.tr.safeAsync {
                     self.successHandler?(self)
@@ -634,7 +634,7 @@ extension TRManager {
         // 处理暂停的状态
         let isSuspended = tasks.reduce(into: true) { (isSuspend, task) in
             if isSuspend {
-                if task.status == .suspended || task.status == .completed || task.status == .failed {
+                if task.status == .suspended || task.status == .succeeded || task.status == .failed {
                     isSuspend = true
                 } else {
                     isSuspend = false

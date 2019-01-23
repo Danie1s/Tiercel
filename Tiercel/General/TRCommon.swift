@@ -3,7 +3,7 @@
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2018 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ public enum TRStatus: String {
     case canceled
     case failed
     case removed
-    case completed
+    case succeeded
 
     // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
     case willSuspend

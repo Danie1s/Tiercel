@@ -163,30 +163,23 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LHD-Al-lEb">
-                                <rect key="frame" x="172" y="321" width="31" height="30"/>
-                                <state key="normal" title="开始"/>
-                                <connections>
-                                    <action selector="start:" destination="hzf-Gg-ctm" eventType="touchUpInside" id="ZnK-dm-JDR"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wLD-6d-l2K">
-                                <rect key="frame" x="172" y="371" width="31" height="30"/>
+                                <rect key="frame" x="172" y="421.5" width="31" height="30"/>
                                 <state key="normal" title="暂停"/>
                                 <connections>
                                     <action selector="suspend:" destination="hzf-Gg-ctm" eventType="touchUpInside" id="9eK-ae-QEw"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mSJ-IS-nau">
-                                <rect key="frame" x="172" y="421" width="31" height="30"/>
+                                <rect key="frame" x="172" y="471.5" width="31" height="30"/>
                                 <state key="normal" title="取消"/>
                                 <connections>
                                     <action selector="cancel:" destination="hzf-Gg-ctm" eventType="touchUpInside" id="Zc2-sy-WyS"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c01-JJ-8FR">
-                                <rect key="frame" x="172" y="471" width="31" height="30"/>
-                                <state key="normal" title="删除"/>
+                                <rect key="frame" x="156.5" y="521.5" width="62" height="30"/>
+                                <state key="normal" title="删除任务"/>
                                 <connections>
                                     <action selector="deleteTask:" destination="hzf-Gg-ctm" eventType="touchUpInside" id="TCE-8s-xm7"/>
                                 </connections>
@@ -198,8 +191,8 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kN5-Ez-WZe">
-                                <rect key="frame" x="156.5" y="521" width="62" height="30"/>
-                                <state key="normal" title="清除文件"/>
+                                <rect key="frame" x="156.5" y="571.5" width="62" height="30"/>
+                                <state key="normal" title="清空缓存"/>
                                 <connections>
                                     <action selector="clearDisk:" destination="hzf-Gg-ctm" eventType="touchUpInside" id="ewl-Cg-f5x"/>
                                 </connections>
@@ -222,17 +215,35 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="文件验证：未知" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kOK-3f-1A2">
+                                <rect key="frame" x="40" y="331" width="295" height="20.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LHD-Al-lEb">
+                                <rect key="frame" x="172" y="371.5" width="31" height="30"/>
+                                <state key="normal" title="开始"/>
+                                <connections>
+                                    <action selector="start:" destination="hzf-Gg-ctm" eventType="touchUpInside" id="ZnK-dm-JDR"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="kOK-3f-1A2" firstAttribute="top" secondItem="3PX-Ns-upn" secondAttribute="bottom" constant="20" id="1Qb-FL-caI"/>
                             <constraint firstItem="hgA-fN-GF4" firstAttribute="trailing" secondItem="ujx-Pv-Mds" secondAttribute="trailing" id="1mg-AO-llt"/>
                             <constraint firstItem="hgA-fN-GF4" firstAttribute="top" secondItem="9gX-3V-RgC" secondAttribute="bottom" constant="20" id="40q-AD-Be8"/>
                             <constraint firstItem="mSJ-IS-nau" firstAttribute="centerX" secondItem="wLD-6d-l2K" secondAttribute="centerX" id="AXX-dS-QYm"/>
                             <constraint firstItem="kN5-Ez-WZe" firstAttribute="top" secondItem="c01-JJ-8FR" secondAttribute="bottom" constant="20" id="JXr-IC-rRf"/>
+                            <constraint firstItem="LHD-Al-lEb" firstAttribute="centerX" secondItem="fEk-Fh-2vy" secondAttribute="centerX" id="JoX-Ds-Ajs"/>
                             <constraint firstItem="kN5-Ez-WZe" firstAttribute="centerX" secondItem="c01-JJ-8FR" secondAttribute="centerX" id="KYd-Yi-4vb"/>
                             <constraint firstItem="3PX-Ns-upn" firstAttribute="top" secondItem="vhb-85-4ul" secondAttribute="bottom" constant="20" id="L4p-vZ-rDV"/>
+                            <constraint firstItem="LHD-Al-lEb" firstAttribute="top" secondItem="kOK-3f-1A2" secondAttribute="bottom" constant="20" id="M5L-7Y-zVg"/>
                             <constraint firstItem="TU1-qf-Vnk" firstAttribute="trailing" secondItem="ujx-Pv-Mds" secondAttribute="trailing" id="MI1-kJ-Aag"/>
+                            <constraint firstItem="kOK-3f-1A2" firstAttribute="leading" secondItem="3PX-Ns-upn" secondAttribute="leading" id="MMk-9A-Prs"/>
                             <constraint firstItem="ujx-Pv-Mds" firstAttribute="centerX" secondItem="fEk-Fh-2vy" secondAttribute="centerX" id="MyS-ss-8Au"/>
+                            <constraint firstItem="kOK-3f-1A2" firstAttribute="trailing" secondItem="3PX-Ns-upn" secondAttribute="trailing" id="NqP-dr-bo6"/>
                             <constraint firstItem="vhb-85-4ul" firstAttribute="top" secondItem="TU1-qf-Vnk" secondAttribute="bottom" constant="20" id="Ovw-In-nKo"/>
                             <constraint firstItem="3PX-Ns-upn" firstAttribute="trailing" secondItem="ujx-Pv-Mds" secondAttribute="trailing" id="PYK-mJ-43w"/>
                             <constraint firstItem="ujx-Pv-Mds" firstAttribute="top" secondItem="FBA-3L-RWo" secondAttribute="bottom" constant="40" id="R1D-uY-Slf"/>
@@ -244,13 +255,11 @@
                             <constraint firstItem="hgA-fN-GF4" firstAttribute="leading" secondItem="ujx-Pv-Mds" secondAttribute="leading" id="cdc-jz-Fk6"/>
                             <constraint firstItem="vhb-85-4ul" firstAttribute="trailing" secondItem="ujx-Pv-Mds" secondAttribute="trailing" id="ePN-el-L3h"/>
                             <constraint firstItem="wLD-6d-l2K" firstAttribute="top" secondItem="LHD-Al-lEb" secondAttribute="bottom" constant="20" id="eXb-Or-7ZR"/>
-                            <constraint firstItem="LHD-Al-lEb" firstAttribute="top" secondItem="3PX-Ns-upn" secondAttribute="bottom" constant="10" id="fYe-h7-g7j"/>
                             <constraint firstAttribute="trailing" secondItem="ujx-Pv-Mds" secondAttribute="trailing" constant="40" id="gRo-6S-9ER"/>
                             <constraint firstItem="c01-JJ-8FR" firstAttribute="top" secondItem="mSJ-IS-nau" secondAttribute="bottom" constant="20" id="geZ-Yr-Dck"/>
                             <constraint firstItem="wLD-6d-l2K" firstAttribute="centerX" secondItem="LHD-Al-lEb" secondAttribute="centerX" id="ial-HH-zlB"/>
                             <constraint firstItem="9gX-3V-RgC" firstAttribute="trailing" secondItem="ujx-Pv-Mds" secondAttribute="trailing" id="j1x-Mb-lJI"/>
                             <constraint firstItem="vhb-85-4ul" firstAttribute="leading" secondItem="ujx-Pv-Mds" secondAttribute="leading" id="jqx-U1-Vke"/>
-                            <constraint firstItem="LHD-Al-lEb" firstAttribute="centerX" secondItem="fEk-Fh-2vy" secondAttribute="centerX" id="oy1-w9-tlY"/>
                             <constraint firstItem="3PX-Ns-upn" firstAttribute="leading" secondItem="ujx-Pv-Mds" secondAttribute="leading" id="pyO-1x-1Ez"/>
                             <constraint firstItem="mSJ-IS-nau" firstAttribute="top" secondItem="wLD-6d-l2K" secondAttribute="bottom" constant="20" id="tFy-Sp-Zld"/>
                             <constraint firstItem="TU1-qf-Vnk" firstAttribute="top" secondItem="hgA-fN-GF4" secondAttribute="bottom" constant="20" id="znE-xC-o1g"/>
@@ -263,6 +272,7 @@
                         <outlet property="speedLabel" destination="9gX-3V-RgC" id="Aet-qd-PBn"/>
                         <outlet property="startDateLabel" destination="vhb-85-4ul" id="Gux-0w-KK3"/>
                         <outlet property="timeRemainingLabel" destination="TU1-qf-Vnk" id="4Ed-jv-rSJ"/>
+                        <outlet property="validationLabel" destination="kOK-3f-1A2" id="H2G-8b-AjR"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cAF-cd-0Nr" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -595,7 +605,7 @@
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NRD-wJ-7mm">
                                         <rect key="frame" x="97" y="116" width="62" height="30"/>
-                                        <state key="normal" title="清除文件"/>
+                                        <state key="normal" title="清空缓存"/>
                                         <connections>
                                             <action selector="clearDisk:" destination="wVe-jT-pWR" eventType="touchUpInside" id="vaS-dV-o9y"/>
                                         </connections>

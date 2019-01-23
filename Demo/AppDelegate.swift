@@ -3,7 +3,7 @@
 //  Example
 //
 //  Created by Daniels on 2018/3/16.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2018 Daniels. All rights reserved.
 //
 
 import UIKit
@@ -25,9 +25,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        print(TRManager.default)
 
+        TRManager.default.configuration.allowsCellularAccess = false
+        print(TRManager.default)
+        
         return true
     }
 
@@ -54,7 +55,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
-        
         let downloadManagers = [TRManager.default, downloadManager2, downloadManager3, downloadManager4]
         downloadManagers.forEach { (manager) in
             if identifier == manager.identifier {

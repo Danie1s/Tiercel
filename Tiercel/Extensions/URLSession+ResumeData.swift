@@ -3,7 +3,7 @@
 //  Tiercel
 //
 //  Created by Daniels on 2019/1/22.
-//  Copyright © 2018年 Daniels. All rights reserved.
+//  Copyright © 2019 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
