@@ -33,6 +33,7 @@ public struct TRConfiguration {
     // 最大并发数
     public var maxConcurrentTasksLimit = Int.max
     
+    // 是否允许蜂窝网络下载
     public var allowsCellularAccess = false
     
     public init() {

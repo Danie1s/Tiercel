@@ -34,6 +34,7 @@ public enum TRVerificationType : Int {
 }
 
 public class TRChecksumHelper {
+    
     public class func validateFile(_ filePath: String, verificationCode: String, verificationType: TRVerificationType, completion: @escaping (Bool) -> ()) {
         if verificationCode.isEmpty {
             TiercelLog("verification code is empty")

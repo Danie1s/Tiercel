@@ -153,7 +153,6 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             let task = downloadManager.fetchTask(URLString)
             else { return cell }
 
-
         // task的闭包引用了cell，所以这里的task要用weak
         cell.tapClosure = { [weak self, weak task] cell in
             guard let strongSelf = self,

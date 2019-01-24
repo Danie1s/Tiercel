@@ -26,7 +26,6 @@ class ViewController1: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        TRManager.logLevel = .detailed
 
         if let task = TRManager.default.tasks.safeObjectAtIndex(0) as? TRDownloadTask {
             updateUI(task)
@@ -68,18 +67,16 @@ class ViewController1: UIViewController {
             }
         }, failureHandler: { [weak self] (task) in
             self?.updateUI(task)
+            
             if task.status == .suspended {
                 // 下载任务暂停了
             }
-            
             if task.status == .failed {
                 // 下载任务失败了
             }
-
             if task.status == .canceled {
                 // 下载任务取消了
             }
-
             if task.status == .removed {
                 // 下载任务移除了
             }

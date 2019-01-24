@@ -317,7 +317,6 @@ extension TRManager {
                                   successHandler: successHandler,
                                   failureHandler: failureHandler)
             tasks.append(task!)
-            cache.storeTasks(tasks)
         }
         start(URLString)
         
@@ -365,9 +364,9 @@ extension TRManager {
         for url in uniqueUrls {
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
-                task!.progressHandler = progressHandler
-                task!.successHandler = successHandler
-                task!.failureHandler = failureHandler
+                task?.progressHandler = progressHandler
+                task?.successHandler = successHandler
+                task?.failureHandler = failureHandler
                 if let index = URLStrings.index(of: url.absoluteString),
                     let fileName = fileNames?.safeObjectAtIndex(index) {
                     task?.fileName = fileName
@@ -387,7 +386,7 @@ extension TRManager {
             }
             temp.append(task!)
         }
-        
+
         temp.forEach { (task) in
             start(task.URLString)
         }
