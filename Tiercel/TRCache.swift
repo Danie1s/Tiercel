@@ -172,8 +172,10 @@ extension TRCache {
             let url = URL(string: info["URLString"] as! String)!
             
             let headers = info["headers"] as? [String: String]
+
+            let fileName = info["fileName"] as? String
             
-            let task = TRDownloadTask(url, headers: headers, fileName: info["fileName"] as? String, cache: self, isCacheInfo: isStoreInfo)
+            let task = TRDownloadTask(url, headers: headers, fileName: fileName, cache: self, isCacheInfo: isStoreInfo)
 
             task.setValuesForKeys(info)
 

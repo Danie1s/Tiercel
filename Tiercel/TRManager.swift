@@ -259,6 +259,7 @@ extension TRManager {
     /// - Parameters:
     ///   - URLString: 需要下载的URLString
     ///   - fileName: 下载文件的文件名，如果传nil，则使用URLString的最后一部分作为文件名
+    ///   - headers: HTTPHeader
     ///   - progressHandler: 当前task的progressHandler
     ///   - successHandler: 当前task的successHandler
     ///   - failureHandler: 当前task的failureHandler
@@ -276,14 +277,20 @@ extension TRManager {
 
         var task = fetchTask(URLString) as? TRDownloadTask
         if task != nil {
-            task!.progressHandler = progressHandler
-            task!.successHandler = successHandler
-            task!.failureHandler = failureHandler
+            task?.progressHandler = progressHandler
+            task?.successHandler = successHandler
+            task?.failureHandler = failureHandler
             if let fileName = fileName {
-                task!.fileName = fileName
+                task?.fileName = fileName
             }
         } else {
-            task = TRDownloadTask(url, headers: headers, fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+            task = TRDownloadTask(url,
+                                  headers: headers,
+                                  fileName: fileName,
+                                  cache: cache,
+                                  progressHandler: progressHandler,
+                                  successHandler: successHandler,
+                                  failureHandler: failureHandler)
             tasks.append(task!)
         }
         start(URLString)
@@ -298,13 +305,14 @@ extension TRManager {
     ///
     /// - Parameters:
     ///   - URLStrings: 需要下载的URLString数组
+    ///   - headers: HTTPHeader
     ///   - fileNames: 下载文件的文件名，如果传nil，则使用URLString的最后一部分作为文件名
     ///   - progressHandler: 每个task的progressHandler
     ///   - successHandler: 每个task的successHandler
     ///   - failureHandler: 每个task的failureHandler
     /// - Returns: 返回URLString数组中有效URString对应的task数组
     @discardableResult
-    public func multiDownload(_ URLStrings: [String], fileNames: [String]? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> [TRDownloadTask] {
+    public func multiDownload(_ URLStrings: [String], headers: [[String: String]]? = nil, fileNames: [String]? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> [TRDownloadTask] {
 
         // 去掉重复, 无效的url
         var uniqueUrls = [URL]()
@@ -341,8 +349,17 @@ extension TRManager {
                 if let fileNames = fileNames, let index = URLStrings.index(of: url.absoluteString) {
                     fileName = fileNames.safeObjectAtIndex(index)
                 }
-
-                task = TRDownloadTask(url, headers: [:], fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+                var header: [String: String]?
+                if let headers = headers, let index = URLStrings.index(of: url.absoluteString) {
+                    header = headers.safeObjectAtIndex(index)
+                }
+                task = TRDownloadTask(url,
+                                      headers: header,
+                                      fileName: fileName,
+                                      cache: cache,
+                                      progressHandler: progressHandler,
+                                      successHandler: successHandler,
+                                      failureHandler: failureHandler)
                 tasks.append(task!)
             }
             temp.append(task!)

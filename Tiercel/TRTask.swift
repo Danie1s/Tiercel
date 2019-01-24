@@ -170,6 +170,7 @@ public class TRTask: NSObject {
         _currentURLString = url.absoluteString
         _fileName = url.lastPathComponent
         super.init()
+        self.headers = headers
         self.progressHandler = progressHandler
         self.successHandler = successHandler
         self.failureHandler = failureHandler
@@ -184,16 +185,12 @@ public class TRTask: NSObject {
 
 
     internal func start() {
-        
-        guard let requestUrl = URL(string: URLString) else { return }
-        
-        var request = URLRequest(url: requestUrl, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
-        
-        headers?.keys.forEach({
-            
-            request.setValue(headers?[$0], forHTTPHeaderField: $0)
-        })
-        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
+        if let headers = headers {
+            for (key, value) in headers {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
         self.request = request
     }
     
