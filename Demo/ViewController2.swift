@@ -16,8 +16,10 @@ class ViewController2: BaseViewController {
 
         downloadManager = TRManager("ViewController2", isStoreInfo: true)
 
-        URLStrings = ["http://api.gfs100.cn/upload/20171219/201712191530562229.mp4",
-                      "http://api.gfs100.cn/upload/20180202/201802021621577474.mp4",
+        URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg",
+                      "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.5.2.dmg",
+                      "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg",
+                      "https://qd.myapp.com/myapp/qqteam/pcqq/QQ9.0.8_2.exe",
                       "http://api.gfs100.cn/upload/20180202/201802021048136875.mp4",
                       "http://api.gfs100.cn/upload/20180122/201801221619073224.mp4",
                       "http://api.gfs100.cn/upload/20180202/201802021048136875.mp4",

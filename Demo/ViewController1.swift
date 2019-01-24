@@ -35,10 +35,10 @@ class ViewController1: UIViewController {
 
     private func updateUI(_ task: TRTask) {
         let per = task.progress.fractionCompleted
-        progressLabel.text = "progress：\(String(format: "%.2f", per * 100))%"
+        progressLabel.text = "progress： \(String(format: "%.2f", per * 100))%"
         progressView.progress = Float(per)
-        speedLabel.text = "speed: \(task.speed.tr.convertSpeedToString())"
-        timeRemainingLabel.text = "剩余时间：\(task.timeRemaining.tr.convertTimeToString())"
+        speedLabel.text = "speed： \(task.speed.tr.convertSpeedToString())"
+        timeRemainingLabel.text = "剩余时间： \(task.timeRemaining.tr.convertTimeToString())"
         startDateLabel.text = "开始时间： \(task.startDate.tr.convertTimeToDateString())"
         endDateLabel.text = "结束时间： \(task.endDate.tr.convertTimeToDateString())"
     }
@@ -49,7 +49,6 @@ class ViewController1: UIViewController {
             self?.updateUI(task)
         }, successHandler: { [weak self] (task) in
             self?.updateUI(task)
-
             if task.status == .completed {
                 // 下载任务完成了
             }
@@ -59,15 +58,12 @@ class ViewController1: UIViewController {
             if task.status == .suspended {
                 // 下载任务暂停了
             }
-            
             if task.status == .failed {
                 // 下载任务失败了
             }
-
             if task.status == .canceled {
                 // 下载任务取消了
             }
-
             if task.status == .removed {
                 // 下载任务移除了
             }

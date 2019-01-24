@@ -282,7 +282,12 @@ extension TRManager {
                 task!.fileName = fileName
             }
         } else {
-            task = TRDownloadTask(url, fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+            task = TRDownloadTask(url,
+                                  fileName: fileName,
+                                  cache: cache,
+                                  progressHandler: progressHandler,
+                                  successHandler: successHandler,
+                                  failureHandler: failureHandler)
             tasks.append(task!)
         }
         start(URLString)
@@ -328,12 +333,12 @@ extension TRManager {
 
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
-                task!.progressHandler = progressHandler
-                task!.successHandler = successHandler
-                task!.failureHandler = failureHandler
+                task?.progressHandler = progressHandler
+                task?.successHandler = successHandler
+                task?.failureHandler = failureHandler
                 if let index = URLStrings.index(of: url.absoluteString),
                     let fileName = fileNames?.safeObjectAtIndex(index)  {
-                    task!.fileName = fileName
+                    task?.fileName = fileName
                 }
             } else {
                 var fileName: String?
@@ -386,7 +391,7 @@ extension TRManager {
                 task.progress.totalUnitCount = length
             }
             task.completed()
-            self.completed()
+            completed()
             return
         }
 
@@ -433,7 +438,6 @@ extension TRManager {
     /// 其他状态的任务都可以被取消，被取消的任务会被移除
     /// 会保留还没有下载完成的缓存文件
     /// 取消正在运行的任务，会触发sessionDelegate的完成回调，是异步的
-    /// 不会触发task的successHandler或者failureHandler
     public func cancel(_ URLString: String) {
         guard let task = fetchTask(URLString) else { return }
         task.cancel()
@@ -444,7 +448,7 @@ extension TRManager {
     /// 所有状态的任务都可以被移除
     /// 会删除还没有下载完成的缓存文件
     /// 可以选择是否删除下载完成的文件
-    /// 不会触发task的successHandler或者failureHandler
+    /// 取消正在运行的任务，会触发sessionDelegate的完成回调，是异步的
     ///
     /// - Parameters:
     ///   - URLString: URLString
@@ -562,20 +566,20 @@ extension TRManager {
 
 
         // 处理所有任务结束后的状态
-        let isEnd = tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
-        if isEnd {
-            if isCompleted {
+        let isCompleted = tasks.filter { $0.status != .completed && $0.status != .failed }.isEmpty
+        if isCompleted {
+            if self.isCompleted {
                 return
             }
-            isCompleted = true
+            self.isCompleted = true
             timeRemaining = 0
             DispatchQueue.main.tr.safeAsync {
                 self.progressHandler?(self)
             }
 
             // 成功或者失败
-            let isSuccess = tasks.filter { $0.status == .failed }.isEmpty
-            if isSuccess {
+            let isSucceeded = tasks.filter { $0.status == .failed }.isEmpty
+            if isSucceeded {
                 TiercelLog("[manager] succeeded, manager.name: \(name)")
                 status = .completed
                 DispatchQueue.main.tr.safeAsync {
@@ -677,7 +681,7 @@ extension TRManager {
         progress.setUserInfoObject(currentData, forKey: .fileCompletedCountKey)
 
         // 把当前的时间保存在estimatedTimeRemainingKey，作为下一次的lastTime
-        progress.setUserInfoObject(time, forKey: .estimatedTimeRemainingKey)
+        progress.setUserInfoObject(currentTime, forKey: .estimatedTimeRemainingKey)
 
     }
 

@@ -74,10 +74,10 @@ class BaseViewController: UIViewController {
                 strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
                 strongSelf.tableView.reloadData()
                 strongSelf.updateUI()
+                
                 if manager.status == .suspended {
                     // manager 暂停了
                 }
-
                 if manager.status == .failed {
                     // manager 失败了
                 }
@@ -181,12 +181,12 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
 
         task.progress { [weak cell] (task) in
             guard let cell = cell else { return }
+            cell.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
             cell.updateProgress(task: task)
             }
             .success({ [weak cell] (task) in
                 guard let cell = cell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
-
                 if task.status == .completed {
                     // 下载任务完成了
                 }
@@ -198,7 +198,6 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
                 if task.status == .suspended {
                     // 下载任务暂停了
                 }
-                
                 if task.status == .failed {
                     // 下载任务失败了
                 }
@@ -218,6 +217,10 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             else { return }
 
         task.progress { _ in }.success({ _ in }).failure({ _ in})
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 
 }

@@ -160,14 +160,7 @@ public class TRDownloadTask: TRTask {
 
 }
 
-// MARK: - KVO
-extension TRDownloadTask {
-    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if let change = change, let newRequest = change[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
-            currentURLString = url.absoluteString
-        }
-    }
-}
+
 
 // MARK: - info
 extension TRDownloadTask {

@@ -167,10 +167,14 @@ extension Tiercel where Base: UIDevice {
 extension DispatchQueue: TiercelCompatible {}
 extension Tiercel where Base: DispatchQueue {
     internal func safeAsync(_ block: @escaping ()->()) {
-        if base === DispatchQueue.main && Thread.isMainThread {
+        if Thread.isMainThread {
             block()
-        } else {
+        } else if base == DispatchQueue.main {
             base.async { block() }
+        } else {
+            DispatchQueue.main.async {
+                block()
+            }
         }
     }
 }
