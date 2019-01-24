@@ -84,24 +84,8 @@ extension Tiercel where Base == Int64 {
     /// - Returns:
     public func convertSpeedToString() -> String {
         
-        let size = convertBytesToString()
-        
-        //TODO: Localize the time unit
-        let time: String
-        if #available(iOS 10.0, *) {
-            let formater = MeasurementFormatter()
-            
-            formater.unitStyle = .short
-            
-            time = formater.string(from: UnitDuration.seconds)
-        } else {
-            time = "s"
-        }
-        
-        
-        let speed = [size, time].joined(separator: "/")
-        
-        return speed
+        let size = convertBytesToString() 
+        return [size, "s"].joined(separator: "/")
     }
 
     /// 返回 00：00格式的字符串
@@ -112,10 +96,8 @@ extension Tiercel where Base == Int64 {
         let formatter = DateComponentsFormatter()
         
         formatter.unitsStyle = .abbreviated
-        
-        let time = formatter.string(from: TimeInterval(base)) ?? ""
-
-        return time
+       
+        return formatter.string(from: TimeInterval(base)) ?? ""
     }
 
     /// 返回字节大小的字符串
@@ -138,8 +120,7 @@ extension Tiercel where Base == Double {
         let time = base
         let date = Date(timeIntervalSince1970: time)
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .medium
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return formatter.string(from: date)
     }
 
