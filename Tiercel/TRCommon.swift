@@ -83,66 +83,63 @@ extension Tiercel where Base == Int64 {
     ///
     /// - Returns:
     public func convertSpeedToString() -> String {
-        let length = Double(base)
-        if length >= pow(1024, 3) {
-            return "\(String(format: "%.2f", length / pow(1024, 3)))GB/s"
-        } else if length >= pow(1024, 2) {
-            return "\(String(format: "%.2f", length / pow(1024, 2)))MB/s"
-        } else if length >= 1024 {
-            return "\(String(format: "%.0f", length / 1024))KB/s"
+        
+        let size = convertBytesToString()
+        
+        //TODO: Localize the time unit
+        let time: String
+        if #available(iOS 10.0, *) {
+            let formater = MeasurementFormatter()
+            
+            formater.unitStyle = .short
+            
+            time = formater.string(from: UnitDuration.seconds)
         } else {
-            return "\(base)B/s"
+            time = "s"
         }
+        
+        
+        let speed = [size, time].joined(separator: "/")
+        
+        return speed
     }
 
     /// 返回 00：00格式的字符串
     ///
     /// - Returns:
     public func convertTimeToString() -> String {
-        let time = Double(base)
-        let date = Date(timeIntervalSinceNow: time)
-        var timeString = ""
-        let calender = Calendar.current
-        let set: Set<Calendar.Component> = [.hour, .minute, .second]
-        let dateCmp = calender.dateComponents(set, from: Date(), to: date)
-        if let hour = dateCmp.hour, let minute = dateCmp.minute, let second = dateCmp.second {
-            if hour > 0 {
-                timeString = timeString + "\(String(format: "%02d", hour)):"
-            }
-            timeString = timeString + "\(String(format: "%02d", minute)):"
-            timeString = timeString + "\(String(format: "%02d", second))"
-        }
-        return timeString
+        
+        let formatter = DateComponentsFormatter()
+        
+        formatter.unitsStyle = .abbreviated
+        
+        let time = formatter.string(from: TimeInterval(base)) ?? ""
+
+        return time
     }
 
     /// 返回字节大小的字符串
     ///
     /// - Returns:
     public func convertBytesToString() -> String {
-        let length = Double(base)
-        if length >= pow(1024, 3) {
-            return "\(String(format: "%.2f", length / pow(1024, 3)))GB"
-        } else if length >= pow(1024, 2) {
-            return "\(String(format: "%.2f", length / pow(1024, 2)))MB"
-        } else if length >= 1024 {
-            return "\(String(format: "%.0f", length / 1024))KB"
-        } else {
-            return "\(base)B"
-        }
+        
+        let size = ByteCountFormatter.string(fromByteCount: base, countStyle: .file)
+        
+        return size
     }
 
 
 }
 
 extension Tiercel where Base == Double {
-    /// 返回 yyyy-MM-dd HH:mm:ss格式的字符串
-    ///
-    /// - Returns:
+
+    /// - Returns: A formated date with `DateFormatter.Style.medium` for both date and time
     public func convertTimeToDateString() -> String {
         let time = base
         let date = Date(timeIntervalSince1970: time)
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .medium
         return formatter.string(from: date)
     }
 
