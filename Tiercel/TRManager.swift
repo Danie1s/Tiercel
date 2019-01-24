@@ -264,7 +264,8 @@ extension TRManager {
     ///   - failureHandler: 当前task的failureHandler
     /// - Returns: 如果URLString有效，则返回对应的task；如果URLString无效，则返回nil
     @discardableResult
-    public func download(_ URLString: String, fileName: String? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> TRDownloadTask? {
+    public func download(_ URLString: String, headers: [String: String]? = nil, fileName: String? = nil, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) -> TRDownloadTask? {
+        status = .waiting
 
         guard let url = URL(string: URLString) else {
             TiercelLog("[manager] URLString错误：\(URLString), manager.name: \(name)")
@@ -282,12 +283,7 @@ extension TRManager {
                 task!.fileName = fileName
             }
         } else {
-            task = TRDownloadTask(url,
-                                  fileName: fileName,
-                                  cache: cache,
-                                  progressHandler: progressHandler,
-                                  successHandler: successHandler,
-                                  failureHandler: failureHandler)
+            task = TRDownloadTask(url, headers: headers, fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
             tasks.append(task!)
         }
         start(URLString)
@@ -346,7 +342,7 @@ extension TRManager {
                     fileName = fileNames.safeObjectAtIndex(index)
                 }
 
-                task = TRDownloadTask(url, fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+                task = TRDownloadTask(url, headers: [:], fileName: fileName, cache: cache, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
                 tasks.append(task!)
             }
             temp.append(task!)

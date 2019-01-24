@@ -35,6 +35,8 @@ public class TRTask: NSObject {
     internal var progressHandler: TRTaskHandler?
     internal var successHandler: TRTaskHandler?
     internal var failureHandler: TRTaskHandler?
+    
+    internal var headers: [String: String]?
 
     private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
 
@@ -156,6 +158,7 @@ public class TRTask: NSObject {
 
     
     public init(_ url: URL,
+                headers: [String: String]? = nil,
                 cache: TRCache,
                 isCacheInfo: Bool = false,
                 progressHandler: TRTaskHandler? = nil,
@@ -181,7 +184,17 @@ public class TRTask: NSObject {
 
 
     internal func start() {
-        self.request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
+        
+        guard let requestUrl = URL(string: URLString) else { return }
+        
+        var request = URLRequest(url: requestUrl, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
+        
+        headers?.keys.forEach({
+            
+            request.setValue(headers?[$0], forHTTPHeaderField: $0)
+        })
+        
+        self.request = request
     }
     
 

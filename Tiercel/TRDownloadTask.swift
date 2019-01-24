@@ -31,24 +31,15 @@ public class TRDownloadTask: TRTask {
     private var task: URLSessionDataTask?
     
     private var outputStream: OutputStream?
+//    public var destination: String = ""
 
-    public init(_ url: URL,
-                fileName: String? = nil,
-                cache: TRCache,
-                isCacheInfo: Bool = false,
-                progressHandler: TRTaskHandler? = nil,
-                successHandler: TRTaskHandler? = nil,
-                failureHandler: TRTaskHandler? = nil) {
+    public init(_ url: URL, headers: [String: String]?, fileName: String? = nil, cache: TRCache, isCacheInfo: Bool = false, progressHandler: TRTaskHandler? = nil, successHandler: TRTaskHandler? = nil, failureHandler: TRTaskHandler? = nil) {
 
-        super.init(url,
-                   cache: cache,
-                   isCacheInfo: isCacheInfo,
-                   progressHandler: progressHandler,
-                   successHandler: successHandler,
-                   failureHandler: failureHandler)
-        if let fileName = fileName,
-            !fileName.isEmpty {
-            self.fileName = fileName
+        super.init(url, headers: headers, cache: cache, isCacheInfo: isCacheInfo, progressHandler: progressHandler, successHandler: successHandler, failureHandler: failureHandler)
+        if let fileName = fileName {
+            if !fileName.isEmpty {
+                self.fileName = fileName
+            }
         }
         cache.storeTaskInfo(self)
     }

@@ -168,8 +168,12 @@ extension TRCache {
     internal func retrieveTasks() -> [TRTask] {
         guard let taskInfoArray = retrieveTaskInfos() else { return [TRTask]() }
         return taskInfoArray.map { (info) -> TRDownloadTask in
+            
             let url = URL(string: info["URLString"] as! String)!
-            let task = TRDownloadTask(url, fileName: info["fileName"] as? String, cache: self, isCacheInfo: isStoreInfo)
+            
+            let headers = info["headers"] as? [String: String]
+            
+            let task = TRDownloadTask(url, headers: headers, fileName: info["fileName"] as? String, cache: self, isCacheInfo: isStoreInfo)
 
             task.setValuesForKeys(info)
 
@@ -217,7 +221,8 @@ extension TRCache {
     internal func storeTaskInfo(_ task: TRDownloadTask) {
         ioQueue.async {
             guard self.isStoreInfo else { return }
-            let info: [String: Any] = ["fileName": task.fileName,
+            let info: [String : Any] = ["fileName": task.fileName,
+                                        "headers": task.headers ?? [:],
                                         "startDate": task.startDate,
                                         "endDate": task.endDate,
                                         "totalBytes": task.progress.totalUnitCount,
