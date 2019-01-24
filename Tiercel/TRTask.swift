@@ -78,9 +78,7 @@ public class TRTask: NSObject {
     }
     
     public var downloadedFileURL: URL? {
-        return queue.sync {
-            cache.fileURL(fileName: fileName)
-        }
+        return cache.fileURL(fileName: fileName)
     }
 
     public internal(set) var progress: Progress = Progress()
