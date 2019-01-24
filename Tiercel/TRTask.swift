@@ -71,16 +71,6 @@ public class TRTask: NSObject {
         }
     }
     
-    public var isDownloaded: Bool {
-        return queue.sync {
-            status == .completed
-        }
-    }
-    
-    public var downloadedFileURL: URL? {
-        return cache.fileURL(fileName: fileName)
-    }
-
     public internal(set) var progress: Progress = Progress()
 
 
