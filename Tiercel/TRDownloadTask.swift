@@ -31,6 +31,10 @@ public class TRDownloadTask: TRTask {
     private var task: URLSessionDataTask?
     
     private var outputStream: OutputStream?
+    
+    public var filePath: String {
+        return cache.filePtah(fileName: fileName)!
+    }
 
     public init(_ url: URL,
                 headers: [String: String]? = nil,

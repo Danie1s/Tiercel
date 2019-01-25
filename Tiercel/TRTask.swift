@@ -149,9 +149,7 @@ public class TRTask: NSObject {
         }
     }
 
-    public var filePath: String {
-        return cache.filePtah(fileName: fileName)!
-    }
+
 
     public internal(set) var error: Error?
 

@@ -1,7 +1,6 @@
 <div align=center>
 <img src="https://github.com/Danie1s/Tiercel/blob/master/Images/logo.png"/>
 </div>
-
 [![Version](https://img.shields.io/cocoapods/v/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Platform](https://img.shields.io/cocoapods/p/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Language](https://img.shields.io/badge/language-swift-red.svg?style=flat)]()
@@ -16,12 +15,19 @@ Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的�
 - [Installation](#installation)
 - [Example](#example)
 - [Usage](#usage)
-  - [最简单的用法](#最简单的用法)
+  - [基本用法](#基本用法)
   - [TRManager](#trmanager)
-  - [TRCache](#trcache)
   - [TRDownloadTask](#trdownloadtask)
-  - [后台下载](#后台下载)
+  - [TRCache](#trcache)
 - [License](#license)
+
+
+
+## WARNING:
+
+这是Tiercel 1版本的分支，下载实现基于`URLSessionDataTask`，不支持后台下载，已经不再更新，如果需要后台下载和更强大的功能，请使用`master`的最新版本
+
+
 
 ## Features:
 
@@ -61,7 +67,7 @@ platform :ios, '8.0'
 use_frameworks!
 
 target '<Your Target Name>' do
-    pod 'Tiercel'
+    pod 'Tiercel', :git => 'https://github.com/Danie1s/Tiercel.git', :branch => 'dataTask'
 end
 ```
 
@@ -169,7 +175,7 @@ downloadManager.totalRemove(completely: false)
 
 ### TRManager
 
-TRManager是下载任务的管理者，管理当前模块所有下载任务，要使用Tiercel进行下载，必须要先创建TRManager实例。Tiercel没有设计成单例模式，如果需要多个下载模块，或者需要自定义TRManager，可以手动创建TRManager实例。
+TRManager是下载任务的管理者，管理当前模块所有下载任务，要使用Tiercel进行下载，必须要先创建TRManager实例。Tiercel没有设计成单例模式，如果需要多个下载模块，可以创建多个不同的TRManager实例。
 
 ```swift
 ///  初始化方法
@@ -258,7 +264,7 @@ TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel�
 主要属性
 
 ```swift
-// 保存到沙盒的下载文件的文件名，如果在下载的时候没有设置，则默认使用url的最后一部分
+// 保存到沙盒的下载文件的文件名，如果在创建的时候没有设置，则默认使用url的最后一部分
 public internal(set) var fileName: String
 // 下载任务对应的URLString
 public var URLString: String
@@ -291,7 +297,7 @@ public var filePath: String
 
 ### TRCache
 
-TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。同样地，TRCache没有设计成单例模式，TRCache实例一般作为TRManager实例的属性来使用，如果需要跨控制器使用，那么只需要创建跟TRManager实例同样名字的TRCache实例即可操作对应模块的缓存信息和文件。
+TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。TRCache实例一般作为TRManager实例的属性来使用，如果需要单独使用TRCache，那么只需要创建跟TRManager实例同样名字的TRCache实例即可操作对应模块的缓存信息和文件。Tiercel内置一个全局的`TRCache.default`单例，如果创建TRManager实例时`name`为`nil`，则对应的TRCache为`TRCache.default`。
 
 ```swift
 /// 初始化方法
@@ -323,14 +329,6 @@ public let downloadFilePath: String
 - 移除跟下载任务相关的文件
 - 保存跟下载任务相关的文件
 - 读取下载任务相关的文件，获得下载任务相关的信息
-
-
-
-###  后台下载
-
-~~如果需要开启后台下载，只需要在项目的info.plist中添加Required background modes -> App downloads content from the network~~
-
-目前正在寻找解决办法
 
 
 

@@ -195,8 +195,8 @@ public class TRManager {
     ///   - MaximumRunning: 下载的最大并发数
     ///   - isStoreInfo: 是否把下载任务的相关信息持久化到沙盒，如果是，则初始化完成后自动恢复上次的任务
     public init(_ name: String? = nil, MaximumRunning: Int? = nil, isStoreInfo: Bool = false) {
-        if name != nil {
-            cache = TRCache(name!)
+        if let name = name {
+            cache = TRCache(name)
         } else {
             cache = TRCache.default
         }

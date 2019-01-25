@@ -101,10 +101,8 @@ extension Tiercel where Base == Int64 {
     ///
     /// - Returns:
     public func convertBytesToString() -> String {
-        
-        let size = ByteCountFormatter.string(fromByteCount: base, countStyle: .file)
-        
-        return size
+                
+        return ByteCountFormatter.string(fromByteCount: base, countStyle: .file)
     }
 }
 
