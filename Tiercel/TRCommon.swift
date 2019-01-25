@@ -92,7 +92,7 @@ extension Tiercel where Base == Int64 {
         
         let formatter = DateComponentsFormatter()
         
-        formatter.unitsStyle = .abbreviated
+        formatter.unitsStyle = .positional
        
         return formatter.string(from: TimeInterval(base)) ?? ""
     }
