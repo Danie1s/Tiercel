@@ -12,6 +12,11 @@
 Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的特点就是拥有强大的任务管理功能和可以直接获取下载速度等常见的下载信息，只要加上一些简单的UI，就可以实现一个下载类APP的大部分功能。
 
 
+## WARNING:
+
+这是Tiercel 1版本的分支，下载实现基于`URLSessionDataTask`，不支持后台下载，已经不再更新，如果需要后台下载和更强大的功能，请使用`master`的最新版本
+
+
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -25,9 +30,7 @@ Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的�
 
 
 
-## WARNING:
 
-这是Tiercel 1版本的分支，下载实现基于`URLSessionDataTask`，不支持后台下载，已经不再更新，如果需要后台下载和更强大的功能，请使用`master`的最新版本
 
 
 
