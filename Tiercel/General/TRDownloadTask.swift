@@ -37,7 +37,9 @@ public class TRDownloadTask: TRTask {
     public var filePath: String {
         return cache.filePtah(fileName: fileName)!
     }
-    
+
+    public var pathExtension: String?
+
     internal var tmpFileURL: URL?
     
     internal var tmpFileName: String?
@@ -60,6 +62,9 @@ public class TRDownloadTask: TRTask {
         if let fileName = fileName,
             !fileName.isEmpty {
             self.fileName = fileName
+        }
+        if !url.pathExtension.isEmpty {
+            pathExtension = url.pathExtension
         }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
@@ -227,7 +232,9 @@ public class TRDownloadTask: TRTask {
 // MARK: - closure
 extension TRDownloadTask {
     @discardableResult
-    public func validateFile(_ verificationCode: String, verificationType: TRVerificationType, validateHandler: @escaping TRTaskHandler) -> TRDownloadTask {
+    public func validateFile(verificationCode: String,
+                             verificationType: TRVerificationType,
+                             validateHandler: @escaping TRTaskHandler) -> TRDownloadTask {
         self.verificationCode = verificationCode
         self.verificationType = verificationType
         self.validateHandler = validateHandler
@@ -283,7 +290,7 @@ extension TRDownloadTask {
 
 // MARK: - download callback
 extension TRDownloadTask {
-    internal func didWriteData(_ bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+    internal func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
         manager?.updateSpeedAndTimeRemaining()
@@ -297,13 +304,13 @@ extension TRDownloadTask {
     }
     
     
-    internal func didFinishDownloadingTo(_ location: URL) {
+    internal func didFinishDownloadingTo(location: URL) {
         self.tmpFileURL = location
         cache.storeFile(self)
         cache.removeTmpFile(self)
     }
     
-    internal func didComplete(_ task: URLSessionTask, error: Error?) {
+    internal func didComplete(task: URLSessionTask, error: Error?) {
         if TRManager.isControlNetworkActivityIndicator {
             DispatchQueue.main.tr.safeAsync {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -313,7 +320,10 @@ extension TRDownloadTask {
         session = nil
         progress.totalUnitCount = task.countOfBytesExpectedToReceive
         progress.completedUnitCount = task.countOfBytesReceived
-        
+        if let pathExtension = task.response?.url?.pathExtension, !pathExtension.isEmpty {
+            self.pathExtension = pathExtension
+        }
+
         if let error = error {
             self.error = error
         
@@ -372,7 +382,9 @@ extension TRDownloadTask {
 
 
 extension Array where Element == TRDownloadTask {
-    public func validateFile(_ verificationCodes: [String], verificationType: TRVerificationType, validateHandler: @escaping TRTaskHandler) -> [TRDownloadTask] {
+    public func validateFile(verificationCodes: [String],
+                             verificationType: TRVerificationType,
+                             validateHandler: @escaping TRTaskHandler) -> [TRDownloadTask] {
         for (index, task) in self.enumerated() {
             task.verificationCode = verificationCodes.safeObjectAtIndex(index)
             task.verificationType = verificationType

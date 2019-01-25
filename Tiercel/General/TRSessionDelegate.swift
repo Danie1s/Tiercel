@@ -47,8 +47,8 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
         guard let manager = manager,
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
             let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
-            else { return  }
-        task.didWriteData(bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
+            else { return }
+        task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
     }
     
     
@@ -57,7 +57,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
             let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        task.didFinishDownloadingTo(location)
+        task.didFinishDownloadingTo(location: location)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -65,7 +65,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
             let currentURLString = task.currentRequest?.url?.absoluteString,
             let downloadTask = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
             else { return  }
-        downloadTask.didComplete(task, error: error)
+        downloadTask.didComplete(task: task, error: error)
     }
     
     

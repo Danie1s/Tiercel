@@ -79,7 +79,7 @@ class ViewController1: UIViewController {
             if task.status == .removed {
                 // 下载任务移除了
             }
-        }).validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { [weak self] (task) in
+        }).validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { [weak self] (task) in
             self?.updateUI(task)
             if task.validation == .correct {
                 TiercelLog("文件正确")

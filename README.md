@@ -237,12 +237,14 @@ Tiercel提供了文件校验功能，可以根据需要添加，校验结果在�
 // 回调闭包在主线程运行
 let task = TRManager.default.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
 
-task?.validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { (task) in
-    if task.validation == .correct {
-        // 文件正确
-    } else {
-        // 文件错误
-    }
+task?.validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c",
+                   verificationType: .md5,
+                   validateHandler: { (task) in
+                    if task.validation == .correct {
+                        // 文件正确
+                    } else {
+                        // 文件错误
+                    }
 })
 ```
 
@@ -256,7 +258,10 @@ TRChecksumHelper是文件校验的工具类，可以直接使用它对已经存�
 ///   - verificationCode: 文件的Hash值
 ///   - verificationType: Hash类型
 ///   - completion: 完成回调
-public class func validateFile(_ filePath: String, verificationCode: String, verificationType: TRVerificationType, completion: @escaping (Bool) -> ()) {
+public class func validateFile(_ filePath: String, 
+                               verificationCode: String, 
+                               verificationType: TRVerificationType, 
+                               completion: @escaping (Bool) -> ()) {
     
 }
 ```
@@ -399,6 +404,8 @@ public var speed: Int64 = 0
 public var timeRemaining: Int64 = 0
 // 下载文件路径
 public var filePath: String
+// 下载文件的扩展名
+public var pathExtension: String?
 ```
 
 对下载任务操作，必须通过TRManager实例进行，不能用TRDownloadTask实例直接操作

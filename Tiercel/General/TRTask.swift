@@ -26,6 +26,15 @@
 
 import Foundation
 
+extension TRTask {
+    public enum TRValidation: Int {
+        case unkown
+        case correct
+        case incorrect
+    }
+}
+
+
 public class TRTask: NSObject, NSCoding {
 
     internal weak var manager: TRManager?
@@ -281,11 +290,24 @@ extension TRTask {
     }
 }
 
+extension Array where Element == TRTask {
+    @discardableResult
+    public func progress(_ handler: @escaping TRTaskHandler) -> [TRTask] {
+        self.forEach { $0.progress(handler) }
+        return self
+    }
 
-extension TRTask {
-    public enum TRValidation: Int {
-        case unkown
-        case correct
-        case incorrect
+    @discardableResult
+    public func success(_ handler: @escaping TRTaskHandler) -> [TRTask] {
+        self.forEach { $0.success(handler) }
+        return self
+    }
+
+    @discardableResult
+    public func failure(_ handler: @escaping TRTaskHandler) -> [TRTask] {
+        self.forEach { $0.failure(handler) }
+        return self
     }
 }
+
+
