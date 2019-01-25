@@ -10,7 +10,6 @@
 
 Tiercel是一个简单易用且功能丰富的纯Swift下载框架，支持原生级别后台下载，拥有强大的任务管理功能，满足下载类APP的大部分需求。
 
-- [Tiercel 2](#tiercel 2)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
