@@ -20,7 +20,7 @@ Tiercel是一个简单易用且功能丰富的纯Swift下载框架，支持原�
   - [后台下载](#后台下载)
   - [文件校验](#文件校验)
   - [TRManager](#trmanager)
-  - [TRConfiguration](#TRConfiguration)
+  - [TRConfiguration](#trconfiguration)
   - [TRDownloadTask](#trdownloadtask)
   - [TRCache](#trcache)
 - [License](#license)
@@ -120,7 +120,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
     // 如果有使用内置全局的default单例，必须在此方法内调用一次，否则不会在App启动的时候初始化
     
     // 在这里进行初始化的配置，也可以在任何地方，随时进行配置
-   	TRManager.default.configuration.allowsCellularAccess = true
+    TRManager.default.configuration.allowsCellularAccess = true
     
     return true
 }
