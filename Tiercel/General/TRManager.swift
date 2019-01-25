@@ -58,7 +58,6 @@ public class TRManager {
                     shouldCreatSession = true
                     session.invalidateAndCancel()
                 }
-
             }
         }
     }
@@ -289,10 +288,8 @@ extension TRManager {
     /// - Returns: 如果URLString有效，则返回对应的task；如果URLString无效，则返回nil
     @discardableResult
     public func download(_ URLString: String,
-                         fileName: String? = nil,
-                         progressHandler: TRTaskHandler? = nil,
-                         successHandler: TRTaskHandler? = nil,
-                         failureHandler: TRTaskHandler? = nil) -> TRDownloadTask? {
+                         headers: [String: String]? = nil,
+                         fileName: String? = nil) -> TRDownloadTask? {
         
         guard let url = URL(string: URLString) else {
             TiercelLog("[manager] URLString错误：\(URLString), manager.identifier: \(identifier)")
@@ -303,19 +300,15 @@ extension TRManager {
         
         var task = fetchTask(URLString) as? TRDownloadTask
         if task != nil {
-            task!.progressHandler = progressHandler
-            task!.successHandler = successHandler
-            task!.failureHandler = failureHandler
+            task?.headers = headers
             if let fileName = fileName {
-                task!.fileName = fileName
+                task?.fileName = fileName
             }
         } else {
             task = TRDownloadTask(url,
+                                  headers: headers,
                                   fileName: fileName,
-                                  cache: cache,
-                                  progressHandler: progressHandler,
-                                  successHandler: successHandler,
-                                  failureHandler: failureHandler)
+                                  cache: cache)
             tasks.append(task!)
         }
         start(URLString)
@@ -337,10 +330,8 @@ extension TRManager {
     /// - Returns: 返回URLString数组中有效URString对应的task数组
     @discardableResult
     public func multiDownload(_ URLStrings: [String],
-                              fileNames: [String]? = nil,
-                              progressHandler: TRTaskHandler? = nil,
-                              successHandler: TRTaskHandler? = nil,
-                              failureHandler: TRTaskHandler? = nil) -> [TRDownloadTask] {
+                              headers: [[String: String]]? = nil,
+                              fileNames: [String]? = nil) -> [TRDownloadTask] {
         
         // 去掉重复, 无效的url
         var uniqueUrls = [URL]()
@@ -364,24 +355,23 @@ extension TRManager {
         for url in uniqueUrls {
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
-                task?.progressHandler = progressHandler
-                task?.successHandler = successHandler
-                task?.failureHandler = failureHandler
-                if let index = URLStrings.index(of: url.absoluteString),
-                    let fileName = fileNames?.safeObjectAtIndex(index) {
-                    task?.fileName = fileName
+                if let index = URLStrings.index(of: url.absoluteString) {
+                    task?.headers = headers?.safeObjectAtIndex(index)
+                    if let fileName = fileNames?.safeObjectAtIndex(index) {
+                        task?.fileName = fileName
+                    }
                 }
             } else {
-                task = TRDownloadTask(url,
-                                      fileName: nil,
-                                      cache: cache,
-                                      progressHandler: progressHandler,
-                                      successHandler: successHandler,
-                                      failureHandler: failureHandler)
-                if let index = URLStrings.index(of: url.absoluteString),
-                    let fileName = fileNames?.safeObjectAtIndex(index) {
-                        task?.fileName = fileName
+                var fileName: String?
+                var header: [String: String]?
+                if let index = URLStrings.index(of: url.absoluteString) {
+                    fileName = fileNames?.safeObjectAtIndex(index)
+                    header = headers?.safeObjectAtIndex(index)
                 }
+                task = TRDownloadTask(url,
+                                      headers: header,
+                                      fileName: fileName,
+                                      cache: cache)
                 tasks.append(task!)
             }
             temp.append(task!)
@@ -390,7 +380,6 @@ extension TRManager {
         temp.forEach { (task) in
             start(task.URLString)
         }
-
         return temp
     }
 }
@@ -747,12 +736,25 @@ extension TRManager {
     @discardableResult
     public func success(_ handler: @escaping TRManagerHandler) -> Self {
         successHandler = handler
+        if status == .succeeded {
+            DispatchQueue.main.tr.safeAsync {
+                self.successHandler?(self)
+            }
+        }
         return self
     }
     
     @discardableResult
     public func failure(_ handler: @escaping TRManagerHandler) -> Self {
         failureHandler = handler
+        if status == .suspended ||
+            status == .canceled ||
+            status == .removed ||
+            status == .failed  {
+            DispatchQueue.main.tr.safeAsync {
+                self.failureHandler?(self)
+            }
+        }
         return self
     }
 }

@@ -43,8 +43,6 @@ public enum TRStatus: String {
 }
 
 
-
-
 public enum TRLogLevel {
     case detailed
     case simple

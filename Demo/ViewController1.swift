@@ -56,16 +56,15 @@ class ViewController1: UIViewController {
     }
     
     @IBAction func start(_ sender: UIButton) {
-
-        TRManager.default.download(URLString, progressHandler: { [weak self] (task) in
+        TRManager.default.download(URLString)?.progress({ [weak self] (task) in
             self?.updateUI(task)
-        }, successHandler: { [weak self] (task) in
+        }).success({ [weak self] (task) in
             self?.updateUI(task)
             if task.status == .succeeded {
                 // 下载任务成功了
-
+                
             }
-        }, failureHandler: { [weak self] (task) in
+        }).failure({ [weak self] (task) in
             self?.updateUI(task)
             
             if task.status == .suspended {
@@ -80,7 +79,7 @@ class ViewController1: UIViewController {
             if task.status == .removed {
                 // 下载任务移除了
             }
-        })?.validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { [weak self] (task) in
+        }).validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { [weak self] (task) in
             self?.updateUI(task)
             if task.validation == .correct {
                 TiercelLog("文件正确")

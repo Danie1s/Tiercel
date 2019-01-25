@@ -33,52 +33,26 @@ extension Tiercel where Base == Int64 {
     ///
     /// - Returns:
     public func convertSpeedToString() -> String {
-        let length = Double(base)
-        if length >= pow(1024, 3) {
-            return "\(String(format: "%.2f", length / pow(1024, 3)))GB/s"
-        } else if length >= pow(1024, 2) {
-            return "\(String(format: "%.2f", length / pow(1024, 2)))MB/s"
-        } else if length >= 1024 {
-            return "\(String(format: "%.0f", length / 1024))KB/s"
-        } else {
-            return "\(base)B/s"
-        }
+        let size = convertBytesToString()
+        return [size, "s"].joined(separator: "/")
     }
     
     /// 返回 00：00格式的字符串
     ///
     /// - Returns:
     public func convertTimeToString() -> String {
-        let time = Double(base)
-        let date = Date(timeIntervalSinceNow: time)
-        var timeString = ""
-        let calender = Calendar.current
-        let set: Set<Calendar.Component> = [.hour, .minute, .second]
-        let dateCmp = calender.dateComponents(set, from: Date(), to: date)
-        if let hour = dateCmp.hour, let minute = dateCmp.minute, let second = dateCmp.second {
-            if hour > 0 {
-                timeString = timeString + "\(String(format: "%02d", hour)):"
-            }
-            timeString = timeString + "\(String(format: "%02d", minute)):"
-            timeString = timeString + "\(String(format: "%02d", second))"
-        }
-        return timeString
+        let formatter = DateComponentsFormatter()
+        
+        formatter.unitsStyle = .positional
+        
+        return formatter.string(from: TimeInterval(base)) ?? ""
     }
     
     /// 返回字节大小的字符串
     ///
     /// - Returns:
     public func convertBytesToString() -> String {
-        let length = Double(base)
-        if length >= pow(1024, 3) {
-            return "\(String(format: "%.2f", length / pow(1024, 3)))GB"
-        } else if length >= pow(1024, 2) {
-            return "\(String(format: "%.2f", length / pow(1024, 2)))MB"
-        } else if length >= 1024 {
-            return "\(String(format: "%.0f", length / 1024))KB"
-        } else {
-            return "\(base)B"
-        }
+        return ByteCountFormatter.string(fromByteCount: base, countStyle: .file)
     }
     
     

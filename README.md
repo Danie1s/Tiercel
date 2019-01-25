@@ -8,9 +8,9 @@
 [![Support](https://img.shields.io/badge/support-iOS%208%2B%20-brightgreen.svg?style=flat)](https://www.apple.com/nl/ios/)
 [![License](https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 
-
 Tiercel是一个简单易用且功能丰富的纯Swift下载框架，支持原生级别后台下载，拥有强大的任务管理功能，满足下载类APP的大部分需求。
 
+- [Tiercel 2](#tiercel 2)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -109,7 +109,7 @@ To run the example project, clone the repo, and run `Tiercel.xcodeproj` .
 
 ### 配置
 
-Tiercel内置一个全局的`default`单例，因为支持原生后台下载，所以需要在`AppDelegate` 文件里配置
+Tiercel内置一个全局的`TRManager.default`单例，因为支持原生后台下载，所以需要在`AppDelegate` 文件里配置
 
 以下为内置的`default`单例配置方法，如果需要使用多个下载模块，或者需要自定义`TRManager`，可参照`Demo`
 
@@ -119,7 +119,6 @@ Tiercel内置一个全局的`default`单例，因为支持原生后台下载，�
 func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
     // 如果有使用内置全局的default单例，必须在此方法内调用一次，否则不会在App启动的时候初始化
-    print(TRManager.default)
     
     // 在这里进行初始化的配置，也可以在任何地方，随时进行配置
    	TRManager.default.configuration.allowsCellularAccess = true
@@ -154,8 +153,6 @@ let tasks = TRManager.default.multiDownload(URLStrings)
 如果需要设置回调
 
 ```swift
-// 可以在创建下载任务的时候设置
-
 // 回调闭包的参数是TRDownloadTask实例，可以得到所有相关的信息
 // 回调闭包都是在主线程运行
 // progress 闭包：如果任务正在下载，就会触发
@@ -165,28 +162,16 @@ let tasks = TRManager.default.multiDownload(URLStrings)
 //    2. 任务下载失败，这时候task.status == .failed
 //    3. 取消任务，这时候task.status == .canceled
 //    4. 移除任务，这时候task.status == .removed
-TRManager.default.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4", fileName: "视频.mp4", progressHandler: { (task) in
+let task = TRManager.default.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
+
+task?.progress({ (task) in
     let progress = task.progress.fractionCompleted
     print("下载中, 进度：\(progress)")
-}, successHandler: { (task) in
-    print("下载成功")
-}) { (task) in
+}).success({ (task) in
+    print("下载完成")
+}).failure({ (task) in
     print("下载失败")
-}
-
-// 也可以拿到下载任务后，再对它进行设置
-let task = TRManager.default.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"）
-                                      
-task.progress { (task) in
-     let progress = task.progress.fractionCompleted
-     print("下载中, 进度：\(progress)")
-    }
-    .success({ (task) in
-      	print("下载完成")
-    })
-    .failure({  (task) in
-		print("下载失败")
-    })
+})
 ```
 
 下载任务的管理和操作。**在Tiercel中，URLString是下载任务的唯一标识，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。**
@@ -232,7 +217,6 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
     if TRManager.default.identifier == identifier {
         TRManager.default.completionHandler = completionHandler
     }
-
 }
 ```
 
@@ -251,26 +235,16 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
 Tiercel提供了文件校验功能，可以根据需要添加，校验结果在回调的`task.validation`里
 
 ```swift
-// 直接在创建下载任务的时候添加文件校验
 // 回调闭包在主线程运行
-TRManager.default.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")?
-    .validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { (task) in
-        if task.validation == .correct {
-            // 文件正确
-        } else {
-            // 文件错误
-        }
-    })
-
-// 也可以拿到下载任务后，再添加文件校验
 let task = TRManager.default.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
-task.validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { (task) in
-        if task.validation == .correct {
-            // 文件正确
-        } else {
-            // 文件错误
-        }
-    })
+
+task?.validateFile("9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { (task) in
+    if task.validation == .correct {
+        // 文件正确
+    } else {
+        // 文件错误
+    }
+})
 ```
 
 TRChecksumHelper是文件校验的工具类，可以直接使用它对已经存在的文件进行校验
@@ -294,7 +268,7 @@ public class func validateFile(_ filePath: String, verificationCode: String, ver
 
 TRManager是下载任务的管理者，管理当前模块所有下载任务，内置一个全局的`default`单例，如果需要多个下载模块，或者需要自定义TRManager，可以手动创建TRManager实例。
 
-**⚠️⚠️⚠️** 按照苹果官方文档的要求，TRManager实例必须在App启动的时候创建，为方便使用，最好是作为`AppDelegate`的属性，或者是全局变量，具体请参照`Demo`。
+**⚠️⚠️⚠️** 按照苹果官方文档的要求，TRManager实例必须在App启动的时候创建，即TRManager的生命周期跟App几乎一致，为方便使用，最好是作为`AppDelegate`的属性，或者是全局变量，具体请参照`Demo`。
 
 ```swift
 ///  初始化方法
@@ -441,7 +415,7 @@ public var filePath: String
 
 ### TRCache
 
-TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。TRCache实例一般作为TRManager实例的属性来使用，同样地，Tiercel内置一个全局的`default`单例，对应`TRManager.default`。
+TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。TRCache实例一般作为TRManager实例的属性来使用，同样地，Tiercel内置一个全局的`TRCache.default`单例，对应`TRManager.default`。
 
 ```swift
 /// 初始化方法

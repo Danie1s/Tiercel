@@ -31,6 +31,8 @@ public class TRTask: NSObject, NSCoding {
     internal weak var manager: TRManager?
     internal var cache: TRCache
     internal var session: URLSession?
+    
+    internal var headers: [String: String]?
 
     internal var verificationCode: String?
     internal var verificationType: TRVerificationType = .md5
@@ -172,25 +174,22 @@ public class TRTask: NSObject, NSCoding {
 
 
     public init(_ url: URL,
-                cache: TRCache,
-                progressHandler: TRTaskHandler? = nil,
-                successHandler: TRTaskHandler? = nil,
-                failureHandler: TRTaskHandler? = nil) {
+                headers: [String: String]? = nil,
+                cache: TRCache) {
         self.cache = cache
         self.url = url
         self.URLString = url.absoluteString
         _currentURLString = url.absoluteString
         _fileName = url.tr.fileName
         super.init()
-        self.progressHandler = progressHandler
-        self.successHandler = successHandler
-        self.failureHandler = failureHandler
+        self.headers = headers
     }
     
     public func encode(with aCoder: NSCoder) {
         aCoder.encode(URLString, forKey: "URLString")
         aCoder.encode(currentURLString, forKey: "currentURLString")
         aCoder.encode(fileName, forKey: "fileName")
+        aCoder.encode(headers, forKey: "headers")
         aCoder.encode(startDate, forKey: "startDate")
         aCoder.encode(endDate, forKey: "endDate")
         aCoder.encode(progress.totalUnitCount, forKey: "totalBytes")
@@ -209,6 +208,7 @@ public class TRTask: NSObject, NSCoding {
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         super.init()
         
+        headers = aDecoder.decodeObject(forKey: "headers") as? [String: String]
         startDate = aDecoder.decodeDouble(forKey: "startDate")
         endDate = aDecoder.decodeDouble(forKey: "endDate")
         progress.totalUnitCount = aDecoder.decodeInt64(forKey: "totalBytes")
@@ -227,7 +227,13 @@ public class TRTask: NSObject, NSCoding {
 
 
     internal func start() {
-        self.request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
+        if let headers = headers {
+            for (key, value) in headers {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
+        self.request = request
     }
     
 

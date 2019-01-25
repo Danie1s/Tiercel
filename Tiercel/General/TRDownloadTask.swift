@@ -51,16 +51,12 @@ public class TRDownloadTask: TRTask {
     
 
     public init(_ url: URL,
+                headers: [String: String]? = nil,
                 fileName: String? = nil,
-                cache: TRCache,
-                progressHandler: TRTaskHandler? = nil,
-                successHandler: TRTaskHandler? = nil,
-                failureHandler: TRTaskHandler? = nil) {
+                cache: TRCache) {
         super.init(url,
-                   cache: cache,
-                   progressHandler: progressHandler,
-                   successHandler: successHandler,
-                   failureHandler: failureHandler)
+                   headers: headers,
+                   cache: cache)
         if let fileName = fileName,
             !fileName.isEmpty {
             self.fileName = fileName
