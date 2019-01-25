@@ -277,6 +277,7 @@ extension TRManager {
 
         var task = fetchTask(URLString) as? TRDownloadTask
         if task != nil {
+            task?.headers = headers
             task?.progressHandler = progressHandler
             task?.successHandler = successHandler
             task?.failureHandler = failureHandler
@@ -340,18 +341,18 @@ extension TRManager {
                 task?.progressHandler = progressHandler
                 task?.successHandler = successHandler
                 task?.failureHandler = failureHandler
-                if let index = URLStrings.index(of: url.absoluteString),
-                    let fileName = fileNames?.safeObjectAtIndex(index)  {
-                    task?.fileName = fileName
+                if let index = URLStrings.index(of: url.absoluteString) {
+                    task?.headers = headers?.safeObjectAtIndex(index)
+                    if let fileName = fileNames?.safeObjectAtIndex(index) {
+                        task?.fileName = fileName
+                    }
                 }
             } else {
                 var fileName: String?
-                if let fileNames = fileNames, let index = URLStrings.index(of: url.absoluteString) {
-                    fileName = fileNames.safeObjectAtIndex(index)
-                }
                 var header: [String: String]?
-                if let headers = headers, let index = URLStrings.index(of: url.absoluteString) {
-                    header = headers.safeObjectAtIndex(index)
+                if let index = URLStrings.index(of: url.absoluteString) {
+                    fileName = fileNames?.safeObjectAtIndex(index)
+                    header = headers?.safeObjectAtIndex(index)
                 }
                 task = TRDownloadTask(url,
                                       headers: header,
