@@ -1,6 +1,7 @@
 <div align=center>
 <img src="https://github.com/Danie1s/Tiercel/blob/master/Images/logo.png"/>
 </div>
+
 [![Version](https://img.shields.io/cocoapods/v/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Platform](https://img.shields.io/cocoapods/p/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Language](https://img.shields.io/badge/language-swift-red.svg?style=flat)]()
@@ -10,6 +11,10 @@
 
 Tiercel是一个简单易用且功能丰富的纯Swift下载框架。最大的特点就是拥有强大的任务管理功能和可以直接获取下载速度等常见的下载信息，只要加上一些简单的UI，就可以实现一个下载类APP的大部分功能。
 
+
+
+
+- [WARNING](#warning)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -139,7 +144,7 @@ task.progress { (task) in
       	print("下载完成")
     })
     .failure({  (task) in
-		print("下载失败")
+	print("下载失败")
     })
 ```
 
@@ -259,7 +264,7 @@ public var tasks: [TRTask] = []
 
 ### TRDownloadTask
 
-TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。**所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
+TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。** 所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
 
 主要属性
 
