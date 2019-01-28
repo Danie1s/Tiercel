@@ -29,7 +29,7 @@ Tiercel是一个简单易用且功能丰富的纯Swift下载框架，支持原�
 
 ## Tiercel 2:
 
-Tiercel 2 是全新的版本，下载实现基于`URLSessionDownloadTask`，支持原生的后台下载，功能更加强大，使用方式也有了一些改变，不兼容旧版本，请注意新版的使用方法。
+Tiercel 2 是全新的版本，下载实现基于`URLSessionDownloadTask`，支持原生的后台下载，功能更加强大，使用方式也有了一些改变，不兼容旧版本，请注意新版的使用方法。如果想了解后台下载的细节和注意事项，可以看这篇文章：[iOS原生级别后台下载详解](https://juejin.im/post/5c4ed0b0e51d4511dc730799)
 
 旧版本下载实现基于`URLSessionDataTask`，不支持后台下载，已经移至`dataTask`分支，原则上不再更新，如果不需要后台下载功能，或者不想迁移到新版，可以直接下载`dataTask`分支的源码使用，也可以在`Podfile`里使用以下方式安装：
 
@@ -227,7 +227,7 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
   - 无论在前台还是后台，如果App崩溃或者被系统关闭，任务还是会一直在下载
   - 重启手机，任务会一直在下载
 
-
+如果想了解后台下载的细节和注意事项，可以看这篇文章：[iOS原生级别后台下载详解](https://juejin.im/post/5c4ed0b0e51d4511dc730799)
 
 ### 文件校验
 
