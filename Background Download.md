@@ -1,12 +1,25 @@
-[TOC]
+# iOS原生级别后台下载详解
+
+- [初衷](#初衷)
+- [理想与现实](#理想与现实)
+- [勿忘初心](#勿忘初心)
+- [后台下载](#后台下载)
+  - [URLSession](#urlsession)
+  - [URLSessionDownloadTask](#urlsessiondownloadtask)
+  - [断点续传](#断点续传)
+  - [ResumeData](#resumedata)
+    - [ResumeData的结构](#resumedata的结构)
+    - [ResumeData的Bug](#resumedata的bug)
+  - [具体表现](#具体表现)
+    - [下载过程中](#下载过程中)
+    - [下载完成](#下载完成)
+    - [下载错误](下载错误)
+  - [重定向](#重定向)
+  - [前后台切换](#前后台切换)
+  - [注意事项](#注意事项)
+- [最后](#最后)
 
 
-
-
-
-
-
-# iOS原生后台下载详解
 
 ## 初衷
 
@@ -30,7 +43,7 @@
 
 ## 后台下载
 
-关于后台下载，其实苹果有提供文档---[Downloading Files in the Background](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background)，但还是那句话，实现起来要面对的问题要多得多。
+关于后台下载，其实苹果有提供文档---[Downloading Files in the Background](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background)，但还是那句话，实现起来要面对的问题比文档说的要多得多。
 
 ### URLSession
 
@@ -100,7 +113,7 @@ downloadTask.resume()
 
 在iOS中，这个`resumeData`简直就是奇葩的存在，如果你有去研究过它，你会觉得不可思议，因为这个东西一直在变，而且经常有Bug，似乎苹果就是不想让我们去操作它。
 
-#### ResumeData 的结构
+#### ResumeData的结构
 
 在iOS12之前，直接把`resumeData`保存为`resumeData.plist`到本地，可以看出里面的结构。
 
@@ -137,7 +150,7 @@ NSURLSessionResumeServerDownloadDate
 
 了解`resumeData`结构对解决它引起的Bug，实现离线断点续传，起到关键作用。
 
-#### ResumeData 的Bug
+#### ResumeData的Bug
 
 `resumeData`不但结构一直变化，而且也一直存在各种各样的Bug
 
@@ -286,17 +299,19 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
 
 以上是我测试了一些机型后发现的问题，没有覆盖全部机型，更多的情况可自行测试
 
-解决办法：监听didBecomeActiveNotification，延迟0.1秒调用`suspend`方法，然后调用`resume`方法即可
+解决办法：使用通知监听`UIApplication.didBecomeActiveNotification`，延迟0.1秒调用`suspend`方法，再调用`resume`方法
 
 ### 注意事项
 
-用Xcode运行和停止项目，可以达到App crash的效果，但是无论是用真机还是模拟器，每用Xcode运行一次项目安装，都会改变沙盒路径，这会导致系统对downloadTask相关的文件操作失败，在某些情况系统记录的是上次的项目沙盒路径，最终导致出现奇怪的错误。我一开始就是遇到这种情况，我并不知道是这个原因，所以觉得无法预测，也无法解决。各位在开发测试的时候，一定要注意。
+- 沙盒路径：用Xcode运行和停止项目，可以达到App crash的效果，但是无论是用真机还是模拟器，每用Xcode运行一次，都会改变沙盒路径，这会导致系统对downloadTask相关的文件操作失败，在某些情况系统记录的是上次的项目沙盒路径，最终导致出现奇怪的错误。我刚开始就是遇到这种情况，我并不知道是这个原因，所以觉得无法预测，也无法解决。各位在开发测试的时候，一定要注意。
 
-TempFileName，前面说了恢复下载依靠的是resumeData
+- 缓存文件，前面说了恢复下载依靠的是resumeData，其实还需要对应的缓存文件，在resumeData里可以得到缓存文件的文件名（在iOS 8获得的是缓存文件路径），因为之前推荐使用`cancelByProducingResumeData`方法暂停任务，那么缓存文件会被移动到沙盒的Tmp文件夹，这个文件夹的数据在某些时候会被系统自动清理掉，所以为了以防万一，最好是自己保存一份。
 
 ## 最后
 
-如果大家有耐心把前面的内容认真看完，那么恭喜你们，你们已经了解了iOS后台下载的所有特性和注意事项，同时你们也已经明白为什么目前没有一款完整实现后台下载的开源框架，因为Bug和要处理的情况实在是太多。目前[Tiercel 2](https://github.com/Danie1s/Tiercel)已经发布，需要了解更多的细节，可以参考代码，欢迎各位开发使用，测试，提交Bug和建议，这篇文章只是我个人的一些总结，可能会存在没有发现问题或者细节，如果有新的发现，请给我留言。
+如果大家有耐心把前面的内容认真看完，那么恭喜你们，你们已经了解了iOS后台下载的所有特性和注意事项，同时你们也已经明白为什么目前没有一款完整实现后台下载的开源框架，因为Bug和要处理的情况实在是太多。这篇文章只是我个人的一些总结，可能会存在没有发现问题或者细节，如果有新的发现，请给我留言。
+
+目前[Tiercel 2](https://github.com/Danie1s/Tiercel)已经发布，完美地支持后台下载，还加入了文件校验等功能，需要了解更多的细节，可以参考代码，欢迎各位使用，测试，提交Bug和建议。
 
 
 
