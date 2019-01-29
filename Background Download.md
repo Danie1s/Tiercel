@@ -208,8 +208,8 @@ NSURLSessionResumeServerDownloadDate
 
 - 在前台：跟普通的downloadTask一样，调用相关的session代理方法
 - 在后台：当`Background Sessions`里面所有的任务（注意是所有任务，不单单是下载任务）都完成后，会调用`AppDelegate`的`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，激活App，然后跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
-- crash或者App被系统关闭：当`Background Sessions`里面所有的任务（注意是所有任务，不单单是下载任务）都完成后，会自动启动App，调用`AppDelegate`的`application(_:didFinishLaunchingWithOptions:)`方法，然后调用`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会调用跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
-- 代码引起的crash或者App被系统关闭，打开App打开App保持前台，当所有的任务都完成后才创建对应的`Background Sessions`：没有创建session时，只会调用`AppDelegate`的`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会调用跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
+- crash或者App被系统关闭：当`Background Sessions`里面所有的任务（注意是所有任务，不单单是下载任务）都完成后，会自动启动App，调用`AppDelegate`的`application(_:didFinishLaunchingWithOptions:)`方法，然后调用`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
+- 代码引起的crash或者App被系统关闭，打开App打开App保持前台，当所有的任务都完成后才创建对应的`Background Sessions`：没有创建session时，只会调用`AppDelegate`的`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
 - 代码引起的crash或者App被系统关闭，打开App，创建对应的`Background Sessions`后所有任务才完成：跟在前台的时候一样
 
 总结：
