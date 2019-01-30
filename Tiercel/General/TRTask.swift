@@ -46,12 +46,7 @@ public class TRTask: NSObject, NSCoding {
     internal var verificationCode: String?
     internal var verificationType: TRVerificationType = .md5
     
-    internal var progressHandler: TRTaskHandler?
-    internal var successHandler: TRTaskHandler?
-    internal var failureHandler: TRTaskHandler?
-    internal var controlHandler: TRTaskHandler?
-    internal var validateHandler: TRTaskHandler?
-
+    internal var controlHandler: TRHandler<TRTask>?
 
     private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
 
@@ -247,17 +242,17 @@ public class TRTask: NSObject, NSCoding {
     
 
     
-    internal func suspend(_ handler: TRTaskHandler? = nil) {
+    internal func suspend(_ handler: TRHandler<TRTask>? = nil) {
         
         
     }
     
-    internal func cancel(_ handler: TRTaskHandler? = nil) {
+    internal func cancel(_ handler: TRHandler<TRTask>? = nil) {
         
         
     }
 
-    internal func remove(_ handler: TRTaskHandler? = nil) {
+    internal func remove(_ handler: TRHandler<TRTask>? = nil) {
 
 
     }
@@ -269,45 +264,5 @@ public class TRTask: NSObject, NSCoding {
     
 }
 
-// MARK: - closure
-extension TRTask {
-    @discardableResult
-    public func progress(_ handler: @escaping TRTaskHandler) -> Self {
-        progressHandler = handler
-        return self
-    }
-
-    @discardableResult
-    public func success(_ handler: @escaping TRTaskHandler) -> Self {
-        successHandler = handler
-        return self
-    }
-
-    @discardableResult
-    public func failure(_ handler: @escaping TRTaskHandler) -> Self {
-        failureHandler = handler
-        return self
-    }
-}
-
-extension Array where Element == TRTask {
-    @discardableResult
-    public func progress(_ handler: @escaping TRTaskHandler) -> [TRTask] {
-        self.forEach { $0.progress(handler) }
-        return self
-    }
-
-    @discardableResult
-    public func success(_ handler: @escaping TRTaskHandler) -> [TRTask] {
-        self.forEach { $0.success(handler) }
-        return self
-    }
-
-    @discardableResult
-    public func failure(_ handler: @escaping TRTaskHandler) -> [TRTask] {
-        self.forEach { $0.failure(handler) }
-        return self
-    }
-}
 
 

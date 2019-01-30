@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E10B78A721E73C3E00DFF2B3 /* TRResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */; };
 		E10B78A821E73C3E00DFF2B3 /* TRConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */; };
+		E11338612201AB5E00D276EF /* TRHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11338602201AB5E00D276EF /* TRHandler.swift */; };
 		E1C1DD3E206C91EF003665A9 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1C1DD3C206C91EF003665A9 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E1C1DD4A206C9241003665A9 /* TRDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD44206C9241003665A9 /* TRDownloadTask.swift */; };
 		E1C1DD4B206C9241003665A9 /* TRCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD45206C9241003665A9 /* TRCache.swift */; };
@@ -69,6 +70,7 @@
 /* Begin PBXFileReference section */
 		E10B78A521E73C3E00DFF2B3 /* TRResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRResumeDataHelper.swift; sourceTree = "<group>"; };
 		E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TRConfiguration.swift; sourceTree = "<group>"; };
+		E11338602201AB5E00D276EF /* TRHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TRHandler.swift; sourceTree = "<group>"; };
 		E1C1DD39206C91EF003665A9 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C1DD3C206C91EF003665A9 /* Tiercel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tiercel.h; sourceTree = "<group>"; };
 		E1C1DD3D206C91EF003665A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -193,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				E1C1DD46206C9241003665A9 /* TRCommon.swift */,
+				E11338602201AB5E00D276EF /* TRHandler.swift */,
 				E10B78A621E73C3E00DFF2B3 /* TRConfiguration.swift */,
 				E1C1DD45206C9241003665A9 /* TRCache.swift */,
 				E1C1DD47206C9241003665A9 /* TRTask.swift */,
@@ -330,6 +333,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E11338612201AB5E00D276EF /* TRHandler.swift in Sources */,
 				E1D8EF9821F6CE53004B70C5 /* String+Hash.swift in Sources */,
 				E1D8EFA621F6D328004B70C5 /* UIDevice+Free.swift in Sources */,
 				E1D8EFA021F6CFC2004B70C5 /* Double+TaskInfo.swift in Sources */,

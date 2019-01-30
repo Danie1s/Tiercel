@@ -26,7 +26,17 @@
 
 import UIKit
 
-public class TRDownloadTask: TRTask {
+public class TRDownloadTask: TRTask, TRHandleable {
+    
+    public typealias CompatibleType = TRDownloadTask
+    
+    public var progressHandler: TRHandler<TRDownloadTask>?
+    
+    public var successHandler: TRHandler<TRDownloadTask>?
+    
+    public var failureHandler: TRHandler<TRDownloadTask>?
+    
+    internal var validateHandler: TRHandler<TRDownloadTask>?
 
     internal var task: URLSessionDownloadTask? {
         didSet {
@@ -131,7 +141,7 @@ public class TRDownloadTask: TRTask {
     }
 
 
-    internal override func suspend(_ handler: TRTaskHandler? = nil) {
+    internal override func suspend(_ handler: TRHandler<TRTask>? = nil) {
         guard status == .running || status == .waiting else { return }
         controlHandler = handler
 
@@ -152,7 +162,7 @@ public class TRDownloadTask: TRTask {
         }
     }
     
-    internal override func cancel(_ handler: TRTaskHandler? = nil) {
+    internal override func cancel(_ handler: TRHandler<TRTask>? = nil) {
         guard status != .succeeded else { return }
         controlHandler = handler
         
@@ -173,7 +183,7 @@ public class TRDownloadTask: TRTask {
     }
 
 
-    internal override func remove(_ handler: TRTaskHandler? = nil) {
+    internal override func remove(_ handler: TRHandler<TRTask>? = nil) {
         controlHandler = handler
 
         if status == .running {
@@ -234,7 +244,7 @@ extension TRDownloadTask {
     @discardableResult
     public func validateFile(verificationCode: String,
                              verificationType: TRVerificationType,
-                             validateHandler: @escaping TRTaskHandler) -> TRDownloadTask {
+                             validateHandler: @escaping TRHandler<TRDownloadTask>) -> TRDownloadTask {
         self.verificationCode = verificationCode
         self.verificationType = verificationType
         self.validateHandler = validateHandler
@@ -384,7 +394,7 @@ extension TRDownloadTask {
 extension Array where Element == TRDownloadTask {
     public func validateFile(verificationCodes: [String],
                              verificationType: TRVerificationType,
-                             validateHandler: @escaping TRTaskHandler) -> [TRDownloadTask] {
+                             validateHandler: @escaping TRHandler<TRDownloadTask>) -> [TRDownloadTask] {
         for (index, task) in self.enumerated() {
             task.verificationCode = verificationCodes.safeObjectAtIndex(index)
             task.verificationType = verificationType

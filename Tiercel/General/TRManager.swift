@@ -26,7 +26,7 @@
 
 import UIKit
 
-public class TRManager {
+public class TRManager: TRHandleable {
     
     public static let `default` = TRManager("default")
     
@@ -184,13 +184,15 @@ public class TRManager {
         }
     }
     
-    private var successHandler: TRManagerHandler?
+    public typealias CompatibleType = TRManager
     
-    private var failureHandler: TRManagerHandler?
+    public var progressHandler: TRHandler<TRManager>?
     
-    private var progressHandler: TRManagerHandler?
+    public var successHandler: TRHandler<TRManager>?
     
-    private var controlHandler: TRManagerHandler?
+    public var failureHandler: TRHandler<TRManager>?
+    
+    private var controlHandler: TRHandler<TRManager>?
 
     
     public init(_ identifier: String) {
@@ -447,7 +449,7 @@ extension TRManager {
     }
     
     /// 暂停任务，会触发sessionDelegate的完成回调
-    public func suspend(_ URLString: String, _ handler: TRTaskHandler? = nil) {
+    public func suspend(_ URLString: String, _ handler: TRHandler<TRTask>? = nil) {
         guard let task = fetchTask(URLString) else { return }
         task.suspend(handler)
     }
@@ -457,7 +459,7 @@ extension TRManager {
     /// 其他状态的任务都可以被取消，被取消的任务会被移除
     /// 会删除还没有下载完成的缓存文件
     /// 会触发sessionDelegate的完成回调
-    public func cancel(_ URLString: String, _ handler: TRTaskHandler? = nil) {
+    public func cancel(_ URLString: String, _ handler: TRHandler<TRTask>? = nil) {
         guard let task = fetchTask(URLString) else { return }
         task.cancel(handler)
     }
@@ -472,7 +474,7 @@ extension TRManager {
     /// - Parameters:
     ///   - URLString: URLString
     ///   - completely: 是否删除下载完成的文件
-    public func remove(_ URLString: String, completely: Bool = false, _ handler: TRTaskHandler? = nil) {
+    public func remove(_ URLString: String, completely: Bool = false, _ handler: TRHandler<TRTask>? = nil) {
         guard let task = fetchTask(URLString) as? TRDownloadTask else { return }
         isRemoveCompletely = completely
         task.remove(handler)
@@ -490,7 +492,7 @@ extension TRManager {
     }
     
     
-    public func totalSuspend(_ handler: TRManagerHandler? = nil) {
+    public func totalSuspend(_ handler: TRHandler<TRManager>? = nil) {
         guard status == .running || status == .waiting else { return }
         status = .willSuspend
         controlHandler = handler
@@ -500,7 +502,7 @@ extension TRManager {
         
     }
     
-    public func totalCancel(_ handler: TRManagerHandler? = nil) {
+    public func totalCancel(_ handler: TRHandler<TRManager>? = nil) {
         guard status != .succeeded && status != .canceled else { return }
         status = .willCancel
         controlHandler = handler
@@ -509,7 +511,7 @@ extension TRManager {
         }
     }
     
-    public func totalRemove(completely: Bool = false, _ handler: TRManagerHandler? = nil) {
+    public func totalRemove(completely: Bool = false, _ handler: TRHandler<TRManager>? = nil) {
         guard status != .removed else { return }
         isCompleted = false
         status = .willRemove
@@ -728,13 +730,13 @@ extension TRManager {
 // MARK: - closure
 extension TRManager {
     @discardableResult
-    public func progress(_ handler: @escaping TRManagerHandler) -> Self {
+    public func progress(_ handler: @escaping TRHandler<TRManager>) -> Self {
         progressHandler = handler
         return self
     }
     
     @discardableResult
-    public func success(_ handler: @escaping TRManagerHandler) -> Self {
+    public func success(_ handler: @escaping TRHandler<TRManager>) -> Self {
         successHandler = handler
         if status == .succeeded {
             DispatchQueue.main.tr.safeAsync {
@@ -745,7 +747,7 @@ extension TRManager {
     }
     
     @discardableResult
-    public func failure(_ handler: @escaping TRManagerHandler) -> Self {
+    public func failure(_ handler: @escaping TRHandler<TRManager>) -> Self {
         failureHandler = handler
         if status == .suspended ||
             status == .canceled ||

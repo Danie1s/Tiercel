@@ -50,8 +50,7 @@ public enum TRLogLevel {
 }
 
 
-public typealias TRTaskHandler = (TRTask) -> ()
-public typealias TRManagerHandler = (TRManager) -> ()
+
 
 public class Tiercel<Base> {
     internal let base: Base
@@ -91,4 +90,5 @@ public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #
     case .none: break
     }
 }
+
 
