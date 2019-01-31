@@ -97,7 +97,7 @@ extension TRCache {
     }
     
     
-    public func filePtah(fileName: String) -> String? {
+    public func filePath(fileName: String) -> String? {
         if fileName.isEmpty {
             return nil
         }
@@ -106,28 +106,28 @@ extension TRCache {
     }
     
     public func fileURL(fileName: String) -> URL? {
-        guard let path = filePtah(fileName: fileName) else { return nil }
+        guard let path = filePath(fileName: fileName) else { return nil }
         return URL(fileURLWithPath: path)
     }
     
     public func fileExists(fileName: String) -> Bool {
-        guard let path = filePtah(fileName: fileName) else { return false }
+        guard let path = filePath(fileName: fileName) else { return false }
         return fileManager.fileExists(atPath: path)
     }
     
-    public func filePtah(URLString: String) -> String? {
+    public func filePath(URLString: String) -> String? {
         guard let url = URL(string: URLString) else { return nil }
         let fileName = url.tr.fileName
-        return filePtah(fileName: fileName)
+        return filePath(fileName: fileName)
     }
     
     public func fileURL(URLString: String) -> URL? {
-        guard let path = filePtah(URLString: URLString) else { return nil }
+        guard let path = filePath(URLString: URLString) else { return nil }
         return URL(fileURLWithPath: path)
     }
     
     public func fileExists(URLString: String) -> Bool {
-        guard let path = filePtah(URLString: URLString) else { return false }
+        guard let path = filePath(URLString: URLString) else { return false }
         return fileManager.fileExists(atPath: path)
     }
     

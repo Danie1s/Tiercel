@@ -408,7 +408,7 @@ extension TRManager {
         
         if cache.fileExists(fileName: task.fileName) {
             TiercelLog("[manager] 文件已经存在 URLString: \(task.URLString), manager.identifier: \(identifier)")
-            if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePtah(fileName: task.fileName)!), let length = fileInfo[.size] as? Int64 {
+            if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePath(fileName: task.fileName)!), let length = fileInfo[.size] as? Int64 {
                 task.progress.totalUnitCount = length
             }
             task.completed()
