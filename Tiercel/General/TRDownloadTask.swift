@@ -35,7 +35,7 @@ public class TRDownloadTask: TRTask {
     }
 
     public var filePath: String {
-        return cache.filePtah(fileName: fileName)!
+        return cache.filePath(fileName: fileName)!
     }
 
     public var pathExtension: String?
