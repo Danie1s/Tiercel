@@ -51,6 +51,20 @@ public class TRTask: NSObject, NSCoding {
     private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
 
     internal var request: URLRequest?
+    
+    private var _isRemoveCompletely = false
+    internal var isRemoveCompletely: Bool {
+        get {
+            return queue.sync {
+                _isRemoveCompletely
+            }
+        }
+        set {
+            return queue.sync {
+                _isRemoveCompletely = newValue
+            }
+        }
+    }
 
     private var _status: TRStatus = .waiting
     public var status: TRStatus {
@@ -177,7 +191,7 @@ public class TRTask: NSObject, NSCoding {
 
 
 
-    public init(_ url: URL,
+    internal init(_ url: URL,
                 headers: [String: String]? = nil,
                 cache: TRCache) {
         self.cache = cache
@@ -252,8 +266,7 @@ public class TRTask: NSObject, NSCoding {
         
     }
 
-    internal func remove(_ handler: TRHandler<TRTask>? = nil) {
-
+    internal func remove(completely: Bool = false, _ handler: TRHandler<TRTask>? = nil) {
 
     }
 
