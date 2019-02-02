@@ -46,6 +46,12 @@ public class TRTask: NSObject, NSCoding {
     internal var verificationCode: String?
     internal var verificationType: TRVerificationType = .md5
     
+    internal var progressHandler: TRHandler<TRTask>?
+    
+    internal var successHandler: TRHandler<TRTask>?
+    
+    internal var failureHandler: TRHandler<TRTask>?
+    
     internal var controlHandler: TRHandler<TRTask>?
 
     private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
@@ -255,7 +261,6 @@ public class TRTask: NSObject, NSCoding {
     }
     
 
-    
     internal func suspend(_ handler: TRHandler<TRTask>? = nil) {
         
         
@@ -265,17 +270,70 @@ public class TRTask: NSObject, NSCoding {
         
         
     }
-
+    
     internal func remove(completely: Bool = false, _ handler: TRHandler<TRTask>? = nil) {
-
+        
     }
-
+    
     internal func completed() {
-
-
+        
+    }
+    
+    internal func asDownloadTask() -> TRDownloadTask? {
+        return self as? TRDownloadTask
     }
     
 }
 
+extension TRTask {
+    @discardableResult
+    public func progress(_ handler: @escaping TRHandler<TRTask>) -> Self {
+        progressHandler = handler
+        return self
+    }
+    
+    @discardableResult
+    public func success(_ handler: @escaping TRHandler<TRTask>) -> Self {
+        successHandler = handler
+        if status == .succeeded {
+            DispatchQueue.main.tr.safeAsync {
+                self.successHandler?(self)
+            }
+        }
+        return self
+    }
+    
+    @discardableResult
+    public func failure(_ handler: @escaping TRHandler<TRTask>) -> Self {
+        failureHandler = handler
+        if status == .suspended ||
+            status == .canceled ||
+            status == .removed ||
+            status == .failed  {
+            DispatchQueue.main.tr.safeAsync {
+                self.failureHandler?(self)
+            }
+        }
+        return self
+    }
+}
 
-
+extension Array where Element == TRTask {
+    @discardableResult
+    public func progress(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
+        self.forEach { $0.progress(handler) }
+        return self
+    }
+    
+    @discardableResult
+    public func success(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
+        self.forEach { $0.success(handler) }
+        return self
+    }
+    
+    @discardableResult
+    public func failure(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
+        self.forEach { $0.failure(handler) }
+        return self
+    }
+}

@@ -175,7 +175,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     // 每个cell中的状态更新，应该在willDisplay中执行
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let URLString = downloadURLStrings.safeObjectAtIndex(indexPath.row),
-            let task = downloadManager?.fetchTask(URLString) as? TRDownloadTask
+            let task = downloadManager?.fetchTask(URLString)
             else { return }
         
         var image: UIImage = #imageLiteral(resourceName: "suspend")
@@ -228,7 +228,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     // 由于cell是循环利用的，不在可视范围内的cell，不应该去更新cell的状态
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let URLString = downloadURLStrings.safeObjectAtIndex(indexPath.row),
-            let task = downloadManager?.fetchTask(URLString) as? TRDownloadTask
+            let task = downloadManager?.fetchTask(URLString)
             else { return }
 
         task.progress { _ in }.success({ _ in }).failure({ _ in})

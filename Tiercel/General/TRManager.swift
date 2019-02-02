@@ -26,7 +26,7 @@
 
 import UIKit
 
-public class TRManager: TRHandleable {
+public class TRManager {
     
     public static let `default` = TRManager("default")
     
@@ -140,14 +140,12 @@ public class TRManager: TRHandleable {
             }
         }
     }
+        
+    private var progressHandler: TRHandler<TRManager>?
     
-    public typealias CompatibleType = TRManager
+    private var successHandler: TRHandler<TRManager>?
     
-    public var progressHandler: TRHandler<TRManager>?
-    
-    public var successHandler: TRHandler<TRManager>?
-    
-    public var failureHandler: TRHandler<TRManager>?
+    private var failureHandler: TRHandler<TRManager>?
     
     private var controlHandler: TRHandler<TRManager>?
 
@@ -306,7 +304,6 @@ extension TRManager {
             return [TRDownloadTask]()
         }
         
-        
         var temp = [TRDownloadTask]()
         for url in uniqueUrls {
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
@@ -357,7 +354,7 @@ extension TRManager {
     /// 会检查存放下载完成的文件中是否存在跟fileName一样的文件
     /// 如果存在则不会开启下载，直接调用task的successHandler
     public func start(_ URLString: String) {
-        guard let task = fetchTask(URLString) as? TRDownloadTask else { return }
+        guard let task = fetchTask(URLString) else { return }
         task.start()
     }
 

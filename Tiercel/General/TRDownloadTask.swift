@@ -26,18 +26,8 @@
 
 import UIKit
 
-public class TRDownloadTask: TRTask, TRHandleable {
+public class TRDownloadTask: TRTask {
     
-    public typealias CompatibleType = TRDownloadTask
-    
-    public var progressHandler: TRHandler<TRDownloadTask>?
-    
-    public var successHandler: TRHandler<TRDownloadTask>?
-    
-    public var failureHandler: TRHandler<TRDownloadTask>?
-    
-    internal var validateHandler: TRHandler<TRDownloadTask>?
-
     internal var task: URLSessionDownloadTask? {
         didSet {
             task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
@@ -61,6 +51,7 @@ public class TRDownloadTask: TRTask, TRHandleable {
         }
     }
     
+    internal var validateHandler: TRHandler<TRDownloadTask>?
 
     internal init(_ url: URL,
                 headers: [String: String]? = nil,
@@ -184,8 +175,6 @@ public class TRDownloadTask: TRTask, TRHandleable {
         }
     }
     
-
-    
     internal override func completed() {
         guard status != .succeeded else { return }
         status = .succeeded
@@ -303,7 +292,7 @@ extension TRDownloadTask {
     @discardableResult
     public func validateFile(verificationCode: String,
                              verificationType: TRVerificationType,
-                             validateHandler: @escaping TRHandler<TRDownloadTask>) -> TRDownloadTask {
+                             validateHandler: @escaping TRHandler<TRDownloadTask>) -> Self {
         self.verificationCode = verificationCode
         self.verificationType = verificationType
         self.validateHandler = validateHandler

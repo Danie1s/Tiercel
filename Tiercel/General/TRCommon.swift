@@ -49,7 +49,7 @@ public enum TRLogLevel {
     case none
 }
 
-
+public typealias TRHandler<T> = (T) -> ()
 
 
 public class Tiercel<Base> {
@@ -90,5 +90,4 @@ public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #
     case .none: break
     }
 }
-
 
