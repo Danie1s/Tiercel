@@ -271,7 +271,7 @@ func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
 // 或者是在session delegate 的 urlSession(_:task:didCompleteWithError:) 方法里面获取
 func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
     if let error = error {
-        let backgroundTaskCancelledReason = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Data
+        let backgroundTaskCancelledReason = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int
     }
 }
 ```
