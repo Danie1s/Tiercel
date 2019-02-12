@@ -167,7 +167,15 @@ extension TRCache {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
-            if self.fileManager.fileExists(atPath: path1) && !self.fileManager.fileExists(atPath: path2) {
+            guard self.fileManager.fileExists(atPath: path1) else { return }
+
+            if self.fileManager.fileExists(atPath: path2) {
+                do {
+                    try self.fileManager.removeItem(atPath: path1)
+                } catch {
+                    TiercelLog("removeItem error: \(error)")
+                }
+            } else {
                 do {
                     try self.fileManager.moveItem(atPath: path1, toPath: path2)
                 } catch {
