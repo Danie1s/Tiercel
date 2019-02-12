@@ -192,7 +192,7 @@ NSURLSessionResumeServerDownloadDate
   - 在iOS 8 上，手动kill会马上调用`cancelByProducingResumeData`或者`cancel`方法，然后会调用`urlSession(_:task:didCompleteWithError:)`代理方法
   - 在iOS 9 - iOS 12 上，手动kill会马上停止下载，当App重新启动后，创建对应的`Background Sessions`后，才会调用`cancelByProducingResumeData`或者`cancel`方法，然后会调用`urlSession(_:task:didCompleteWithError:)`代理方法
 - 进入后台、crash或者被系统关闭，系统会有另外一条进程对下载任务进行管理，没有开启的任务会自动开启，已经开启的会保持原来的状态（继续运行或者暂停），当App重新启动后，创建对应的`Background Sessions`，可以使用`session.getTasksWithCompletionHandler(_:)`方法来获取任务，session的代理方法也会继续被调用（如果需要）
-- 最令人意外的是，只要没有手动手动Kill App，就算重启手机，重启完成后原来在运行的下载任务还是会继续下载，实在牛逼
+- 最令人意外的是，只要没有手动Kill App，就算重启手机，重启完成后原来在运行的下载任务还是会继续下载，实在牛逼
 
 既然已经总结出规律，那么处理起来就简单了：
 
