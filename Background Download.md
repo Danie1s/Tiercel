@@ -232,15 +232,13 @@ NSURLSessionResumeServerDownloadDate
 //
 //   - identifier: 对应Background Sessions的identifier
 //   - completionHandler: 需要保存起来
-func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-    DispatchQueue.main.async {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-            let backgroundCompletionHandler = appDelegate.backgroundCompletionHandler else {
-                return
-        }
-        // 上面保存的completionHandler
-        backgroundCompletionHandler()
-    }
+func application(_ application: UIApplication,
+                 handleEventsForBackgroundURLSession identifier: String,
+                 completionHandler: @escaping () -> Void) {
+    	if identifier == urlSession.configuration.identifier ?? "" {
+            // 这里用作为AppDelegate的属性，保存completionHandler
+            backgroundCompletionHandler = completionHandler
+	    }
 }
 ```
 
@@ -249,13 +247,11 @@ func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
 ```swift
 // 必须实现这个方法，并且在主线程调用completionHandler
 func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+    guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+        let backgroundCompletionHandler = appDelegate.backgroundCompletionHandler else { return }
+        
     DispatchQueue.main.async {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-            let backgroundCompletionHandler =
-        	// 上面保存的completionHandler
-            appDelegate.backgroundCompletionHandler else {
-                return
-        }
+        // 上面保存的completionHandler
         backgroundCompletionHandler()
     }
 }
