@@ -221,7 +221,7 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
 
 只要使用Tiercel 开启了下载任务：
 
-- 手动Kill App，任务会暂时，重启App后可以恢复进度，继续下载
+- 手动Kill App，任务会暂停，重启App后可以恢复进度，继续下载
 - 只要不是手动Kill App，任务会一直在下载
   - 把App退回后台，任务会一直在下载
   - 无论在前台还是后台，如果App崩溃或者被系统关闭，任务还是会一直在下载
