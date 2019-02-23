@@ -128,7 +128,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
 // 必须实现此方法，并且把identifier对应的completionHandler保存起来
 func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
 
-    if TRManager.default.identifier == identifier {
+    if identifier == TRManager.default.identifier {
         TRManager.default.completionHandler = completionHandler
     }
 
@@ -155,7 +155,7 @@ let tasks = TRManager.default.multiDownload(URLStrings)
 // 回调闭包的参数是TRDownloadTask实例，可以得到所有相关的信息
 // 回调闭包都是在主线程运行
 // progress 闭包：如果任务正在下载，就会触发
-// success 闭包：任务已经下载过，或者下载完成，都会出发，这时候task.status == .succeeded
+// success 闭包：任务已经下载过，或者下载完成，都会触发，这时候task.status == .succeeded
 // failure 闭包：只要task.status != .succeeded，就会触发：
 //    1. 暂停任务，这时候task.status == .suspended
 //    2. 任务下载失败，这时候task.status == .failed
@@ -213,19 +213,19 @@ Tiercel 2 的下载实现基于`URLSessionDownloadTask`，支持原生的后台�
 // 必须实现此方法，并且把identifier对应的completionHandler保存起来
 func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
 
-    if TRManager.default.identifier == identifier {
+    if identifier == TRManager.default.identifier {
         TRManager.default.completionHandler = completionHandler
     }
 }
 ```
 
-只要使用Tiercel 开启了下载任务：
+只要使用 Tiercel 开启了下载任务：
 
 - 手动Kill App，任务会暂停，重启App后可以恢复进度，继续下载
-- 只要不是手动Kill App，任务会一直在下载
-  - 把App退回后台，任务会一直在下载
-  - 无论在前台还是后台，如果App崩溃或者被系统关闭，任务还是会一直在下载
-  - 重启手机，任务会一直在下载
+- 只要不是手动Kill App，任务都会一直在下载，例如：
+  - App退回后台
+  - App崩溃或者被系统关闭
+  - 重启手机
 
 如果想了解后台下载的细节和注意事项，可以看这篇文章：[iOS原生级别后台下载详解](https://juejin.im/post/5c4ed0b0e51d4511dc730799)
 
@@ -251,7 +251,7 @@ task?.validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c",
 TRChecksumHelper是文件校验的工具类，可以直接使用它对已经存在的文件进行校验
 
 ```swift
-/// 对文件进行校验，是在子线程进行的
+/// 对文件进行校验，是在子线程进行的，但完成回调的闭包在主线程运行
 ///
 /// - Parameters:
 ///   - filePath: 文件路径
