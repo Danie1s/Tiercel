@@ -126,7 +126,7 @@ NSURLSessionDownloadURL
 NSURLSessionResumeBytesReceived
 // currentRequest
 NSURLSessionResumeCurrentRequest
-// tag
+// Etag，下载文件的唯一标识
 NSURLSessionResumeEntityTag
 // 已经下载的缓存文件路径
 NSURLSessionResumeInfoLocalPath
