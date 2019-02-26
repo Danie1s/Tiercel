@@ -34,7 +34,7 @@ internal class TRSessionDelegate: NSObject {
 
 extension TRSessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        manager?.didBecomeInvalidWithError(error)
+        manager?.didBecomeInvalidation(withError: error)
     }
     
     
