@@ -34,6 +34,150 @@ extension TRTask {
     }
 }
 
+protocol DownloadTask {
+    
+    var cache: TRCache { set get }
+    
+    var session: URLSession? { set get }
+    
+    var headers: [String: String]? { set get }
+    
+    var progressHandler: TRHandler<TRTask>? { set get }
+    
+    var successHandler: TRHandler<TRTask>? { set get }
+    
+    var failureHandler: TRHandler<TRTask>? { set get }
+    
+    var request: URLRequest? { set get }
+    
+    /// 开始下载一个任务
+    func start()
+    /// 暂停任务
+    func suspend(_ handler: TRHandler<TRTask>?)
+    /// 取消任务
+    func cancel(_ handler: TRHandler<TRTask>?)
+    /// 删除任务
+    func remove(completely: Bool, _ handler: TRHandler<TRTask>?)
+    
+}
+
+extension DownloadTask {
+    
+    func start() {}
+    
+    func suspend(_ handler: TRHandler<TRTask>?) {}
+    
+    func cancel(_ handler: TRHandler<TRTask>?) {}
+    
+    func remove(completely: Bool, _ handler: TRHandler<TRTask>?) {}
+}
+
+public struct DefaultTask: Codable {
+    
+    public let URLString: String
+    
+    enum CodingKeys: String, CodingKey {
+        case URLString
+        case currentURLString
+        case fileName
+        case headers
+        case startDate
+        case endDate
+        case totalBytes
+        case completedBytes
+        case status
+        case verificationCode
+        case verificationType
+        case validation
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        URLString = (try? container.decode(String.self, forKey: .URLString)) ?? ""
+        try? container.decode(String.self, forKey: .currentURLString)
+        try? container.decode(String.self, forKey: .fileName)
+        try? container.decode([String: String].self, forKey: .headers)
+        try? container.decode(Double.self, forKey: .startDate)
+        try? container.decode(Double.self, forKey: .endDate)
+        try? container.decode(Int64.self, forKey: .totalBytes)
+        try? container.decode(Int64.self, forKey: .completedBytes)
+        try? container.decode(String.self, forKey: .status)
+        try? container.decode(String.self, forKey: .verificationCode)
+        try? container.decode(Int.self, forKey: .verificationType)
+        try? container.decode(Int.self, forKey: .validation)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        let container = try encoder.container(keyedBy: CodingKeys.self)
+        
+    }
+}
+
+extension DefaultTask: DownloadTask {
+    var cache: TRCache {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+    
+    var session: URLSession? {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+    
+    var headers: [String : String]? {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+    
+    var progressHandler: TRHandler<TRTask>? {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+    
+    var successHandler: TRHandler<TRTask>? {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+    
+    var failureHandler: TRHandler<TRTask>? {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+    
+    var request: URLRequest? {
+        get {
+            <#code#>
+        }
+        set {
+            <#code#>
+        }
+    }
+}
+
 
 public class TRTask: NSObject, NSCoding {
 
