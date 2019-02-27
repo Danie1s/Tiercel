@@ -32,6 +32,12 @@ public class TRManager {
     
     public static var logLevel: TRLogLevel = .detailed
     
+    public private(set) var successTasks: [TRTask] = []
+    
+    public private(set) var failureTasks: [TRTask] = []
+    
+    public private(set) var progressTasks: [TRTask] = []
+    
     public static var isControlNetworkActivityIndicator = true
 
     private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.queue")
@@ -46,16 +52,15 @@ public class TRManager {
 
     private var shouldCreatSession: Bool = false
     
-    public var configuration = TRConfiguration() {
+    public var configuration = TRDefaultConfiguration() {
         didSet {
             if !shouldCreatSession {
+                shouldCreatSession = true
                 if status == .running {
-                    runningTasks = tasks.filter({ $0.status == .running })
-                    waitingTasks = tasks.filter({ $0.status == .waiting })
-                    shouldCreatSession = true
+                    runningTasks = tasks.filter { $0.status == .running }
+                    waitingTasks = tasks.filter { $0.status == .waiting }
                     totalSuspend()
                 } else {
-                    shouldCreatSession = true
                     session.invalidateAndCancel()
                 }
             }
@@ -158,68 +163,66 @@ public class TRManager {
         } else {
             cache = TRCache(identifier)
         }
-        shouldCreatSession = true
         tasks = cache.retrieveAllTasks() ?? [TRTask]()
-        tasks.forEach({ $0.manager = self })
+        tasks.forEach { $0.manager = self }
+        shouldCreatSession = true
         createSession()
-
-        TiercelLog("[manager] retrieveTasks, tasks.count: \(tasks.count), manager.identifier: \(self.identifier)")
-
         matchStatus()
+        
+        TiercelLog("[manager] retrieveTasks, tasks.count: \(tasks.count), manager.identifier: \(self.identifier)")
     }
 
 
     private func createSession(_ completion: (() -> ())? = nil) {
-        if shouldCreatSession {
-            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
-            sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
-            sessionConfiguration.httpMaximumConnectionsPerHost = 10000
-            sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
-            let sessionDelegate = TRSessionDelegate()
-            sessionDelegate.manager = self
-            session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
-            tasks.forEach({ $0.session = session })
-            shouldCreatSession = false
-            completion?()
-        }
+        guard shouldCreatSession else { return }
+        shouldCreatSession = false
+        let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
+        sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
+        sessionConfiguration.httpMaximumConnectionsPerHost = 10000
+        sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
+        let sessionDelegate = TRSessionDelegate()
+        sessionDelegate.manager = self
+        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
+        tasks.forEach { $0.session = session }
+        completion?()
     }
     
     private func matchStatus() {
         session.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-            guard let strongSelf = self else { return }
+            guard let self = self else { return }
             downloadTasks.forEach({ (downloadTask) in
                 if let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-                    let task = strongSelf.fetchTask(currentURLString: currentURLString) as? TRDownloadTask,
+                    let task = self.fetchTask(currentURLString: currentURLString) as? TRDownloadTask,
                     downloadTask.state == .running {
                     task.status = .running
                     task.task = downloadTask
-                    TiercelLog("[downloadTask] runing, manager.identifier: \(strongSelf.identifier), URLString: \(task.URLString)")
+                    TiercelLog("[downloadTask] runing, manager.identifier: \(self.identifier), URLString: \(task.URLString)")
                 }
             })
 
             //  处理mananger状态
-            if strongSelf.tasks.isEmpty {
-                strongSelf.status = .waiting
+            if self.tasks.isEmpty {
+                self.status = .waiting
                 return
             }
             
-            let isRunning = strongSelf.tasks.filter { $0.status == .running }.count > 0
+            let isRunning = self.tasks.filter { $0.status == .running }.count > 0
             if isRunning {
-                TiercelLog("[manager] running, manager.identifier: \(strongSelf.identifier)")
-                strongSelf.status = .running
+                TiercelLog("[manager] running, manager.identifier: \(self.identifier)")
+                self.status = .running
                 return
             }
 
-            let isCompleted = strongSelf.tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
+            let isCompleted = self.tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
             if isCompleted {
-                let isSucceeded = strongSelf.tasks.filter { $0.status == .failed }.isEmpty
+                let isSucceeded = self.tasks.filter { $0.status == .failed }.isEmpty
                 if isSucceeded {
-                    strongSelf.status = .succeeded
+                    self.status = .succeeded
                 } else {
-                    strongSelf.status = .failed
+                    self.status = .failed
                 }
             } else {
-                strongSelf.status = .suspended
+                self.status = .suspended
             }
         }
     }
@@ -232,33 +235,38 @@ extension TRManager {
     
     /// 开启一个下载任务
     ///
-    ///
     /// - Parameters:
     ///   - URLString: 需要下载的URLString
     ///   - fileName: 下载文件的文件名，如果传nil，则默认为url的md5加上文件扩展名
-    ///   - params: 参数
-    ///   - progressHandler: 当前task的progressHandler
-    ///   - successHandler: 当前task的successHandler
-    ///   - failureHandler: 当前task的failureHandler
+    ///   - progressHandler: 当前 task 的 progressHandler
+    ///   - successHandler: 当前 task 的 successHandler
+    ///   - failureHandler: 当前 task 的 failureHandler
     /// - Returns: 如果URLString有效，则返回对应的task；如果URLString无效，则返回nil
     @discardableResult
     public func download(_ URLString: String,
                          headers: [String: String]? = nil,
-                         fileName: String? = nil) -> TRDownloadTask? {
+                         fileName: String? = nil,
+                         progressHandler: TRHandler<TRTask>? = nil,
+                         successHandler: TRHandler<TRTask>? = nil,
+                         failureHandler: TRHandler<TRTask>? = nil) -> TRDownloadTask? {
         
         guard let url = URL(string: URLString) else {
             TiercelLog("[manager] URLString错误：\(URLString), manager.identifier: \(identifier)")
             return nil
         }
-        
+        // 如果是新任务，添加到数组中
         guard let task = fetchTask(URLString) as? TRDownloadTask else {
             let newTask = TRDownloadTask(url,
                                          headers: headers,
                                          fileName: fileName,
-                                         cache: cache)
+                                         cache: cache,
+                                         progressHandler: progressHandler,
+                                         successHandler: successHandler,
+                                         failureHandler: failureHandler)
             newTask.manager = self
             newTask.session = session
             tasks.append(newTask)
+            newTask.start()
             return newTask
         }
         
@@ -276,10 +284,9 @@ extension TRManager {
     /// - Parameters:
     ///   - URLStrings: 需要下载的URLString数组
     ///   - fileNames: 下载文件的文件名，如果传nil，则默认为url的md5加上文件扩展名
-    ///   - params: 参数
-    ///   - progressHandler: 每个task的progressHandler
-    ///   - successHandler: 每个task的successHandler
-    ///   - failureHandler: 每个task的failureHandler
+    ///   - progressHandler: 每个 task 的 progressHandler
+    ///   - successHandler: 每个 task 的 successHandler
+    ///   - failureHandler: 每个 task 的 failureHandler
     /// - Returns: 返回URLString数组中有效URString对应的task数组
     @discardableResult
     public func multiDownload(_ URLStrings: [String],
@@ -307,8 +314,8 @@ extension TRManager {
             var task = fetchTask(url.absoluteString) as? TRDownloadTask
             if task != nil {
                 if let index = URLStrings.index(of: url.absoluteString) {
-                    task?.headers = headers?.safeObjectAtIndex(index)
-                    if let fileName = fileNames?.safeObjectAtIndex(index) {
+                    task?.headers = headers?.safeObject(at: index)
+                    if let fileName = fileNames?.safeObject(at: index) {
                         task?.fileName = fileName
                     }
                 }
@@ -316,8 +323,8 @@ extension TRManager {
                 var fileName: String?
                 var header: [String: String]?
                 if let index = URLStrings.index(of: url.absoluteString) {
-                    fileName = fileNames?.safeObjectAtIndex(index)
-                    header = headers?.safeObjectAtIndex(index)
+                    fileName = fileNames?.safeObject(at: index)
+                    header = headers?.safeObject(at: index)
                 }
                 task = TRDownloadTask(url,
                                       headers: header,
@@ -460,6 +467,11 @@ extension TRManager {
     internal func completed() {
         cache.storeTasks(tasks)
         
+        // 过滤出不同状态的任务
+        successTasks = tasks.filter { $0.status == .succeeded }
+        progressTasks = ((tasks - successTasks) ?? [] - failureTasks) ?? []
+        failureTasks = tasks.filter { $0.status == .failed }
+        
         // 处理移除状态
         guard !shouldRemove else { return }
         // 处理取消状态
@@ -560,8 +572,8 @@ extension TRManager {
     private func startNextTask() {
         let waitingTasks = tasks.filter { $0.status == .waiting }
         guard !waitingTasks.isEmpty else { return }
-        TiercelLog("[manager] start to download the next task, manager.identifier: \(identifier)")
         waitingTasks.forEach { $0.start() }
+        TiercelLog("[manager] start to download the next task, manager.identifier: \(identifier)")
     }
 }
 
@@ -666,9 +678,9 @@ extension TRManager {
     internal func didBecomeInvalidation(withError error: Error?) {
         createSession { [weak self] in
             guard let self = self else { return }
-            self.runningTasks.forEach({ $0.start() })
+            self.runningTasks.forEach { $0.start() }
             self.runningTasks.removeAll()
-            self.waitingTasks.forEach({ $0.start() })
+            self.waitingTasks.forEach { $0.start() }
             self.waitingTasks.removeAll()
         }
     }

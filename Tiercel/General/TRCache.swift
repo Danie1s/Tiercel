@@ -152,13 +152,13 @@ extension TRCache {
     internal func retrieveAllTasks() -> [TRTask]? {
         let path = (self.downloadPath as NSString).appendingPathComponent("\(self.name)Tasks.plist")
         
-        let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [TRTask]
-        tasks?.forEach({ (task) in
-            task.cache = self
-            if task.status == .waiting || task.status == .running {
-                task.status = .suspended
+        let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [TRDownloadTask]
+        tasks?.forEach {
+            $0.cache = self
+            if $0.status == .waiting || $0.status == .running {
+                $0.status = .suspended
             }
-        })
+        }
         return tasks
     }
 

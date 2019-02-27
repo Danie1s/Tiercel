@@ -34,155 +34,9 @@ extension TRTask {
     }
 }
 
-protocol DownloadTask {
-    
-    var cache: TRCache { set get }
-    
-    var session: URLSession? { set get }
-    
-    var headers: [String: String]? { set get }
-    
-    var progressHandler: TRHandler<TRTask>? { set get }
-    
-    var successHandler: TRHandler<TRTask>? { set get }
-    
-    var failureHandler: TRHandler<TRTask>? { set get }
-    
-    var request: URLRequest? { set get }
-    
-    /// 开始下载一个任务
-    func start()
-    /// 暂停任务
-    func suspend(_ handler: TRHandler<TRTask>?)
-    /// 取消任务
-    func cancel(_ handler: TRHandler<TRTask>?)
-    /// 删除任务
-    func remove(completely: Bool, _ handler: TRHandler<TRTask>?)
-    
-}
-
-extension DownloadTask {
-    
-    func start() {}
-    
-    func suspend(_ handler: TRHandler<TRTask>?) {}
-    
-    func cancel(_ handler: TRHandler<TRTask>?) {}
-    
-    func remove(completely: Bool, _ handler: TRHandler<TRTask>?) {}
-}
-
-public struct DefaultTask: Codable {
-    
-    public let URLString: String
-    
-    enum CodingKeys: String, CodingKey {
-        case URLString
-        case currentURLString
-        case fileName
-        case headers
-        case startDate
-        case endDate
-        case totalBytes
-        case completedBytes
-        case status
-        case verificationCode
-        case verificationType
-        case validation
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        URLString = (try? container.decode(String.self, forKey: .URLString)) ?? ""
-        try? container.decode(String.self, forKey: .currentURLString)
-        try? container.decode(String.self, forKey: .fileName)
-        try? container.decode([String: String].self, forKey: .headers)
-        try? container.decode(Double.self, forKey: .startDate)
-        try? container.decode(Double.self, forKey: .endDate)
-        try? container.decode(Int64.self, forKey: .totalBytes)
-        try? container.decode(Int64.self, forKey: .completedBytes)
-        try? container.decode(String.self, forKey: .status)
-        try? container.decode(String.self, forKey: .verificationCode)
-        try? container.decode(Int.self, forKey: .verificationType)
-        try? container.decode(Int.self, forKey: .validation)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        let container = try encoder.container(keyedBy: CodingKeys.self)
-        
-    }
-}
-
-extension DefaultTask: DownloadTask {
-    var cache: TRCache {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-    
-    var session: URLSession? {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-    
-    var headers: [String : String]? {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-    
-    var progressHandler: TRHandler<TRTask>? {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-    
-    var successHandler: TRHandler<TRTask>? {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-    
-    var failureHandler: TRHandler<TRTask>? {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-    
-    var request: URLRequest? {
-        get {
-            <#code#>
-        }
-        set {
-            <#code#>
-        }
-    }
-}
-
-
 public class TRTask: NSObject, NSCoding {
 
     internal weak var manager: TRManager?
-    internal var cache: TRCache
     internal var session: URLSession?
     
     internal var headers: [String: String]?
@@ -340,17 +194,20 @@ public class TRTask: NSObject, NSCoding {
     public internal(set) var error: Error?
 
 
-
     internal init(_ url: URL,
                 headers: [String: String]? = nil,
-                cache: TRCache) {
-        self.cache = cache
+                progressHandler: TRHandler<TRTask>? = nil,
+                successHandler: TRHandler<TRTask>? = nil,
+                failureHandler: TRHandler<TRTask>? = nil) {
         self.url = url
         self.URLString = url.absoluteString
         _currentURLString = url.absoluteString
         _fileName = url.tr.fileName
         super.init()
         self.headers = headers
+        self.successHandler = successHandler
+        self.progressHandler = progressHandler
+        self.failureHandler = failureHandler
     }
     
     public func encode(with aCoder: NSCoder) {
@@ -369,7 +226,6 @@ public class TRTask: NSObject, NSCoding {
     }
     
     public required init?(coder aDecoder: NSCoder) {
-        cache = TRCache.default
         URLString = aDecoder.decodeObject(forKey: "URLString") as! String
         url = URL(string: URLString)!
         _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
@@ -430,12 +286,15 @@ public class TRTask: NSObject, NSCoding {
 }
 
 extension TRTask {
+    
+    @available(*, deprecated, message: "Use `progressHandler` instead.")
     @discardableResult
     public func progress(_ handler: @escaping TRHandler<TRTask>) -> Self {
         progressHandler = handler
         return self
     }
-    
+
+    @available(*, deprecated, message: "Use `successHandler` instead.")
     @discardableResult
     public func success(_ handler: @escaping TRHandler<TRTask>) -> Self {
         successHandler = handler
@@ -446,10 +305,11 @@ extension TRTask {
         }
         return self
     }
-    
+    @available(*, deprecated, message: "Use `failureHandler` instead.")
     @discardableResult
     public func failure(_ handler: @escaping TRHandler<TRTask>) -> Self {
         failureHandler = handler
+        
         if status == .suspended ||
             status == .canceled ||
             status == .removed ||
@@ -465,19 +325,19 @@ extension TRTask {
 extension Array where Element == TRTask {
     @discardableResult
     public func progress(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.progress(handler) }
+        self.forEach { $0.progressHandler = handler }
         return self
     }
-    
+
     @discardableResult
     public func success(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.success(handler) }
+        self.forEach { $0.successHandler = handler }
         return self
     }
-    
+
     @discardableResult
     public func failure(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.failure(handler) }
+        self.forEach { $0.failureHandler = handler }
         return self
     }
 }

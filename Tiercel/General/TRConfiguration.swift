@@ -28,25 +28,23 @@ import UIKit
 
 protocol Configuration {
     // 请求超时时间
-    var timeoutIntervalForRequest: Double { set get }
+    var timeoutIntervalForRequest: Double { get }
     
     // 最大并发数
-    var maxConcurrentTasksLimit: Int { set get }
+    var maxConcurrentTasksLimit: Int { get }
     
     // 是否允许蜂窝网络下载
-    var allowsCellularAccess: Bool { set get }
+    var allowsCellularAccess: Bool { get }
 }
 
 public struct TRDefaultConfiguration: Configuration {
-    var timeoutIntervalForRequest: Double
+    public let timeoutIntervalForRequest: Double
     
-    var maxConcurrentTasksLimit: Int
+    public let maxConcurrentTasksLimit: Int
     
-    var allowsCellularAccess: Bool
+    public let allowsCellularAccess: Bool
     
-    // 请求超时时间
-    
-    public init(timeoutIntervalForRequest: Double = 30.0,
+    init(timeoutIntervalForRequest: Double = 30.0,
                 maxConcurrentTasksLimit: Int = Int.max,
                 allowsCellularAccess: Bool = false) {
         self.timeoutIntervalForRequest = timeoutIntervalForRequest
