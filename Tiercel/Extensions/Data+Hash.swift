@@ -28,7 +28,7 @@ import Foundation
 import CommonCrypto
 
 extension Data: TiercelCompatible { }
-extension Tiercel where Base == Data {
+extension TiercelWrapper where Base == Data {
     public var md5: String {
         var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
         _ = base.withUnsafeBytes { bytes in

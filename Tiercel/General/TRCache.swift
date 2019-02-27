@@ -290,7 +290,7 @@ extension TRCache {
 }
 
 extension URL: TiercelCompatible { }
-extension Tiercel where Base == URL {
+extension TiercelWrapper where Base == URL {
     public var fileName: String {
         var fileName = base.absoluteString.tr.md5
         if !base.pathExtension.isEmpty {
