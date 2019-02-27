@@ -162,7 +162,7 @@ extension TRCache {
         return tasks
     }
 
-    internal func retrievTmpFile(_ task: TRDownloadTask) {
+    internal func retrieveTmpFile(_ task: TRDownloadTask) {
         ioQueue.sync {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
