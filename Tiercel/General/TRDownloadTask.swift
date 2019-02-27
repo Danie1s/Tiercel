@@ -33,9 +33,7 @@ public class TRDownloadTask: TRTask {
             task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         }
     }
-    
-    internal var cache: TRCache
-    
+
     public var filePath: String {
         return cache.filePath(fileName: fileName)!
     }
@@ -56,18 +54,12 @@ public class TRDownloadTask: TRTask {
     internal var validateHandler: TRHandler<TRDownloadTask>?
     
     internal init(_ url: URL,
-                headers: [String: String]? = nil,
-                fileName: String? = nil,
-                cache: TRCache,
-                progressHandler: TRHandler<TRTask>? = nil,
-                successHandler: TRHandler<TRTask>? = nil,
-                failureHandler: TRHandler<TRTask>? = nil) {
-        self.cache = cache
+                  headers: [String: String]? = nil,
+                  fileName: String? = nil,
+                  cache: TRCache) {
         super.init(url,
                    headers: headers,
-                   progressHandler: progressHandler,
-                   successHandler: successHandler,
-                   failureHandler: failureHandler)
+                   cache: cache)
         if let fileName = fileName,
             !fileName.isEmpty {
             self.fileName = fileName
@@ -87,7 +79,6 @@ public class TRDownloadTask: TRTask {
     }
     
     public required init?(coder aDecoder: NSCoder) {
-        cache = TRCache.default
         super.init(coder: aDecoder)
         resumeData = aDecoder.decodeObject(forKey: "resumeData") as? Data
         guard let resumeData = resumeData else { return  }

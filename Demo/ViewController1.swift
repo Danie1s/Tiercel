@@ -27,7 +27,7 @@ class ViewController1: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let task = TRManager.default.tasks.safeObjectAtIndex(0) as? TRDownloadTask {
+        if let task = TRManager.default.tasks.safeObject(at: 0) as? TRDownloadTask {
             updateUI(task)
         }
     }

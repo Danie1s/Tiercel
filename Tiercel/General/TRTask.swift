@@ -37,6 +37,9 @@ extension TRTask {
 public class TRTask: NSObject, NSCoding {
 
     internal weak var manager: TRManager?
+
+    internal var cache: TRCache
+
     internal var session: URLSession?
     
     internal var headers: [String: String]?
@@ -195,19 +198,15 @@ public class TRTask: NSObject, NSCoding {
 
 
     internal init(_ url: URL,
-                headers: [String: String]? = nil,
-                progressHandler: TRHandler<TRTask>? = nil,
-                successHandler: TRHandler<TRTask>? = nil,
-                failureHandler: TRHandler<TRTask>? = nil) {
+                  headers: [String: String]? = nil,
+                  cache: TRCache) {
+        self.cache = cache
         self.url = url
         self.URLString = url.absoluteString
         _currentURLString = url.absoluteString
         _fileName = url.tr.fileName
         super.init()
         self.headers = headers
-        self.successHandler = successHandler
-        self.progressHandler = progressHandler
-        self.failureHandler = failureHandler
     }
     
     public func encode(with aCoder: NSCoder) {
@@ -226,24 +225,25 @@ public class TRTask: NSObject, NSCoding {
     }
     
     public required init?(coder aDecoder: NSCoder) {
+        cache = TRCache.default
         URLString = aDecoder.decodeObject(forKey: "URLString") as! String
         url = URL(string: URLString)!
         _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         super.init()
-        
+
         headers = aDecoder.decodeObject(forKey: "headers") as? [String: String]
         startDate = aDecoder.decodeDouble(forKey: "startDate")
         endDate = aDecoder.decodeDouble(forKey: "endDate")
         progress.totalUnitCount = aDecoder.decodeInt64(forKey: "totalBytes")
         progress.completedUnitCount = aDecoder.decodeInt64(forKey: "completedBytes")
         verificationCode = aDecoder.decodeObject(forKey: "verificationCode") as? String
-        
+
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
         status = TRStatus(rawValue: statusString)!
         let verificationTypeInt = aDecoder.decodeInteger(forKey: "verificationType")
         verificationType = TRVerificationType(rawValue: verificationTypeInt)!
-        
+
         let validationType = aDecoder.decodeInteger(forKey: "validation")
         validation = TRValidation(rawValue: validationType)!
     }
@@ -286,15 +286,12 @@ public class TRTask: NSObject, NSCoding {
 }
 
 extension TRTask {
-    
-    @available(*, deprecated, message: "Use `progressHandler` instead.")
     @discardableResult
     public func progress(_ handler: @escaping TRHandler<TRTask>) -> Self {
         progressHandler = handler
         return self
     }
 
-    @available(*, deprecated, message: "Use `successHandler` instead.")
     @discardableResult
     public func success(_ handler: @escaping TRHandler<TRTask>) -> Self {
         successHandler = handler
@@ -305,11 +302,10 @@ extension TRTask {
         }
         return self
     }
-    @available(*, deprecated, message: "Use `failureHandler` instead.")
+
     @discardableResult
     public func failure(_ handler: @escaping TRHandler<TRTask>) -> Self {
         failureHandler = handler
-        
         if status == .suspended ||
             status == .canceled ||
             status == .removed ||
@@ -325,19 +321,19 @@ extension TRTask {
 extension Array where Element == TRTask {
     @discardableResult
     public func progress(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.progressHandler = handler }
+        self.forEach { $0.progress(handler) }
         return self
     }
 
     @discardableResult
     public func success(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.successHandler = handler }
+        self.forEach { $0.success(handler) }
         return self
     }
 
     @discardableResult
     public func failure(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.failureHandler = handler }
+        self.forEach { $0.failure(handler) }
         return self
     }
 }

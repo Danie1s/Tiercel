@@ -36,19 +36,3 @@ extension Array {
         }
     }
 }
-
-extension Array where Element: Equatable {
-    
-    static func - (lhs: Array, rhs: Array) -> Array? {
-        guard lhs.count != 0, rhs.count != 0 else { return nil }
-        var result = lhs
-        result.forEach { item in
-            if rhs.contains(where: { $0 == item }) {
-                if let index = result.index(of: item) {
-                    result.remove(at: index)
-                }
-            }
-        }
-        return result
-    }
-}
