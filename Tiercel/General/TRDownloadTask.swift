@@ -38,7 +38,10 @@ public class TRDownloadTask: TRTask {
         return cache.filePath(fileName: fileName)!
     }
 
-    public var pathExtension: String?
+    public var pathExtension: String? {
+        let pathExtension = (filePath as NSString).pathExtension
+        return pathExtension.isEmpty ? nil : pathExtension
+    }
 
     internal var tmpFileURL: URL?
     
@@ -63,9 +66,6 @@ public class TRDownloadTask: TRTask {
         if let fileName = fileName,
             !fileName.isEmpty {
             self.fileName = fileName
-        }
-        if !url.pathExtension.isEmpty {
-            pathExtension = url.pathExtension
         }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
@@ -373,9 +373,6 @@ extension TRDownloadTask {
 
         progress.totalUnitCount = task.countOfBytesExpectedToReceive
         progress.completedUnitCount = task.countOfBytesReceived
-        if let pathExtension = task.response?.url?.pathExtension, !pathExtension.isEmpty {
-            self.pathExtension = pathExtension
-        }
 
         if let error = error {
             self.error = error
