@@ -455,22 +455,22 @@ extension TRManager {
         cache.storeTasks(tasks)
         
         // 处理移除状态
-        if shouldRemove {
+        if shouldRemove() {
             return
         }
-
+        
         // 处理取消状态
-        if shouldCancel {
+        if shouldCancel() {
             return
         }
 
         // 处理所有任务结束后的状态
-        if shouldComplete {
+        if shouldComplete() {
             return
         }
 
         // 处理暂停状态
-        if shouldSuspend {
+        if shouldSuspend() {
             return
         }
 
@@ -478,7 +478,8 @@ extension TRManager {
         startNextTask()
     }
     
-    private var shouldRemove: Bool {
+    
+    private func shouldRemove() -> Bool {
         guard status == .willRemove else { return false }
         guard tasks.isEmpty else { return true }
         
@@ -491,7 +492,7 @@ extension TRManager {
         return true
     }
     
-    private var shouldCancel: Bool {
+    private func shouldCancel() -> Bool {
         guard status == .willCancel else { return false }
         
         let isCancel = tasks.filter { $0.status != .succeeded }.isEmpty
@@ -505,7 +506,7 @@ extension TRManager {
         return true
     }
     
-    private var shouldComplete: Bool {
+    private func shouldComplete() -> Bool {
         
         let isCompleted = tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
         guard isCompleted else { return false }
@@ -536,7 +537,7 @@ extension TRManager {
         return true
     }
     
-    private var shouldSuspend: Bool {
+    private func shouldSuspend() -> Bool {
         let isSuspended = tasks.filter { $0.status != .suspended && $0.status != .succeeded && $0.status != .failed }.isEmpty
 
         if isSuspended {
