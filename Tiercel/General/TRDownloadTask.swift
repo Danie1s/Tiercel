@@ -139,10 +139,11 @@ public class TRDownloadTask: TRTask {
     internal override func cancel(_ handler: TRHandler<TRTask>? = nil) {
         guard status != .succeeded else { return }
         controlHandler = handler
-        status = .willCancel
         if status == .running {
+            status = .willCancel
             task?.cancel()
         } else {
+            status = .willCancel
             didCancelOrRemove()
             TiercelLog("[downloadTask] did cancel, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
             DispatchQueue.main.tr.safeAsync {
@@ -157,10 +158,11 @@ public class TRDownloadTask: TRTask {
     internal override func remove(completely: Bool = false, _ handler: TRHandler<TRTask>? = nil) {
         self.isRemoveCompletely = completely
         controlHandler = handler
-        status = .willRemove
         if status == .running {
+            status = .willRemove
             task?.cancel()
         } else {
+            status = .willRemove
             didCancelOrRemove()
             TiercelLog("[downloadTask] did remove, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
             DispatchQueue.main.tr.safeAsync {

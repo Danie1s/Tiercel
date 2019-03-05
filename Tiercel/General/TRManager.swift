@@ -248,7 +248,7 @@ extension TRManager {
         var task = fetchTask(URLString) as? TRDownloadTask
         if task != nil {
             task?.headers = headers
-            if let fileName = fileName {
+            if let fileName = fileName, !fileName.isEmpty {
                 task?.fileName = fileName
             }
         } else {
@@ -302,7 +302,7 @@ extension TRManager {
             if task != nil {
                 if let index = URLStrings.index(of: url.absoluteString) {
                     task?.headers = headers?.safeObject(at: index)
-                    if let fileName = fileNames?.safeObject(at: index) {
+                    if let fileName = fileNames?.safeObject(at: index), !fileName.isEmpty {
                         task?.fileName = fileName
                     }
                 }
@@ -322,10 +322,9 @@ extension TRManager {
                 tasks.append(task!)
             }
             temp.append(task!)
+            task?.start()
         }
-
-        temp.forEach { $0.start() }
-
+        
         return temp
     }
 }

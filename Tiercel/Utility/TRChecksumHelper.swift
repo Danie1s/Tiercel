@@ -35,6 +35,8 @@ public enum TRVerificationType : Int {
 
 public class TRChecksumHelper {
     
+    private static let ioQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.Checksum", attributes: .concurrent)
+    
     public class func validateFile(_ filePath: String,
                                    verificationCode: String,
                                    verificationType: TRVerificationType,
@@ -44,7 +46,7 @@ public class TRChecksumHelper {
             completion(false)
             return
         }
-        DispatchQueue.global().async {
+        ioQueue.async {
             guard FileManager.default.fileExists(atPath: filePath) else {
                 TiercelLog("file does not exist, filePath: \(filePath)")
                 completion(false)

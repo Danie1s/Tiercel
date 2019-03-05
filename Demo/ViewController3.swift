@@ -44,9 +44,17 @@ extension ViewController3 {
     @IBAction func multiDownload(_ sender: Any) {
         if downloadURLStrings.isEmpty {
             downloadURLStrings.append(contentsOf: URLStrings)
-            downloadManager?.multiDownload(URLStrings)
-            updateUI()
-            tableView.reloadData()
+            
+            // 如果同时开启的下载任务过多，会阻塞主线程，所以可以在子线程中开启
+            DispatchQueue.global().async {
+                self.downloadManager?.multiDownload(self.downloadURLStrings)
+                
+                DispatchQueue.main.async {
+                    self.updateUI()
+                    self.tableView.reloadData()
+                    
+                }
+            }
         }
     }
 
