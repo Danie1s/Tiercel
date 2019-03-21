@@ -13,7 +13,7 @@
   - [具体表现](#具体表现)
     - [下载过程中](#下载过程中)
     - [下载完成](#下载完成)
-    - [下载错误](下载错误)
+    - [下载错误](#下载错误)
   - [重定向](#重定向)
   - [前后台切换](#前后台切换)
   - [注意事项](#注意事项)
@@ -264,7 +264,6 @@ func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
 支持后台下载的downloadTask失败的时候，在`urlSession(_:task:didCompleteWithError:)`方法里面的`(error as NSError).userInfo`可能会出现一个key为`NSURLErrorBackgroundTaskCancelledReasonKey`的键值对，由此可以获得只有后台下载任务失败时才有相关的信息，具体请看：[Background Task Cancellation](https://developer.apple.com/documentation/foundation/urlsession/1508626-background_task_cancellation)
 
 ```swift
-// 或者是在session delegate 的 urlSession(_:task:didCompleteWithError:) 方法里面获取
 func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
     if let error = error {
         let backgroundTaskCancelledReason = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int
