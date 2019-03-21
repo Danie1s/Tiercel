@@ -234,9 +234,9 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
 Tiercel提供了文件校验功能，可以根据需要添加，校验结果在回调的`task.validation`里
 
 ```swift
-// 回调闭包在主线程运行
-let task = TRManager.default.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
 
+let task = TRManager.default.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
+// 回调闭包在主线程运行
 task?.validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c",
                    verificationType: .md5,
                    validateHandler: { (task) in
@@ -251,13 +251,13 @@ task?.validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c",
 TRChecksumHelper是文件校验的工具类，可以直接使用它对已经存在的文件进行校验
 
 ```swift
-/// 对文件进行校验，是在子线程进行的，但完成回调的闭包在主线程运行
+/// 对文件进行校验，是在子线程进行的
 ///
 /// - Parameters:
 ///   - filePath: 文件路径
 ///   - verificationCode: 文件的Hash值
 ///   - verificationType: Hash类型
-///   - completion: 完成回调
+///   - completion: 完成回调, 在子线程运行
 public class func validateFile(_ filePath: String, 
                                verificationCode: String, 
                                verificationType: TRVerificationType, 
