@@ -28,8 +28,8 @@ import Foundation
 
 
 extension Array {
-    public func safeObjectAtIndex(_ index: Int) -> Element? {
-        if index < self.count {
+    public func safeObject(at index: Int) -> Element? {
+        if index < count {
             return self[index]
         } else {
             return nil

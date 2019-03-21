@@ -34,11 +34,12 @@ extension TRTask {
     }
 }
 
-
 public class TRTask: NSObject, NSCoding {
 
     internal weak var manager: TRManager?
+
     internal var cache: TRCache
+
     internal var session: URLSession?
     
     internal var headers: [String: String]?
@@ -196,10 +197,9 @@ public class TRTask: NSObject, NSCoding {
     public internal(set) var error: Error?
 
 
-
     internal init(_ url: URL,
-                headers: [String: String]? = nil,
-                cache: TRCache) {
+                  headers: [String: String]? = nil,
+                  cache: TRCache) {
         self.cache = cache
         self.url = url
         self.URLString = url.absoluteString
@@ -231,19 +231,19 @@ public class TRTask: NSObject, NSCoding {
         _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         super.init()
-        
+
         headers = aDecoder.decodeObject(forKey: "headers") as? [String: String]
         startDate = aDecoder.decodeDouble(forKey: "startDate")
         endDate = aDecoder.decodeDouble(forKey: "endDate")
         progress.totalUnitCount = aDecoder.decodeInt64(forKey: "totalBytes")
         progress.completedUnitCount = aDecoder.decodeInt64(forKey: "completedBytes")
         verificationCode = aDecoder.decodeObject(forKey: "verificationCode") as? String
-        
+
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
         status = TRStatus(rawValue: statusString)!
         let verificationTypeInt = aDecoder.decodeInteger(forKey: "verificationType")
         verificationType = TRVerificationType(rawValue: verificationTypeInt)!
-        
+
         let validationType = aDecoder.decodeInteger(forKey: "validation")
         validation = TRValidation(rawValue: validationType)!
     }
@@ -291,7 +291,7 @@ extension TRTask {
         progressHandler = handler
         return self
     }
-    
+
     @discardableResult
     public func success(_ handler: @escaping TRHandler<TRTask>) -> Self {
         successHandler = handler
@@ -302,7 +302,7 @@ extension TRTask {
         }
         return self
     }
-    
+
     @discardableResult
     public func failure(_ handler: @escaping TRHandler<TRTask>) -> Self {
         failureHandler = handler
@@ -324,13 +324,13 @@ extension Array where Element == TRTask {
         self.forEach { $0.progress(handler) }
         return self
     }
-    
+
     @discardableResult
     public func success(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
         self.forEach { $0.success(handler) }
         return self
     }
-    
+
     @discardableResult
     public func failure(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
         self.forEach { $0.failure(handler) }

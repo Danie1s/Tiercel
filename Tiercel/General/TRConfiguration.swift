@@ -29,15 +29,15 @@ import UIKit
 public struct TRConfiguration {
     // 请求超时时间
     public var timeoutIntervalForRequest = 30.0
-    
+
     // 最大并发数
     public var maxConcurrentTasksLimit = Int.max
-    
+
     // 是否允许蜂窝网络下载
     public var allowsCellularAccess = false
-    
+
     public init() {
-        
+
     }
-    
+
 }

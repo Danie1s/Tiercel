@@ -38,7 +38,10 @@ public class TRDownloadTask: TRTask {
         return cache.filePath(fileName: fileName)!
     }
 
-    public var pathExtension: String?
+    public var pathExtension: String? {
+        let pathExtension = (filePath as NSString).pathExtension
+        return pathExtension.isEmpty ? nil : pathExtension
+    }
 
     internal var tmpFileURL: URL?
     
@@ -52,20 +55,17 @@ public class TRDownloadTask: TRTask {
     }
     
     internal var validateHandler: TRHandler<TRDownloadTask>?
-
+    
     internal init(_ url: URL,
-                headers: [String: String]? = nil,
-                fileName: String? = nil,
-                cache: TRCache) {
+                  headers: [String: String]? = nil,
+                  fileName: String? = nil,
+                  cache: TRCache) {
         super.init(url,
                    headers: headers,
                    cache: cache)
         if let fileName = fileName,
             !fileName.isEmpty {
             self.fileName = fileName
-        }
-        if !url.pathExtension.isEmpty {
-            pathExtension = url.pathExtension
         }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
@@ -139,7 +139,6 @@ public class TRDownloadTask: TRTask {
     internal override func cancel(_ handler: TRHandler<TRTask>? = nil) {
         guard status != .succeeded else { return }
         controlHandler = handler
-        
         if status == .running {
             status = .willCancel
             task?.cancel()
@@ -159,7 +158,6 @@ public class TRDownloadTask: TRTask {
     internal override func remove(completely: Bool = false, _ handler: TRHandler<TRTask>? = nil) {
         self.isRemoveCompletely = completely
         controlHandler = handler
-
         if status == .running {
             status = .willRemove
             task?.cancel()
@@ -241,7 +239,7 @@ extension TRDownloadTask {
     private func startToDownload() {
         task?.removeObserver(self, forKeyPath: "currentRequest")
         if let resumeData = resumeData {
-            cache.retrievTmpFile(self)
+            cache.retrieveTmpFile(self)
             if #available(iOS 10.2, *) {
                 task = session?.downloadTask(withResumeData: resumeData)
             } else if #available(iOS 10.0, *) {
@@ -377,9 +375,6 @@ extension TRDownloadTask {
 
         progress.totalUnitCount = task.countOfBytesExpectedToReceive
         progress.completedUnitCount = task.countOfBytesReceived
-        if let pathExtension = task.response?.url?.pathExtension, !pathExtension.isEmpty {
-            self.pathExtension = pathExtension
-        }
 
         if let error = error {
             self.error = error
@@ -443,7 +438,7 @@ extension Array where Element == TRDownloadTask {
                              verificationType: TRVerificationType,
                              validateHandler: @escaping TRHandler<TRDownloadTask>) -> [TRDownloadTask] {
         for (index, task) in self.enumerated() {
-            task.verificationCode = verificationCodes.safeObjectAtIndex(index)
+            task.verificationCode = verificationCodes.safeObject(at: index)
             task.verificationType = verificationType
             task.validateHandler = validateHandler
             if let manager = task.manager {

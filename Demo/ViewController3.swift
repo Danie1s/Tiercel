@@ -24,7 +24,7 @@ class ViewController3: BaseViewController {
                       "http://api.gfs100.cn/upload/20180131/201801311435101664.mp4",
                       "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
                       "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
-        
+
         guard let downloadManager = downloadManager else { return  }
 
         setupManager()
@@ -44,9 +44,17 @@ extension ViewController3 {
     @IBAction func multiDownload(_ sender: Any) {
         if downloadURLStrings.isEmpty {
             downloadURLStrings.append(contentsOf: URLStrings)
-            downloadManager?.multiDownload(URLStrings)
-            updateUI()
-            tableView.reloadData()
+            
+            // 如果同时开启的下载任务过多，会阻塞主线程，所以可以在子线程中开启
+            DispatchQueue.global().async {
+                self.downloadManager?.multiDownload(self.downloadURLStrings)
+                
+                DispatchQueue.main.async {
+                    self.updateUI()
+                    self.tableView.reloadData()
+                    
+                }
+            }
         }
     }
 

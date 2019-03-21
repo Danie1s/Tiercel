@@ -28,7 +28,7 @@ import Foundation
 
 
 extension String: TiercelCompatible { }
-extension Tiercel where Base == String {
+extension TiercelWrapper where Base == String {
     public var md5: String {
         guard let data = base.data(using: .utf8) else {
             return base

@@ -28,7 +28,7 @@ import Foundation
 
 
 extension Double: TiercelCompatible {}
-extension Tiercel where Base == Double {
+extension TiercelWrapper where Base == Double {
     /// 返回 yyyy-MM-dd HH:mm:ss格式的字符串
     ///
     /// - Returns:

@@ -27,7 +27,7 @@
 import Foundation
 
 extension DispatchQueue: TiercelCompatible {}
-extension Tiercel where Base: DispatchQueue {
+extension TiercelWrapper where Base: DispatchQueue {
     internal func safeAsync(_ block: @escaping ()->()) {
         if Thread.isMainThread {
             block()

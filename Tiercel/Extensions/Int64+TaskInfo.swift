@@ -27,7 +27,7 @@
 import Foundation
 
 extension Int64: TiercelCompatible {}
-extension Tiercel where Base == Int64 {
+extension TiercelWrapper where Base == Int64 {
     
     /// 返回下载速度的字符串，如：1MB/s
     ///
