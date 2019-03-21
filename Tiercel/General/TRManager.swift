@@ -230,10 +230,8 @@ extension TRManager {
     ///
     /// - Parameters:
     ///   - URLString: 需要下载的URLString
+    ///   - headers: headers
     ///   - fileName: 下载文件的文件名，如果传nil，则默认为url的md5加上文件扩展名
-    ///   - progressHandler: 当前 task 的 progressHandler
-    ///   - successHandler: 当前 task 的 successHandler
-    ///   - failureHandler: 当前 task 的 failureHandler
     /// - Returns: 如果URLString有效，则返回对应的task；如果URLString无效，则返回nil
     @discardableResult
     public func download(_ URLString: String,
@@ -241,7 +239,7 @@ extension TRManager {
                          fileName: String? = nil) -> TRDownloadTask? {
         
         guard let url = URL(string: URLString) else {
-            TiercelLog("[manager] URLString错误：\(URLString), manager.identifier: \(identifier)")
+            TiercelLog("[manager] URLString error：\(URLString), manager.identifier: \(identifier)")
             return nil
         }
 
@@ -265,67 +263,39 @@ extension TRManager {
         return task
     }
     
-    /// 批量开启多个下载任务
-    /// 所有任务都会并发下载
+
+    /// 批量开启多个下载任务, 所有任务都会并发下载
     ///
     /// - Parameters:
     ///   - URLStrings: 需要下载的URLString数组
+    ///   - headers: headers
     ///   - fileNames: 下载文件的文件名，如果传nil，则默认为url的md5加上文件扩展名
-    ///   - progressHandler: 每个 task 的 progressHandler
-    ///   - successHandler: 每个 task 的 successHandler
-    ///   - failureHandler: 每个 task 的 failureHandler
     /// - Returns: 返回URLString数组中有效URString对应的task数组
     @discardableResult
     public func multiDownload(_ URLStrings: [String],
                               headers: [[String: String]]? = nil,
                               fileNames: [String]? = nil) -> [TRDownloadTask] {
-        
-        // 去掉重复, 无效的url
-        var uniqueURLs = [URL]()
-        URLStrings.forEach { (URLString) in
-            if let uniqueUrl = URL(string: URLString) {
-                if !uniqueURLs.contains(uniqueUrl) {
-                    uniqueURLs.append(uniqueUrl)
-                }
-            } else {
-                TiercelLog("[manager] URLString错误：\(URLString), manager.identifier: \(identifier)")
-            }
-        }
-        
-        if uniqueURLs.isEmpty {
+        if let headers = headers,
+            headers.count != 0 && headers.count != URLStrings.count {
+            TiercelLog("[manager] multiDownload error：headers.count != URLStrings.count, manager.identifier: \(identifier)")
             return [TRDownloadTask]()
         }
         
-        var temp = [TRDownloadTask]()
-        for url in uniqueURLs {
-            var task = fetchTask(url.absoluteString) as? TRDownloadTask
-            if task != nil {
-                if let index = URLStrings.index(of: url.absoluteString) {
-                    task?.headers = headers?.safeObject(at: index)
-                    if let fileName = fileNames?.safeObject(at: index), !fileName.isEmpty {
-                        task?.fileName = fileName
-                    }
-                }
-            } else {
-                var fileName: String?
-                var header: [String: String]?
-                if let index = URLStrings.index(of: url.absoluteString) {
-                    fileName = fileNames?.safeObject(at: index)
-                    header = headers?.safeObject(at: index)
-                }
-                task = TRDownloadTask(url,
-                                      headers: header,
-                                      fileName: fileName,
-                                      cache: cache)
-                task?.manager = self
-                task?.session = session
-                tasks.append(task!)
-            }
-            temp.append(task!)
-            task?.start()
+        if let fileNames = fileNames,
+            fileNames.count != 0 && fileNames.count != URLStrings.count {
+            TiercelLog("[manager] multiDownload error：fileNames.count != URLStrings.count, manager.identifier: \(identifier)")
+            return [TRDownloadTask]()
         }
         
-        return temp
+        return URLStrings.compactMap { (URLString) -> TRDownloadTask? in
+            var fileName: String?
+            var header: [String: String]?
+            if let index = URLStrings.index(of: URLString) {
+                fileName = fileNames?.safeObject(at: index)
+                header = headers?.safeObject(at: index)
+            }
+            return download(URLString, headers: header, fileName: fileName)
+        }
     }
 }
 
