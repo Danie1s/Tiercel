@@ -286,16 +286,21 @@ extension TRManager {
             TiercelLog("[manager] multiDownload error：fileNames.count != URLStrings.count, manager.identifier: \(identifier)")
             return [TRDownloadTask]()
         }
-        
-        return URLStrings.compactMap { (URLString) -> TRDownloadTask? in
+
+        var uniqueTasks = [TRDownloadTask]()
+        URLStrings.forEach { (URLString) in
             var fileName: String?
             var header: [String: String]?
             if let index = URLStrings.index(of: URLString) {
                 fileName = fileNames?.safeObject(at: index)
                 header = headers?.safeObject(at: index)
             }
-            return download(URLString, headers: header, fileName: fileName)
+            if !uniqueTasks.contains { $0.URLString == URLString },
+               let task = download(URLString, headers: header, fileName: fileName) {
+                uniqueTasks.append(task)
+            }
         }
+        return uniqueTasks
     }
 }
 

@@ -24,7 +24,7 @@ class ViewController3: BaseViewController {
                       "http://api.gfs100.cn/upload/20180131/201801311435101664.mp4",
                       "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
                       "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
-        
+
         guard let downloadManager = downloadManager else { return  }
 
         setupManager()
