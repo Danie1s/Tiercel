@@ -31,11 +31,20 @@ extension UIDevice: TiercelCompatible {}
 extension TiercelWrapper where Base: UIDevice {
     public var freeDiskSpaceInBytes: Int64 {
         if #available(iOS 11.0, *) {
+            #if swift(>=5.0)
+            if let space = try? URL(fileURLWithPath: NSHomeDirectory() as String).resourceValues(forKeys: [URLResourceKey.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage {
+                return space
+            } else {
+                return 0
+            }
+            #else
             if let space = try? URL(fileURLWithPath: NSHomeDirectory() as String).resourceValues(forKeys: [URLResourceKey.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage {
                 return space ?? 0
             } else {
                 return 0
             }
+            #endif
+
         } else {
             if let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory() as String),
                 let freeSpace = (systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber)?.int64Value {

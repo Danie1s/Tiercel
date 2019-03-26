@@ -291,10 +291,17 @@ extension TRManager {
         URLStrings.forEach { (URLString) in
             var fileName: String?
             var header: [String: String]?
+            #if swift(>=5.0)
+            if let index = URLStrings.firstIndex(of: URLString) {
+                fileName = fileNames?.safeObject(at: index)
+                header = headers?.safeObject(at: index)
+            }
+            #else
             if let index = URLStrings.index(of: URLString) {
                 fileName = fileNames?.safeObject(at: index)
                 header = headers?.safeObject(at: index)
             }
+            #endif
             if !uniqueTasks.contains { $0.URLString == URLString },
                let task = download(URLString, headers: header, fileName: fileName) {
                 uniqueTasks.append(task)
@@ -409,8 +416,11 @@ extension TRManager {
     
     internal func didCancelOrRemove(_ URLString: String) {
         guard let task = fetchTask(URLString) else { return }
-
-        guard let tasksIndex = tasks.index(where: { $0.URLString == task.URLString }) else { return  }
+        #if swift(>=5.0)
+        guard let tasksIndex = tasks.firstIndex(where: { $0.URLString == task.URLString }) else { return }
+        #else
+        guard let tasksIndex = tasks.index(where: { $0.URLString == task.URLString }) else { return }
+        #endif
         tasks.remove(at: tasksIndex)
         
         
