@@ -183,7 +183,7 @@ public class TRManager {
     private func matchStatus() {
         session.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
             guard let self = self else { return }
-            downloadTasks.forEach({ (downloadTask) in
+            downloadTasks.forEach { downloadTask in
                 if let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
                     let task = self.fetchTask(currentURLString: currentURLString) as? TRDownloadTask,
                     downloadTask.state == .running {
@@ -191,7 +191,7 @@ public class TRManager {
                     task.task = downloadTask
                     TiercelLog("[downloadTask] runing, manager.identifier: \(self.identifier), URLString: \(task.URLString)")
                 }
-            })
+            }
 
             //  处理mananger状态
             if self.tasks.isEmpty {
@@ -209,11 +209,7 @@ public class TRManager {
             let isCompleted = self.tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
             if isCompleted {
                 let isSucceeded = self.tasks.filter { $0.status == .failed }.isEmpty
-                if isSucceeded {
-                    self.status = .succeeded
-                } else {
-                    self.status = .failed
-                }
+                self.status = isSucceeded ? .succeeded : .failed
             } else {
                 self.status = .suspended
             }
@@ -288,22 +284,13 @@ extension TRManager {
         }
 
         var uniqueTasks = [TRDownloadTask]()
-        URLStrings.forEach { (URLString) in
+        for (index, URLString) in URLStrings.enumerated() {
             var fileName: String?
             var header: [String: String]?
-            #if swift(>=5.0)
-            if let index = URLStrings.firstIndex(of: URLString) {
-                fileName = fileNames?.safeObject(at: index)
-                header = headers?.safeObject(at: index)
-            }
-            #else
-            if let index = URLStrings.index(of: URLString) {
-                fileName = fileNames?.safeObject(at: index)
-                header = headers?.safeObject(at: index)
-            }
-            #endif
+            fileName = fileNames?.safeObject(at: index)
+            header = headers?.safeObject(at: index)
             if !uniqueTasks.contains { $0.URLString == URLString },
-               let task = download(URLString, headers: header, fileName: fileName) {
+                let task = download(URLString, headers: header, fileName: fileName) {
                 uniqueTasks.append(task)
             }
         }
@@ -572,18 +559,7 @@ extension TRManager {
         let costTime = currentTime - lastTime
         
         // costTime作为速度刷新的频率，也作为计算实时速度的时间段
-        if costTime <= 0.8 {
-            if speed == 0 {
-                if currentData > lastData {
-                    speed = Int64(Double(currentData - lastData) / costTime)
-                    updateTimeRemaining()
-                }
-                tasks.forEach({ (task) in
-                    if let task = task as? TRDownloadTask {
-                        task.updateSpeedAndTimeRemaining(costTime)
-                    }
-                })
-            }
+        if costTime <= 0.8 && speed != 0 {
             return
         }
         
