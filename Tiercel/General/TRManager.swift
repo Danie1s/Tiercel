@@ -285,13 +285,12 @@ extension TRManager {
 
         var uniqueTasks = [TRDownloadTask]()
         for (index, URLString) in URLStrings.enumerated() {
-            var fileName: String?
-            var header: [String: String]?
-            fileName = fileNames?.safeObject(at: index)
-            header = headers?.safeObject(at: index)
-            if !uniqueTasks.contains { $0.URLString == URLString },
-                let task = download(URLString, headers: header, fileName: fileName) {
-                uniqueTasks.append(task)
+            if !uniqueTasks.contains { $0.URLString == URLString } {
+                let fileName = fileNames?.safeObject(at: index)
+                let header = headers?.safeObject(at: index)
+                if let task = download(URLString, headers: header, fileName: fileName) {
+                    uniqueTasks.append(task)
+                }
             }
         }
         return uniqueTasks
