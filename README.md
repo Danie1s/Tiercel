@@ -374,7 +374,7 @@ configuration.timeoutIntervalForRequest = 60
 TRManager.default.configuration = configuration
 ```
 
-**注意：建议在TRManager初始化后修改`configuration`，也支持下载中进行修改。但是不能修改`configuration`后马上开启任务下载，即不能在同一个代码块里修改`configuration`后开启任务下载。**
+**注意：建议在TRManager初始化后修改`configuration`，也支持下载中进行修改。但是不能修改`configuration`后马上开启任务下载，即不能在同一个代码块里修改`configuration`后开启任务下载，如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
 
 ### TRDownloadTask
 
