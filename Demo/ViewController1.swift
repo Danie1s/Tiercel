@@ -60,10 +60,8 @@ class ViewController1: UIViewController {
             self?.updateUI(task)
         }).success({ [weak self] (task) in
             self?.updateUI(task)
-            if task.status == .succeeded {
-                // 下载任务成功了
-                
-            }
+            // 下载任务成功了
+
         }).failure({ [weak self] (task) in
             self?.updateUI(task)
             

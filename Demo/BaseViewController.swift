@@ -68,19 +68,16 @@ class BaseViewController: UIViewController {
             strongSelf.updateUI()
 
             }.success{ [weak self] (manager) in
-                guard let strongSelf = self else { return }
-                strongSelf.updateUI()
-
-                if manager.status == .succeeded {
-                    // manager 成功了
-                }
+                guard let self = self else { return }
+                self.updateUI()
+                // 下载任务成功了
             }.failure { [weak self] (manager) in
-                guard let strongSelf = self,
-                    let downloadManager = strongSelf.downloadManager
+                guard let self = self,
+                    let downloadManager = self.downloadManager
                     else { return }
-                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
-                strongSelf.tableView.reloadData()
-                strongSelf.updateUI()
+                self.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+                self.tableView.reloadData()
+                self.updateUI()
                 
                 if manager.status == .suspended {
                     // manager 暂停了
@@ -155,15 +152,15 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
 
         // task的闭包引用了cell，所以这里的task要用weak
         cell.tapClosure = { [weak self, weak task] cell in
-            guard let strongSelf = self,
+            guard let self = self,
                 let task = task
                 else { return }
             switch task.status {
             case .running:
-                strongSelf.downloadManager?.suspend(URLString)
+                self.downloadManager?.suspend(URLString)
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
             case .waiting, .suspended, .failed:
-                strongSelf.downloadManager?.start(URLString)
+                self.downloadManager?.start(URLString)
                 cell.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
             default: break
             }
@@ -202,9 +199,8 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             .success({ [weak cell] (task) in
                 guard let cell = cell else { return }
                 cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
-                if task.status == .succeeded {
-                    // 下载任务成功了
-                }
+                // 下载任务成功了
+
             })
             .failure({ [weak cell] (task) in
                 guard let cell = cell else { return }
