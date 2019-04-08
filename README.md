@@ -378,7 +378,7 @@ TRManager.default.configuration = configuration
 
 ### TRDownloadTask
 
-TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。**所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
+TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。** 所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
 
 主要属性
 
