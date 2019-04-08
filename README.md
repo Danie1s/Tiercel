@@ -362,7 +362,6 @@ public var allowsCellularAccess = false
 更改TRManager的配置
 
 ```swift
-// 无论是否有下载任务正在运行，都可以在任何地方，随时配置
 // 如果只是更改某一项，可以直接对TRManager属性设置
 TRManager.default.configuration.allowsCellularAccess = true
 
@@ -375,7 +374,7 @@ configuration.timeoutIntervalForRequest = 60
 TRManager.default.configuration = configuration
 ```
 
-
+**注意：建议在TRManager初始化后修改`configuration`，也支持下载中进行修改。但是不能修改`configuration`后马上开启任务下载，即不能在同一个代码块里修改`configuration`后开启任务下载。**
 
 ### TRDownloadTask
 
