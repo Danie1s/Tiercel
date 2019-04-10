@@ -29,6 +29,9 @@ import UIKit
 public class TRDownloadTask: TRTask {
     
     internal var task: URLSessionDownloadTask? {
+        willSet {
+            task?.removeObserver(self, forKeyPath: "currentRequest")
+        }
         didSet {
             task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         }
@@ -199,13 +202,13 @@ public class TRDownloadTask: TRTask {
 
         guard let verificationCode = verificationCode else { return }
         TRChecksumHelper.validateFile(filePath, verificationCode: verificationCode, verificationType: verificationType) { [weak self] (isCorrect) in
-            guard let strongSelf = self else { return }
-            strongSelf.validation = isCorrect ? .correct : .incorrect
-            if let manager = strongSelf.manager {
+            guard let self = self else { return }
+            self.validation = isCorrect ? .correct : .incorrect
+            if let manager = self.manager {
                 manager.cache.storeTasks(manager.tasks)
             }
             DispatchQueue.main.tr.safeAsync {
-                strongSelf.validateHandler?(strongSelf)
+                self.validateHandler?(self)
             }
         }
     }
@@ -237,7 +240,7 @@ extension TRDownloadTask {
     }
     
     private func startToDownload() {
-        task?.removeObserver(self, forKeyPath: "currentRequest")
+        
         if let resumeData = resumeData {
             cache.retrieveTmpFile(self)
             if #available(iOS 10.2, *) {
