@@ -105,8 +105,7 @@ public class TRDownloadTask: TRTask {
         cache.createDirectory()
         
         if cache.fileExists(fileName: fileName) {
-            TiercelLog("[downloadTask] 文件已经存在, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
-
+            TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", URLString: URLString)
             if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePath(fileName: fileName)!), let length = fileInfo[.size] as? Int64 {
                 progress.totalUnitCount = length
             }
@@ -129,7 +128,7 @@ public class TRDownloadTask: TRTask {
 
         if status == .waiting {
             status = .suspended
-            TiercelLog("[downloadTask] did suspend, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
             DispatchQueue.main.tr.safeAsync {
                 self.progressHandler?(self)
                 self.controlHandler?(self)
@@ -148,7 +147,7 @@ public class TRDownloadTask: TRTask {
         } else {
             status = .willCancel
             didCancelOrRemove()
-            TiercelLog("[downloadTask] did cancel, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+            TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
             DispatchQueue.main.tr.safeAsync {
                 self.controlHandler?(self)
                 self.failureHandler?(self)
@@ -167,7 +166,7 @@ public class TRDownloadTask: TRTask {
         } else {
             status = .willRemove
             didCancelOrRemove()
-            TiercelLog("[downloadTask] did remove, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+            TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", URLString: URLString)
             DispatchQueue.main.tr.safeAsync {
                 self.controlHandler?(self)
                 self.failureHandler?(self)
@@ -182,7 +181,7 @@ public class TRDownloadTask: TRTask {
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
-        TiercelLog("[downloadTask] completed, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", URLString: URLString)
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
             self.successHandler?(self)
@@ -224,7 +223,7 @@ extension TRDownloadTask {
                 startToDownload()
             } else {
                 status = .waiting
-                TiercelLog("[downloadTask] waiting, manager.identifier: \(manager.identifier), URLString: \(URLString)")
+                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, URLString: URLString)
                 DispatchQueue.main.tr.safeAsync {
                     self.progressHandler?(self)
                 }
@@ -233,7 +232,7 @@ extension TRDownloadTask {
             completed()
             manager.completed()
         case .running:
-            TiercelLog("[downloadTask] running, manager.identifier: \(manager.identifier), URLString: \(URLString)")
+            TiercelLog("[downloadTask] running", identifier: manager.identifier, URLString: URLString)
         default: break
         }
         cache.storeTasks(manager.tasks)
@@ -264,7 +263,7 @@ extension TRDownloadTask {
             startDate = Date().timeIntervalSince1970
         }
         status = .running
-        TiercelLog("[downloadTask] runing, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", URLString: URLString)
         DispatchQueue.main.tr.safeAsync {
             self.progressHandler?(self)
         }
@@ -396,12 +395,11 @@ extension TRDownloadTask {
             switch status {
             case .suspended:
                 status = .suspended
-                TiercelLog("[downloadTask] did suspend, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
 
             case .willSuspend:
                 status = .suspended
-                TiercelLog("[downloadTask] did suspend, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
-
+                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
                 DispatchQueue.main.tr.safeAsync {
                     self.progressHandler?(self)
                     self.controlHandler?(self)
@@ -410,10 +408,10 @@ extension TRDownloadTask {
             case .willCancel, .willRemove:
                 didCancelOrRemove()
                 if status == .canceled {
-                    TiercelLog("[downloadTask] did cancel, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+                    TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
                 }
                 if status == .removed {
-                    TiercelLog("[downloadTask] did removed, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString)")
+                    TiercelLog("[downloadTask] did removed", identifier: manager?.identifier ?? "", URLString: URLString)
                 }
                 DispatchQueue.main.tr.safeAsync {
                     self.controlHandler?(self)
@@ -421,7 +419,7 @@ extension TRDownloadTask {
                 }
             default:
                 status = .failed
-                TiercelLog("[downloadTask] failed, manager.identifier: \(manager?.identifier ?? ""), URLString: \(URLString), error: \(error)")
+                TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", URLString: URLString)
                 DispatchQueue.main.tr.safeAsync {
                     self.failureHandler?(self)
                 }

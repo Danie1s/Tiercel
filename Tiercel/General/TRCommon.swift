@@ -71,18 +71,23 @@ extension TiercelCompatible {
 }
 
 
-public func TiercelLog<T>(_ message: T, file: String = #file, method: String = #function, line: Int = #line) {
+public func TiercelLog<T>(_ message: T, identifier: String? = nil, URLString: String? = nil, file: String = #file, line: Int = #line) {
 
     switch TRManager.logLevel {
     case .detailed:
-        print("")
         print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
 
-        print("Source  :  \((file as NSString).lastPathComponent)[\(line)]\n" +
-              "Thread  :  \(threadNum)\n" +
-              "Info    :  \(message)"
-        )
+        var log = "Source     :  \((file as NSString).lastPathComponent)[\(line)]\n" +
+                  "Thread     :  \(threadNum)\n"
+        if identifier != nil {
+            log += "identifier :  \(identifier!)\n"
+        }
+        if URLString != nil {
+            log += "URLString  :  \(URLString!)\n"
+        }
+        log += "Info       :  \(message)"
+        print(log)
         print("")
     case .simple: print(message)
     case .none: break

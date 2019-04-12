@@ -204,8 +204,7 @@ public class TRManager {
         shouldCreatSession = true
         createSession()
         matchStatus()
-        
-        TiercelLog("[manager] retrieveTasks, tasks.count: \(tasks.count), manager.identifier: \(self.identifier)")
+        TiercelLog("[manager] retrieveTasks, tasks.count: \(tasks.count)", identifier: self.identifier)
     }
 
 
@@ -232,7 +231,7 @@ public class TRManager {
                     downloadTask.state == .running {
                     task.status = .running
                     task.task = downloadTask
-                    TiercelLog("[downloadTask] runing, manager.identifier: \(self.identifier), URLString: \(task.URLString)")
+                    TiercelLog("[downloadTask] runing", identifier: self.identifier, URLString: task.URLString)
                 }
             }
 
@@ -244,7 +243,7 @@ public class TRManager {
             
             let isRunning = self.tasks.filter { $0.status == .running }.count > 0
             if isRunning {
-                TiercelLog("[manager] running, manager.identifier: \(self.identifier)")
+                TiercelLog("[manager] running", identifier: self.identifier)
                 self.status = .running
                 return
             }
@@ -278,7 +277,7 @@ extension TRManager {
                          fileName: String? = nil) -> TRDownloadTask? {
         
         guard let url = URL(string: URLString) else {
-            TiercelLog("[manager] URLString error：\(URLString), manager.identifier: \(identifier)")
+            TiercelLog("[manager] URLString error：\(URLString)", identifier: identifier)
             return nil
         }
 
@@ -301,10 +300,11 @@ extension TRManager {
             task?.start()
         } else {
             task?.status = .suspended
-            waitingTasks.append(task!)
+            if !waitingTasks.contains(task!) {
+                waitingTasks.append(task!)
+            }
         }
         
-
         return task
     }
     
@@ -322,13 +322,13 @@ extension TRManager {
                               fileNames: [String]? = nil) -> [TRDownloadTask] {
         if let headers = headers,
             headers.count != 0 && headers.count != URLStrings.count {
-            TiercelLog("[manager] multiDownload error：headers.count != URLStrings.count, manager.identifier: \(identifier)")
+            TiercelLog("[manager] multiDownload error：headers.count != URLStrings.count", identifier: identifier)
             return [TRDownloadTask]()
         }
         
         if let fileNames = fileNames,
             fileNames.count != 0 && fileNames.count != URLStrings.count {
-            TiercelLog("[manager] multiDownload error：fileNames.count != URLStrings.count, manager.identifier: \(identifier)")
+            TiercelLog("[manager] multiDownload error：fileNames.count != URLStrings.count", identifier: identifier)
             return [TRDownloadTask]()
         }
 
@@ -363,7 +363,14 @@ extension TRManager {
     /// 如果存在则不会开启下载，直接调用task的successHandler
     public func start(_ URLString: String) {
         guard let task = fetchTask(URLString) else { return }
-        task.start()
+        if !shouldCreatSession {
+            task.start()
+        } else {
+            task.status = .suspended
+            if !waitingTasks.contains(task) {
+                waitingTasks.append(task)
+            }
+        }
     }
 
     
@@ -438,7 +445,7 @@ extension TRManager {
         if status != .running {
             progress.setUserInfoObject(Date().timeIntervalSince1970, forKey: .estimatedTimeRemainingKey)
             status = .running
-            TiercelLog("[manager] running, manager.identifier: \(identifier)")
+            TiercelLog("[manager] running", identifier: identifier)
             DispatchQueue.main.tr.safeAsync {
                 self.progressHandler?(self)
             }
@@ -498,7 +505,7 @@ extension TRManager {
         guard tasks.isEmpty else { return true }
         
         status = .removed
-        TiercelLog("[manager] removed, manager.identifier: \(identifier)")
+        TiercelLog("[manager] removed", identifier: identifier)
         DispatchQueue.main.tr.safeAsync {
             self.controlHandler?(self)
             self.failureHandler?(self)
@@ -512,7 +519,7 @@ extension TRManager {
         let isCancel = tasks.filter { $0.status != .succeeded }.isEmpty
         guard isCancel else { return true }
         status = .canceled
-        TiercelLog("[manager] canceled, manager.identifier: \(identifier)")
+        TiercelLog("[manager] canceled", identifier: identifier)
         DispatchQueue.main.tr.safeAsync {
             self.controlHandler?(self)
             self.failureHandler?(self)
@@ -537,13 +544,13 @@ extension TRManager {
         let isSucceeded = tasks.filter { $0.status == .failed }.isEmpty
         if isSucceeded {
             status = .succeeded
-            TiercelLog("[manager] succeeded, manager.identifier: \(identifier)")
+            TiercelLog("[manager] succeeded", identifier: identifier)
             DispatchQueue.main.tr.safeAsync {
                 self.successHandler?(self)
             }
         } else {
             status = .failed
-            TiercelLog("[manager] failed, manager.identifier: \(identifier)")
+            TiercelLog("[manager] failed", identifier: identifier)
             DispatchQueue.main.tr.safeAsync {
                 self.failureHandler?(self)
             }
@@ -559,7 +566,7 @@ extension TRManager {
                 return true
             }
             status = .suspended
-            TiercelLog("[manager] did suspend, manager.identifier: \(identifier)")
+            TiercelLog("[manager] did suspend", identifier: identifier)
             DispatchQueue.main.tr.safeAsync {
                 self.controlHandler?(self)
                 self.failureHandler?(self)
@@ -583,7 +590,7 @@ extension TRManager {
         if waitingTasks.isEmpty {
             return
         }
-        TiercelLog("[manager] start to download the next task, manager.identifier: \(identifier)")
+        TiercelLog("[manager] start to download the next task", identifier: identifier)
         waitingTasks.forEach { $0.start() }
     }
 }

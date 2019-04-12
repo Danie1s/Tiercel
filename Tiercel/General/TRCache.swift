@@ -36,7 +36,7 @@ public class TRCache {
     
     public let downloadFilePath: String
     
-    public let name: String
+    public let identifier: String
     
     private let fileManager = FileManager.default
     
@@ -51,7 +51,7 @@ public class TRCache {
     /// - Parameters:
     ///   - name: 不同的name，代表不同的下载模块，对应的文件放在不同的地方
     public init(_ name: String) {
-        self.name = name
+        self.identifier = name
         
         let ioQueueName = "com.Daniels.Tiercel.Cache.ioQueue.\(name)"
         ioQueue = DispatchQueue(label: ioQueueName)
@@ -81,7 +81,7 @@ extension TRCache {
             do {
                 try fileManager.createDirectory(atPath: downloadTmpPath, withIntermediateDirectories: true, attributes: nil)
             } catch  {
-                TiercelLog("createDirectory error: \(error)")
+                TiercelLog("createDirectory error: \(error)", identifier: identifier)
             }
         }
         
@@ -89,7 +89,7 @@ extension TRCache {
             do {
                 try fileManager.createDirectory(atPath: downloadFilePath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                TiercelLog("createDirectory error: \(error)")
+                TiercelLog("createDirectory error: \(error)", identifier: identifier)
             }
         }
     }
@@ -137,7 +137,7 @@ extension TRCache {
             do {
                 try self.fileManager.removeItem(atPath: self.downloadPath)
             } catch {
-                TiercelLog("removeItem error: \(error)")
+                TiercelLog("removeItem error: \(error)", identifier: self.identifier)
             }
             self.createDirectory()
         }
@@ -148,7 +148,7 @@ extension TRCache {
 // MARK: - retrieve
 extension TRCache {
     internal func retrieveAllTasks() -> [TRTask]? {
-        let path = (self.downloadPath as NSString).appendingPathComponent("\(self.name)Tasks.plist")
+        let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
         
         let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [TRTask]
         tasks?.forEach({ (task) in
@@ -171,13 +171,13 @@ extension TRCache {
                 do {
                     try self.fileManager.removeItem(atPath: path1)
                 } catch {
-                    TiercelLog("removeItem error: \(error)")
+                    TiercelLog("removeItem error: \(error)", identifier: identifier)
                 }
             } else {
                 do {
                     try self.fileManager.moveItem(atPath: path1, toPath: path2)
                 } catch {
-                    TiercelLog("moveItem error: \(error)")
+                    TiercelLog("moveItem error: \(error)", identifier: identifier)
                 }
             }
         }
@@ -191,7 +191,7 @@ extension TRCache {
 extension TRCache {
     internal func storeTasks(_ tasks: [TRTask]) {
         ioQueue.sync {
-            let path = (self.downloadPath as NSString).appendingPathComponent("\(self.name)Tasks.plist")
+            let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
             NSKeyedArchiver.archiveRootObject(tasks, toFile: path)
         }
     }
@@ -203,7 +203,7 @@ extension TRCache {
             do {
                 try self.fileManager.moveItem(at: location, to: URL(fileURLWithPath: destination))
             } catch {
-                TiercelLog("moveItem error: \(error)")
+                TiercelLog("moveItem error: \(error)", identifier: identifier)
             }
         }
     }
@@ -217,14 +217,14 @@ extension TRCache {
                 do {
                     try self.fileManager.removeItem(atPath: destination)
                 } catch {
-                    TiercelLog("removeItem error: \(error)")
+                    TiercelLog("removeItem error: \(error)", identifier: identifier)
                 }
             }
             if self.fileManager.fileExists(atPath: tmpPath) {
                 do {
                     try self.fileManager.copyItem(atPath: tmpPath, toPath: destination)
                 } catch {
-                    TiercelLog("copyItem error: \(error)")
+                    TiercelLog("copyItem error: \(error)", identifier: identifier)
                 }
             }
         }
@@ -252,7 +252,7 @@ extension TRCache {
                 do {
                     try self.fileManager.removeItem(atPath: path)
                 } catch {
-                    TiercelLog("removeItem error: \(error)")
+                    TiercelLog("removeItem error: \(error)", identifier: self.identifier)
                 }
             }
         }
@@ -273,7 +273,7 @@ extension TRCache {
                     do {
                         try self.fileManager.removeItem(atPath: path)
                     } catch {
-                        TiercelLog("removeItem error: \(error)")
+                        TiercelLog("removeItem error: \(error)", identifier: self.identifier)
                     }
                 }
             })
