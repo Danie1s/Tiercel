@@ -225,7 +225,7 @@ public class TRTask: NSObject, NSCoding {
     }
     
     public required init?(coder aDecoder: NSCoder) {
-        cache = TRCache.default
+        cache = TRCache("default")
         URLString = aDecoder.decodeObject(forKey: "URLString") as! String
         url = URL(string: URLString)!
         _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String

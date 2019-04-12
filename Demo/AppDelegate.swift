@@ -16,19 +16,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     
-    let downloadManager2 = TRManager("ViewController2")
+    let downloadManager1 = TRManager("ViewController1", configuration: TRConfiguration())
     
-    let downloadManager3 = TRManager("ViewController3")
+    var downloadManager2: TRManager = {
+        var configuration = TRConfiguration()
+        configuration.allowsCellularAccess = true
+        let manager = TRManager("ViewController2", configuration: configuration)
+        return manager
+    }()
     
-    let downloadManager4 = TRManager("ViewController4")
+    let downloadManager3 = TRManager("ViewController3", configuration: TRConfiguration())
+    
+    let downloadManager4 = TRManager("ViewController4", configuration: TRConfiguration())
 
     
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-        TRManager.default.configuration.allowsCellularAccess = false
-        print(TRManager.default)
-        
         return true
     }
 
@@ -55,13 +59,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
-        let downloadManagers = [TRManager.default, downloadManager2, downloadManager3, downloadManager4]
-        downloadManagers.forEach { (manager) in
-            if identifier == manager.identifier {
+        let downloadManagers = [downloadManager1, downloadManager2, downloadManager3, downloadManager4]
+        for manager in downloadManagers {
+            if manager.identifier == identifier {
                 manager.completionHandler = completionHandler
+                break
             }
         }
-
     }
 
 

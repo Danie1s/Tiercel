@@ -28,15 +28,25 @@ import UIKit
 
 public class TRManager {
     
-    public static let `default` = TRManager("default")
-    
     public static var logLevel: TRLogLevel = .detailed
     
     public static var isControlNetworkActivityIndicator = true
 
     private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.queue")
     
-    public var session: URLSession!
+    private var _session: URLSession?
+    private var session: URLSession? {
+        get {
+            return queue.sync {
+                _session
+            }
+        }
+        set {
+            return queue.sync {
+                _session = newValue
+            }
+        }
+    }
     
     public let cache: TRCache
     
@@ -44,9 +54,21 @@ public class TRManager {
     
     public var completionHandler: (() -> Void)?
 
-    private var shouldCreatSession: Bool = false
+    private var _shouldCreatSession: Bool = false
+    private var shouldCreatSession: Bool {
+        get {
+            return queue.sync {
+                _shouldCreatSession
+            }
+        }
+        set {
+            return queue.sync {
+                _shouldCreatSession = newValue
+            }
+        }
+    }
     
-    public var configuration = TRConfiguration() {
+    public var configuration: TRConfiguration {
         didSet {
             guard !shouldCreatSession else { return }
             shouldCreatSession = true
@@ -55,7 +77,8 @@ public class TRManager {
                 waitingTasks = tasks.filter { $0.status == .waiting }
                 totalSuspend()
             } else {
-                session.invalidateAndCancel()
+                session?.invalidateAndCancel()
+                session = nil;
             }
         }
     }
@@ -94,15 +117,38 @@ public class TRManager {
         }
     }
     
-    private var runningTasks = [TRTask]()
+    private var _runningTasks = [TRTask]()
+    private var runningTasks: [TRTask] {
+        get {
+            return queue.sync {
+                _runningTasks
+            }
+        }
+        set {
+            return queue.sync {
+                _runningTasks = newValue
+            }
+        }
+    }
     
-    private var waitingTasks = [TRTask]()
-
+    private var _waitingTasks = [TRTask]()
+    private var waitingTasks: [TRTask] {
+        get {
+            return queue.sync {
+                _waitingTasks
+            }
+        }
+        set {
+            return queue.sync {
+                _waitingTasks = newValue
+            }
+        }
+    }
     
     public var completedTasks: [TRTask] {
         return tasks.filter { $0.status == .succeeded }
     }
-    
+
     private let _progress = Progress()
     public var progress: Progress {
         _progress.completedUnitCount = tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
@@ -148,14 +194,11 @@ public class TRManager {
     private var controlHandler: TRHandler<TRManager>?
 
     
-    public init(_ identifier: String) {
+    public init(_ identifier: String, configuration: TRConfiguration) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
-        if identifier == "default" {
-            cache = TRCache.default
-        } else {
-            cache = TRCache(identifier)
-        }
+        self.configuration = configuration
+        cache = TRCache(identifier)
         tasks = cache.retrieveAllTasks() ?? [TRTask]()
         tasks.forEach { $0.manager = self }
         shouldCreatSession = true
@@ -181,7 +224,7 @@ public class TRManager {
     }
     
     private func matchStatus() {
-        session.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+        session?.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
             guard let self = self else { return }
             downloadTasks.forEach { downloadTask in
                 if let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
@@ -254,7 +297,13 @@ extension TRManager {
             task?.session = session
             tasks.append(task!)
         }
-        task?.start()
+        if !shouldCreatSession {
+            task?.start()
+        } else {
+            task?.status = .suspended
+            waitingTasks.append(task!)
+        }
+        
 
         return task
     }
@@ -402,13 +451,8 @@ extension TRManager {
     
     internal func didCancelOrRemove(_ URLString: String) {
         guard let task = fetchTask(URLString) else { return }
-        #if swift(>=5.0)
         guard let tasksIndex = tasks.firstIndex(where: { $0.URLString == task.URLString }) else { return }
-        #else
-        guard let tasksIndex = tasks.index(where: { $0.URLString == task.URLString }) else { return }
-        #endif
         tasks.remove(at: tasksIndex)
-        
         
         // 处理使用单个任务操作移除最后一个task时，manager状态
         if tasks.isEmpty {
@@ -521,7 +565,8 @@ extension TRManager {
                 self.failureHandler?(self)
             }
             if shouldCreatSession {
-                session.invalidateAndCancel()
+                session?.invalidateAndCancel()
+                session = nil
             }
             return true
         }

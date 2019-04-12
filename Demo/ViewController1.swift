@@ -22,12 +22,12 @@ class ViewController1: UIViewController {
 
 //    lazy var URLString = "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg"
     lazy var URLString = "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg"
-
+    var downloadManager = appDelegate.downloadManager1
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let task = TRManager.default.tasks.safeObject(at: 0) as? TRDownloadTask {
+        if let task = downloadManager.tasks.safeObject(at: 0) as? TRDownloadTask {
             updateUI(task)
         }
     }
@@ -56,12 +56,14 @@ class ViewController1: UIViewController {
     }
     
     @IBAction func start(_ sender: UIButton) {
-        TRManager.default.download(URLString)?.progress({ [weak self] (task) in
+        downloadManager.download(URLString)?.progress({ [weak self] (task) in
             self?.updateUI(task)
         }).success({ [weak self] (task) in
             self?.updateUI(task)
-            // 下载任务成功了
-
+            if task.status == .succeeded {
+                // 下载任务成功了
+                
+            }
         }).failure({ [weak self] (task) in
             self?.updateUI(task)
             
@@ -88,20 +90,20 @@ class ViewController1: UIViewController {
     }
 
     @IBAction func suspend(_ sender: UIButton) {
-        TRManager.default.suspend(URLString)
+        downloadManager.suspend(URLString)
     }
 
 
     @IBAction func cancel(_ sender: UIButton) {
-        TRManager.default.cancel(URLString)
+        downloadManager.cancel(URLString)
     }
 
     @IBAction func deleteTask(_ sender: UIButton) {
-        TRManager.default.remove(URLString, completely: false)
+        downloadManager.remove(URLString, completely: false)
     }
 
     @IBAction func clearDisk(_ sender: Any) {
-        TRManager.default.cache.clearDiskCache()
+        downloadManager.cache.clearDiskCache()
     }
 }
 

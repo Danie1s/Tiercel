@@ -27,9 +27,7 @@
 import UIKit
 
 public class TRCache {
-    
-    public static let `default` = TRCache("default")
-    
+        
     private let ioQueue: DispatchQueue
     
     public let downloadPath: String

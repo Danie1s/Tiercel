@@ -108,19 +108,22 @@ To run the example project, clone the repo, and run `Tiercel.xcodeproj` .
 
 ### 配置
 
-Tiercel内置一个全局的`TRManager.default`单例，因为支持原生后台下载，所以需要在`AppDelegate` 文件里配置
-
-以下为内置的`default`单例配置方法，如果需要使用多个下载模块，或者需要自定义`TRManager`，可参照`Demo`
+因为需要支持原生后台下载，所以需要在`AppDelegate` 文件里配置，参考以下做法
 
 ```swift
 // 在AppDelegate文件里
 
+// 不能使用懒加载
+var downloadManager: TRManager = {
+    var configuration = TRConfiguration()
+    configuration.allowsCellularAccess = true
+    let manager = TRManager("default", configuration: configuration)
+    return manager
+}()
+
 func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-    // 如果有使用内置全局的default单例，必须在此方法内调用一次，否则不会在App启动的时候初始化
-    
-    // 在这里进行初始化的配置，也可以在任何地方，随时进行配置
-    TRManager.default.configuration.allowsCellularAccess = true
+    // 必须要保证在这个方法结束前完成TRManager初始化
     
     return true
 }
@@ -128,10 +131,9 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
 // 必须实现此方法，并且把identifier对应的completionHandler保存起来
 func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
 
-    if identifier == TRManager.default.identifier {
-        TRManager.default.completionHandler = completionHandler
+    if downloadManager.identifier == identifier {
+        downloadManager.completionHandler = completionHandler
     }
-
 }
 ```
 
@@ -143,10 +145,10 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
 
 ```swift
 // 创建下载任务并且开启下载，同时返回可选类型的TRDownloadTask实例，如果URLString无效，则返回nil
-let task = TRManager.default.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
+let task = downloadManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
 
 // 批量创建下载任务并且开启下载，返回有效URLString对应的任务数组，URLStrings需要跟fileNames一一对应
-let tasks = TRManager.default.multiDownload(URLStrings)
+let tasks = downloadManager.multiDownload(URLStrings)
 ```
 
 如果需要设置回调
@@ -161,7 +163,7 @@ let tasks = TRManager.default.multiDownload(URLStrings)
 //    2. 任务下载失败，这时候task.status == .failed
 //    3. 取消任务，这时候task.status == .canceled
 //    4. 移除任务，这时候task.status == .removed
-let task = TRManager.default.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
+let task = downloadManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
 
 task?.progress({ (task) in
     let progress = task.progress.fractionCompleted
@@ -179,28 +181,28 @@ task?.progress({ (task) in
 let URLString = "http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"
 
 // 创建下载任务并且开启下载，同时返回可选类型的TRDownloadTask实例，如果URLString无效，则返回nil
-let task = TRManager.default.download(URLString)
+let task = downloadManager.download(URLString)
 // 根据URLString查找下载任务，返回可选类型的TRTask实例，如果不存在，则返回nil
-let task = TRManager.default.fetchTask(URLString)
+let task = downloadManager.fetchTask(URLString)
 
 // 开始下载
 // 如果调用suspend暂停了下载，可以调用这个方法继续下载
-TRManager.default.start(URLString)
+downloadManager.start(URLString)
 
 // 暂停下载
-TRManager.default.suspend(URLString)
+downloadManager.suspend(URLString)
 
 // 取消下载，没有下载完成的任务会被移除，不保留缓存，已经下载完成的不受影响
-TRManager.default.cancel(URLString)
+downloadManager.cancel(URLString)
 
 // 移除下载，任何状态的任务都会被移除，没有下载完成的缓存文件会被删除，可以选择是否保留已经下载完成的文件
-TRManager.default.remove(URLString, completely: false)
+downloadManager.remove(URLString, completely: false)
 
 // 除了可以对单个任务进行操作，TRManager也提供了对所有任务同时操作的API
-TRManager.default.totalStart()
-TRManager.default.totalSuspend()
-TRManager.default.totalCancel()
-TRManager.default.totalRemove(completely: false)
+downloadManager.totalStart()
+downloadManager.totalSuspend()
+downloadManager.totalCancel()
+downloadManager.totalRemove(completely: false)
 ```
 
 
@@ -213,8 +215,8 @@ Tiercel 2 的下载实现基于`URLSessionDownloadTask`，支持原生的后台�
 // 必须实现此方法，并且把identifier对应的completionHandler保存起来
 func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
 
-    if identifier == TRManager.default.identifier {
-        TRManager.default.completionHandler = completionHandler
+    if downloadManager.identifier == identifier {
+        downloadManager.completionHandler = completionHandler
     }
 }
 ```
@@ -235,7 +237,7 @@ Tiercel提供了文件校验功能，可以根据需要添加，校验结果在�
 
 ```swift
 
-let task = TRManager.default.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
+let task = downloadManager.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
 // 回调闭包在主线程运行
 task?.validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c",
                    verificationType: .md5,
@@ -270,7 +272,7 @@ public class func validateFile(_ filePath: String,
 
 ### TRManager
 
-TRManager是下载任务的管理者，管理当前模块所有下载任务，内置一个全局的`default`单例，如果需要多个下载模块，或者需要自定义TRManager，可以手动创建TRManager实例。
+TRManager是下载任务的管理者，管理当前模块所有下载任务
 
 **⚠️⚠️⚠️** 按照苹果官方文档的要求，TRManager实例必须在App启动的时候创建，即TRManager的生命周期跟App几乎一致，为方便使用，最好是作为`AppDelegate`的属性，或者是全局变量，具体请参照`Demo`。
 
@@ -279,7 +281,8 @@ TRManager是下载任务的管理者，管理当前模块所有下载任务，�
 ///
 /// - Parameters:
 ///   - identifier: 设置TRManager实例的标识，区分不同的下载模块，同时为urlSession的标识，原生级别的后台下载必须要有唯一标识
-public init(_ identifier: String) {
+///   - configuration: TRManager的配置
+public init(_ identifier: String, configuration: TRConfiguration) {
     // 实现的代码... 
 }
 ```
@@ -297,7 +300,7 @@ TRManager作为所有下载任务的管理者，也可以设置回调
 //    2. 所有任务都结束，但有一个或者多个是失败的，这时候manager.status == .failed
 //    3. 调用全部取消的方法，或者剩下一个任务的时候把这个任务取消，这时候manager.status == .canceled
 //    4. 调用全部移除的方法，或者剩下一个任务的时候把这个任务移除，这时候manager.status == .removed
-TRManager.default.progress { (manager) in
+downloadManager.progress { (manager) in
     let progress = manager.progress.fractionCompleted
     print("downloadManager运行中, 总进度：\(progress)")
     }.success { (manager) in
@@ -362,23 +365,24 @@ public var allowsCellularAccess = false
 更改TRManager的配置
 
 ```swift
+// 无论是否有下载任务正在运行，都可以更改TRManager配置
 // 如果只是更改某一项，可以直接对TRManager属性设置
-TRManager.default.configuration.allowsCellularAccess = true
+downloadManager.configuration.allowsCellularAccess = true
 
-// 如果是需要更改多项，最好是重新创建TRConfiguration
+// 如果是需要更改多项，需要重新创建TRConfiguration，再进行赋值
 let configuration = TRConfiguration()
 configuration.allowsCellularAccess = true
 configuration.maxConcurrentTasksLimit = 2
 configuration.timeoutIntervalForRequest = 60
 
-TRManager.default.configuration = configuration
+downloadManager.configuration = configuration
 ```
 
-**注意：建议在TRManager初始化后修改`configuration`，也支持下载中进行修改。但是不能修改`configuration`后马上开启任务下载，即不能在同一个代码块里修改`configuration`后开启任务下载，如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
+**注意：建议在TRManager初始化的时候传入已经修改好的`TRConfiguration`实例，参考Demo。Tiercel也支持在任务下载中修改配置，但是不建议修改`configuration`后马上开启任务下载，即不能在同一个代码块里修改`configuration`后开启任务下载，这样很容易造成错误，如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
 
 ### TRDownloadTask
 
-TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。** 所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
+TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。**所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
 
 主要属性
 
@@ -420,7 +424,7 @@ public var pathExtension: String?
 
 ### TRCache
 
-TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。TRCache实例一般作为TRManager实例的属性来使用，同样地，Tiercel内置一个全局的`TRCache.default`单例，对应`TRManager.default`。
+TRCache是Tiercel中负责管理缓存下载任务信息和下载文件的类。TRCache实例一般作为TRManager实例的属性来使用。
 
 ```swift
 /// 初始化方法
