@@ -154,7 +154,7 @@ let tasks = downloadManager.multiDownload(URLStrings)
 如果需要设置回调
 
 ```swift
-// 回调闭包的参数是TRDownloadTask实例，可以得到所有相关的信息
+// 回调闭包的参数是TRTask实例，可以得到所有相关的信息
 // 回调闭包都是在主线程运行
 // progress 闭包：如果任务正在下载，就会触发
 // success 闭包：任务已经下载过，或者下载完成，都会触发，这时候task.status == .succeeded
@@ -321,8 +321,6 @@ downloadManager.progress { (manager) in
 TRManager的主要属性
 
 ```swift
-// 内置的全局单例
-public static let `default` = TRManager("default")
 // 设置内置日志打印等级，如果为none则不打印
 public static var logLevel: TRLogLevel = .detailed
 // 是否需要对networkActivityIndicator进行管理
@@ -382,7 +380,7 @@ downloadManager.configuration = configuration
 
 ### TRDownloadTask
 
-TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。**所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
+TRDownloadTask是Tiercel中的下载任务类，继承自TRTask。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用TRManager实例对URLString进行操作。** 所以TRDownloadTask实例都是由TRManager实例创建，单独创建没有意义。
 
 主要属性
 
