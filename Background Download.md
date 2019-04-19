@@ -15,6 +15,7 @@
     - [下载完成](#下载完成)
     - [下载错误](#下载错误)
   - [重定向](#重定向)
+  - [最大并发数](#最大并发数)
   - [前后台切换](#前后台切换)
   - [注意事项](#注意事项)
 - [最后](#最后)
@@ -283,6 +284,37 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
 
 前面有提到downloadTask的`originalRequest`有可能为nil，只能用`currentRequest`来匹配任务进行管理，但`currentRequest`也有可能因为重定向而发生改变，而重定向的代理方法又不会调用，所以只能用KVO来观察`currentRequest`，这样就可以获取到最新的`currentRequest`
 
+### 最大并发数
+
+`URLSessionConfiguration`里有个`httpMaximumConnectionsPerHost`的属性，它的作用是控制同一个host同时连接的数量，苹果的文档显示，默认在macOS里是6，在iOS里是4。单从字面上来看它的效果应该是：如果设置为N，则同一个host最多有N个任务并发下载，其他任务在等待，而不同host的任务不受这个值影响。但是实际上又有很多需要注意的地方。
+
+- 没有资料显示它的最大值是多少，经测试，设置为1000000都没有问题，但是如果设置为Int.Max，则会出问题，对于大多数URL都是无法下载（应该跟目标url的服务器有关）；如果设置为小于1，对于大多数URL都无法下载
+
+- 当使用`URLSessionConfiguration.default`来创建一个`URLSession`时，无论在真机还是模拟器上
+  - `httpMaximumConnectionsPerHost`设置为10000，无论是否同一个host，都可以有多个任务（测试过180多个）并发下载
+  - `httpMaximumConnectionsPerHost`设置为1，对于同一个host只能同时有一个任务在下载，不同host可以有多个任务并发下载
+
+- 当使用`URLSessionConfiguration.background(withIdentifier:)`来创建一个支持后台下载的`URLSession`
+
+  - 在模拟器上
+
+    - `httpMaximumConnectionsPerHost`设置为10000，无论是否同一个host，都可以有多个任务（测试过180多个）并发下载
+
+    - `httpMaximumConnectionsPerHost`设置为1，对于同一个host只能同时有一个任务在下载，不同host可以有多个任务并发下载
+
+  - 在真机上
+    - 把它设置为10000，无论是否同一个host，并发下载的任务数都有限制（目前最大是6）
+    - 把它设置为1，对于同一个host只能同时有一个任务在下载，不同host并发下载的任务数有限制（目前最大是6）
+    - 即使使用多个`URLSession`开启下载，可以并发下载的任务数量也不会增加
+    - 以下是部分系统并发数的限制
+      - iOS 9 iPhone SE上是3
+      - iOS 10.3.3 iPhone 5上是3 
+      - iOS 11.2.5 iPhone 7Plus上是6
+      - iOS 12.1.2 iPhone 6s上是6
+      - iOS 12.2 iPhone XS Max上是6
+
+从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少性能的开销。即使系统没有对并发数进行限制，对于不同的host，就算设置为1，也会有多个任务同时下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是手动判断正在下载的任务数从而进行并发的控制。
+
 ### 前后台切换
 
 在downloadTask运行中，App进行前后台切换，会导致`urlSession(_:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)`方法不调用
@@ -298,8 +330,8 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
 
 ### 注意事项
 
-- 沙盒路径：用Xcode运行和停止项目，可以达到App crash的效果，但是无论是用真机还是模拟器，每用Xcode运行一次，都会改变沙盒路径，这会导致系统对downloadTask相关的文件操作失败，在某些情况系统记录的是上次的项目沙盒路径，最终导致出现奇怪的错误。我刚开始就是遇到这种情况，我并不知道是这个原因，所以觉得无法预测，也无法解决。各位在开发测试的时候，一定要注意。
-
+- 沙盒路径：用Xcode运行和停止项目，可以达到App crash的效果，但是无论是用真机还是模拟器，每用Xcode运行一次，都会改变沙盒路径，这会导致系统对downloadTask相关的文件操作失败，在某些情况系统记录的是上次的项目沙盒路径，最终导致出现无法开启任务下载、找不到文件夹等错误。我刚开始就是遇到这种情况，我并不知道是这个原因，所以觉得无法预测，也无法解决。各位在开发测试的时候，一定要注意。
+- 真机与模拟器：由于iOS后台下载的特性和注意事项实在太多，而且不同的iOS版本之间还存在一定的差别，所以使用模拟器进行开发和测试是一种很方便的选择。但是有些特性在真机和模拟器上表现又会不一样，例如在模拟器上下载任务的并发数是很大的，而在真机上则很小（在iOS 12上是6），所以一定要在真机上进行测试或者校验。
 - 缓存文件，前面说了恢复下载依靠的是resumeData，其实还需要对应的缓存文件，在resumeData里可以得到缓存文件的文件名（在iOS 8获得的是缓存文件路径），因为之前推荐使用`cancelByProducingResumeData`方法暂停任务，那么缓存文件会被移动到沙盒的Tmp文件夹，这个文件夹的数据在某些时候会被系统自动清理掉，所以为了以防万一，最好是自己保存一份。
 
 ## 最后

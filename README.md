@@ -354,7 +354,9 @@ TRConfiguration是Tiercel中配置TRManager的结构体，可配置属性如下�
 public var timeoutIntervalForRequest = 30.0
 
 // 最大并发数
-public var maxConcurrentTasksLimit = Int.max
+// 支持后台下载的任务，系统会进行最大并发数限制
+// 在iOS 11及以上是6，iOS 11以下是3
+public var maxConcurrentTasksLimit
 
 // 是否允许蜂窝网络下载
 public var allowsCellularAccess = false
@@ -376,7 +378,7 @@ configuration.timeoutIntervalForRequest = 60
 downloadManager.configuration = configuration
 ```
 
-**注意：建议在TRManager初始化的时候传入已经修改好的`TRConfiguration`实例，参考Demo。Tiercel也支持在任务下载中修改配置，但是不建议修改`configuration`后马上开启任务下载，即不能在同一个代码块里修改`configuration`后开启任务下载，这样很容易造成错误，如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
+**注意：建议在TRManager初始化的时候传入已经修改好的`TRConfiguration`实例，参考Demo。Tiercel也支持在任务下载中修改配置，但是不建议修改`configuration`后马上开启任务下载，即不要在同一个代码块里修改`configuration`后开启任务下载，这样很容易造成错误，如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
 
 ### TRDownloadTask
 
