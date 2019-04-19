@@ -142,11 +142,9 @@ NSURLSessionResumeServerDownloadDate
 - 在iOS 9 - iOS 10，改动如下:
   - `NSURLSessionResumeInfoVersion = 2`，`resumeData`版本升级
   - `NSURLSessionResumeInfoLocalPath`改成`NSURLSessionResumeInfoTempFileName`，缓存文件路径变成了缓存文件名
-
 - 在iOS 11，改动如下：
   - `NSURLSessionResumeInfoVersion = 4`，`resumeData`版本再次升级，应该是直接跳过3了
   - 如果是多次对downloadTask进行 `取消 - 恢复` 操作，生成的`resumeData`会多出一个key为`NSURLSessionResumeByteRange`的键值对
-
 - 在iOS 12，`resumeData`编码方式改变，需要用`NSKeyedUnarchiver`来解码，结构没有改变
 
 了解`resumeData`结构对解决它引起的Bug，实现离线断点续传，起到关键作用。
@@ -289,22 +287,16 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
 `URLSessionConfiguration`里有个`httpMaximumConnectionsPerHost`的属性，它的作用是控制同一个host同时连接的数量，苹果的文档显示，默认在macOS里是6，在iOS里是4。单从字面上来看它的效果应该是：如果设置为N，则同一个host最多有N个任务并发下载，其他任务在等待，而不同host的任务不受这个值影响。但是实际上又有很多需要注意的地方。
 
 - 没有资料显示它的最大值是多少，经测试，设置为1000000都没有问题，但是如果设置为Int.Max，则会出问题，对于大多数URL都是无法下载（应该跟目标url的服务器有关）；如果设置为小于1，对于大多数URL都无法下载
-
 - 当使用`URLSessionConfiguration.default`来创建一个`URLSession`时，无论在真机还是模拟器上
   - `httpMaximumConnectionsPerHost`设置为10000，无论是否同一个host，都可以有多个任务（测试过180多个）并发下载
   - `httpMaximumConnectionsPerHost`设置为1，对于同一个host只能同时有一个任务在下载，不同host可以有多个任务并发下载
-
 - 当使用`URLSessionConfiguration.background(withIdentifier:)`来创建一个支持后台下载的`URLSession`
-
   - 在模拟器上
-
     - `httpMaximumConnectionsPerHost`设置为10000，无论是否同一个host，都可以有多个任务（测试过180多个）并发下载
-
     - `httpMaximumConnectionsPerHost`设置为1，对于同一个host只能同时有一个任务在下载，不同host可以有多个任务并发下载
-
   - 在真机上
-    - 把它设置为10000，无论是否同一个host，并发下载的任务数都有限制（目前最大是6）
-    - 把它设置为1，对于同一个host只能同时有一个任务在下载，不同host并发下载的任务数有限制（目前最大是6）
+    - `httpMaximumConnectionsPerHost`设置为10000，无论是否同一个host，并发下载的任务数都有限制（目前最大是6）
+    - `httpMaximumConnectionsPerHost`设置为1，对于同一个host只能同时有一个任务在下载，不同host并发下载的任务数有限制（目前最大是6）
     - 即使使用多个`URLSession`开启下载，可以并发下载的任务数量也不会增加
     - 以下是部分系统并发数的限制
       - iOS 9 iPhone SE上是3
@@ -313,7 +305,7 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
       - iOS 12.1.2 iPhone 6s上是6
       - iOS 12.2 iPhone XS Max上是6
 
-从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少性能的开销。即使系统没有对并发数进行限制，对于不同的host，就算设置为1，也会有多个任务同时下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是手动判断正在下载的任务数从而进行并发的控制。
+从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少性能的开销。同时对于不同的host，就算`httpMaximumConnectionsPerHost`设置为1，也会有多个任务同时下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是手动判断正在下载的任务数从而进行并发的控制。
 
 ### 前后台切换
 
