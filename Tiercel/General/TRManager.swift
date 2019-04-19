@@ -32,17 +32,21 @@ public class TRManager {
     
     public static var isControlNetworkActivityIndicator = true
 
-    private let queue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.queue")
+    private let dataQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.dataQueue")
     
+    private let operationQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.operationQueue")
+    
+    private let configurationQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.configurationQueue")
+
     private var _session: URLSession?
     private var session: URLSession? {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _session
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _session = newValue
             }
         }
@@ -57,18 +61,18 @@ public class TRManager {
     private var _shouldCreatSession: Bool = false
     private var shouldCreatSession: Bool {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _shouldCreatSession
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _shouldCreatSession = newValue
             }
         }
     }
     
-    public var configuration: TRConfiguration {
+    private var _configuration: TRConfiguration {
         didSet {
             guard !shouldCreatSession else { return }
             shouldCreatSession = true
@@ -83,6 +87,21 @@ public class TRManager {
         }
     }
     
+    public var configuration: TRConfiguration {
+        get {
+            return configurationQueue.sync {
+                _configuration
+            }
+        }
+        set {
+            return operationQueue.sync {
+                configurationQueue.sync {
+                    _configuration = newValue
+                }
+            }
+        }
+    }
+    
     internal var shouldRun: Bool {
         return tasks.filter { $0.status == .running }.count < configuration.maxConcurrentTasksLimit
     }
@@ -91,12 +110,12 @@ public class TRManager {
     private var _status: TRStatus = .waiting
     public private(set) var status: TRStatus {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _status
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _status = newValue
             }
         }
@@ -106,12 +125,12 @@ public class TRManager {
     private var _tasks: [TRTask] = []
     public private(set) var tasks: [TRTask] {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _tasks
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _tasks = newValue
             }
         }
@@ -120,12 +139,12 @@ public class TRManager {
     private var _runningTasks = [TRTask]()
     private var runningTasks: [TRTask] {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _runningTasks
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _runningTasks = newValue
             }
         }
@@ -134,12 +153,12 @@ public class TRManager {
     private var _waitingTasks = [TRTask]()
     private var waitingTasks: [TRTask] {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _waitingTasks
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _waitingTasks = newValue
             }
         }
@@ -159,12 +178,12 @@ public class TRManager {
     private var _speed: Int64 = 0
     public private(set) var speed: Int64 {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _speed
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _speed = newValue
             }
         }
@@ -174,12 +193,12 @@ public class TRManager {
     private var _timeRemaining: Int64 = 0
     public private(set) var timeRemaining: Int64 {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _timeRemaining
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _timeRemaining = newValue
             }
         }
@@ -197,7 +216,7 @@ public class TRManager {
     public init(_ identifier: String, configuration: TRConfiguration) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
-        self.configuration = configuration
+        self._configuration = configuration
         cache = TRCache(identifier)
         tasks = cache.retrieveAllTasks() ?? [TRTask]()
         tasks.forEach { $0.manager = self }
@@ -209,17 +228,19 @@ public class TRManager {
 
 
     private func createSession(_ completion: (() -> ())? = nil) {
-        guard shouldCreatSession else { return }
-        let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
-        sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
-        sessionConfiguration.httpMaximumConnectionsPerHost = 10000
-        sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
-        let sessionDelegate = TRSessionDelegate()
-        sessionDelegate.manager = self
-        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
-        tasks.forEach { $0.session = session }
-        shouldCreatSession = false
-        completion?()
+        operationQueue.sync {
+            guard shouldCreatSession else { return }
+            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
+            sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
+            sessionConfiguration.httpMaximumConnectionsPerHost = 100000
+            sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
+            let sessionDelegate = TRSessionDelegate()
+            sessionDelegate.manager = self
+            session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
+            tasks.forEach { $0.session = session }
+            shouldCreatSession = false
+            completion?()
+        }
     }
     
     private func matchStatus() {
@@ -296,13 +317,14 @@ extension TRManager {
             task?.session = session
             tasks.append(task!)
         }
-        if !shouldCreatSession {
-            task?.start()
-        } else {
-            task?.status = .suspended
-            if !waitingTasks.contains(task!) {
+        operationQueue.sync {
+            if !shouldCreatSession {
+                task?.start()
+            } else {
+                task?.status = .suspended
                 waitingTasks.append(task!)
             }
+            cache.storeTasks(tasks)
         }
         
         return task
@@ -375,7 +397,7 @@ extension TRManager {
 
     
     /// 暂停任务，会触发sessionDelegate的完成回调
-    public func suspend(_ URLString: String, handler: TRHandler<TRTask>? = nil) {
+    public func suspend(_ URLString: String, _ handler: TRHandler<TRTask>? = nil) {
         guard let task = fetchTask(URLString) else { return }
         task.suspend(handler)
     }

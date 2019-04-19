@@ -44,14 +44,13 @@ class BaseViewController: UIViewController {
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
 
-        TRManager.logLevel = .detailed
+        TRManager.logLevel = .none
+        
+        updateSwicth()
     }
 
     func updateUI() {
         guard let downloadManager = downloadManager else { return  }
-        taskLimitSwitch.isOn = downloadManager.configuration.maxConcurrentTasksLimit < 3
-        cellularAccessSwitch.isOn = downloadManager.configuration.allowsCellularAccess
-        
         totalTasksLabel.text = "总任务：\(downloadManager.completedTasks.count)/\(downloadManager.tasks.count)"
         totalSpeedLabel.text = "总速度：\(downloadManager.speed.tr.convertSpeedToString())"
         timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemaining.tr.convertTimeToString())"
@@ -59,28 +58,29 @@ class BaseViewController: UIViewController {
         totalProgressLabel.text = "总进度： \(per)"
 
     }
+    
+    func updateSwicth() {
+        guard let downloadManager = downloadManager else { return  }
+        taskLimitSwitch.isOn = downloadManager.configuration.maxConcurrentTasksLimit < 3
+        cellularAccessSwitch.isOn = downloadManager.configuration.allowsCellularAccess
+    }
 
     func setupManager() {
 
         // 设置manager的回调
         downloadManager?.progress { [weak self] (manager) in
-            guard let strongSelf = self else { return }
-            strongSelf.updateUI()
+                self?.updateUI()
 
             }.success{ [weak self] (manager) in
-                guard let strongSelf = self else { return }
-                strongSelf.updateUI()
-
-                if manager.status == .succeeded {
-                    // manager 成功了
-                }
+                self?.updateUI()
+                // 下载任务成功了
             }.failure { [weak self] (manager) in
-                guard let strongSelf = self,
-                    let downloadManager = strongSelf.downloadManager
+                guard let self = self,
+                    let downloadManager = self.downloadManager
                     else { return }
-                strongSelf.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
-                strongSelf.tableView.reloadData()
-                strongSelf.updateUI()
+                self.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+                self.tableView.reloadData()
+                self.updateUI()
                 
                 if manager.status == .suspended {
                     // manager 暂停了
@@ -130,11 +130,13 @@ extension BaseViewController {
         } else {
             downloadManager?.configuration.maxConcurrentTasksLimit = Int.max
         }
+        updateSwicth()
         
     }
     
     @IBAction func cellularAccess(_ sender: UISwitch) {
         downloadManager?.configuration.allowsCellularAccess = sender.isOn
+        updateSwicth()
     }
 }
 
@@ -147,24 +149,18 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as! DownloadTaskCell
 
-        let URLString = downloadURLStrings[indexPath.row]
-
-        guard let downloadManager = downloadManager,
-            let task = downloadManager.fetchTask(URLString)
-            else { return cell }
-
         // task的闭包引用了cell，所以这里的task要用weak
-        cell.tapClosure = { [weak self, weak task] cell in
-            guard let strongSelf = self,
-                let task = task
+        cell.tapClosure = { [weak self] cell in
+            guard let indexPath = self?.tableView.indexPath(for: cell),
+                let URLString = self?.downloadURLStrings.safeObject(at: indexPath.row),
+                let task = self?.downloadManager?.fetchTask(URLString)
                 else { return }
+            
             switch task.status {
             case .running:
-                strongSelf.downloadManager?.suspend(URLString)
-                cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                self?.downloadManager?.suspend(URLString)
             case .waiting, .suspended, .failed:
-                strongSelf.downloadManager?.start(URLString)
-                cell.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
+                self?.downloadManager?.start(URLString)
             default: break
             }
         }
@@ -192,23 +188,19 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         
         cell.titleLabel.text = task.fileName
         
-        cell.updateProgress(task: task)
+        cell.updateProgress(task)
 
         task.progress { [weak cell] (task) in
-            guard let cell = cell else { return }
-            cell.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
-            cell.updateProgress(task: task)
+                cell?.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
+                cell?.updateProgress(task)
             }
-            .success({ [weak cell] (task) in
-                guard let cell = cell else { return }
-                cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
-                if task.status == .succeeded {
-                    // 下载任务成功了
-                }
-            })
-            .failure({ [weak cell] (task) in
-                guard let cell = cell else { return }
-                cell.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+            .success { [weak cell] (task) in
+                cell?.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                // 下载任务成功了
+
+            }
+            .failure { [weak cell] (task) in
+                cell?.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
                 if task.status == .suspended {
                     // 下载任务暂停了
                 }
@@ -222,7 +214,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
                 if task.status == .removed {
                     // 下载任务移除了
                 }
-            })
+            }
     }
 
     // 由于cell是循环利用的，不在可视范围内的cell，不应该去更新cell的状态

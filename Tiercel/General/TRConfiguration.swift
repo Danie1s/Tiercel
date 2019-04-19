@@ -28,16 +28,37 @@ import UIKit
 
 public struct TRConfiguration {
     // 请求超时时间
-    public var timeoutIntervalForRequest = 30.0
+    public var timeoutIntervalForRequest: TimeInterval = 60.0
 
     // 最大并发数
-    public var maxConcurrentTasksLimit = Int.max
+    private var _maxConcurrentTasksLimit: Int = MaxConcurrentTasksLimit
+    public var maxConcurrentTasksLimit: Int {
+        get {
+            return _maxConcurrentTasksLimit
+        }
+        set {
+            if newValue > MaxConcurrentTasksLimit {
+                _maxConcurrentTasksLimit = MaxConcurrentTasksLimit
+            } else if newValue < 1 {
+                _maxConcurrentTasksLimit = 1
+            } else {
+                _maxConcurrentTasksLimit = newValue
+            }
+        }
+    }
 
     // 是否允许蜂窝网络下载
-    public var allowsCellularAccess = false
+    public var allowsCellularAccess: Bool = false
 
     public init() {
 
     }
+}
 
+var MaxConcurrentTasksLimit: Int {
+    if #available(iOS 11.0, *) {
+        return 6
+    } else {
+        return 3
+    }
 }

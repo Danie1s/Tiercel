@@ -27,7 +27,7 @@ class DownloadTaskCell: UITableViewCell {
         tapClosure?(self)
     }
 
-    func updateProgress(task: TRTask) {
+    func updateProgress(_ task: TRTask) {
         progressView.progress = Float(task.progress.fractionCompleted)
         bytesLabel.text = "\(task.progress.completedUnitCount.tr.convertBytesToString())/\(task.progress.totalUnitCount.tr.convertBytesToString())"
         speedLabel.text = task.speed.tr.convertSpeedToString()

@@ -40,6 +40,7 @@
 		E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */; };
 		E1D8EFA421F6D2B3004B70C5 /* Array+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */; };
 		E1D8EFA621F6D328004B70C5 /* UIDevice+Free.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */; };
+		E1F6024A226822D300B69998 /* VideoURLStrings.plist in Resources */ = {isa = PBXBuildFile; fileRef = E1F60249226822D300B69998 /* VideoURLStrings.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +103,7 @@
 		E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
 		E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Safe.swift"; sourceTree = "<group>"; };
 		E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Free.swift"; sourceTree = "<group>"; };
+		E1F60249226822D300B69998 /* VideoURLStrings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = VideoURLStrings.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				E1C1DD5D206C92FE003665A9 /* Assets.xcassets */,
 				E1C1DD5F206C92FE003665A9 /* LaunchScreen.storyboard */,
 				E1C1DD62206C92FE003665A9 /* Info.plist */,
+				E1F60249226822D300B69998 /* VideoURLStrings.plist */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1F6024A226822D300B69998 /* VideoURLStrings.plist in Resources */,
 				E1C1DD77206C9385003665A9 /* DownloadTaskCell.xib in Resources */,
 				E1C1DD61206C92FE003665A9 /* LaunchScreen.storyboard in Resources */,
 				E1C1DD5E206C92FE003665A9 /* Assets.xcassets in Resources */,

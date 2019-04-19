@@ -50,10 +50,22 @@ public class TRDownloadTask: TRTask {
     
     internal var tmpFileName: String?
 
-    private var resumeData: Data? {
+    private var _resumeData: Data? {
         didSet {
-            guard let resumeData = resumeData else { return  }
+            guard let resumeData = _resumeData else { return  }
             tmpFileName = TRResumeDataHelper.getTmpFileName(resumeData)
+        }
+    }
+    private var resumeData: Data? {
+        get {
+            return queue.sync {
+                _resumeData
+            }
+        }
+        set {
+            return queue.sync {
+                _resumeData = newValue
+            }
         }
     }
     
@@ -235,7 +247,6 @@ extension TRDownloadTask {
             TiercelLog("[downloadTask] running", identifier: manager.identifier, URLString: URLString)
         default: break
         }
-        cache.storeTasks(manager.tasks)
     }
     
     private func startToDownload() {
@@ -411,7 +422,7 @@ extension TRDownloadTask {
                     TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
                 }
                 if status == .removed {
-                    TiercelLog("[downloadTask] did removed", identifier: manager?.identifier ?? "", URLString: URLString)
+                    TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", URLString: URLString)
                 }
                 DispatchQueue.main.tr.safeAsync {
                     self.controlHandler?(self)

@@ -45,6 +45,7 @@ public class TRTask: NSObject, NSCoding {
     internal var headers: [String: String]?
 
     internal var verificationCode: String?
+    
     internal var verificationType: TRVerificationType = .md5
     
     internal var progressHandler: TRHandler<TRTask>?
@@ -55,7 +56,7 @@ public class TRTask: NSObject, NSCoding {
     
     internal var controlHandler: TRHandler<TRTask>?
 
-    private let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
+    internal let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
 
     internal var request: URLRequest?
     

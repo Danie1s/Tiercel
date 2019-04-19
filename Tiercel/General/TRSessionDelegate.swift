@@ -27,7 +27,7 @@
 import UIKit
 
 internal class TRSessionDelegate: NSObject {
-    internal var manager: TRManager?
+    internal weak var manager: TRManager?
 
 }
 
