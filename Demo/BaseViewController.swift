@@ -44,7 +44,7 @@ class BaseViewController: UIViewController {
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
 
-        TRManager.logLevel = .none
+        TRManager.logLevel = .detailed
         
         updateSwicth()
     }

@@ -24,27 +24,27 @@
 
 ## 初衷
 
-很久以前，我发现了一个可能要面对的问题：
+很久以前，我发现了一个将要面对的问题：
 
 > 怎样才能并发地下载一堆文件，并且全部下载完成后再执行其他操作？
 
-当然，这个问题其实很简单，解决方案也有很多。但是，我第一时间想到的是，目前是否存一个具有任务组概念，非常权威，非常流行、稳定可靠，并且是用Swift写的，Github上star非常多的下载框架？我考虑的是如果存在这样的轮子，我就打算把它作为项目里专用的下载模块。很可惜，下载框架很多，也有很多这方面的文章和demo，但是像`AFNetworking`、`SDWebImage`这种著名，star非常多的，真的一个都没有，并且有一些还是用`NSURLConnection`实现的，用Swift写的就更少了，这让我有了打算自己撸一个的想法。
+当然，这个问题其实很简单，解决方案也有很多。但我第一时间想到的是，目前是否存一个具有任务组概念，非常权威，非常流行、稳定可靠，并且是用Swift写的，Github上star非常多的下载框架？如果存在这样的轮子，我就打算把它作为项目里专用的下载模块。很可惜，下载框架很多，也有很多这方面的文章和Demo，但是像`AFNetworking`、`SDWebImage`这种著名权威，star非常多的，真的一个都没有，而且有一些还是用`NSURLConnection`实现的，用Swift写的就更少了，这让我有了打算自己实现一个的想法。
 
 ## 理想与现实
 
 轮子这种东西，既然要自己撸，就不能随便，而且下载框架这方面也没权威著名的，所以一开始我打算满足自己需求的同时，尽量能做更多的事情，争取以后负责的项目都可以用得上。首先要满足的就是后台下载，众所周知iOS的App在后台是暂停的，那么要实现后台下载，就需要按照苹果的规定，使用`URLSessionDownloadTask`。
 
-网上一搜就有大量的相关文章和demo，然后我就开始愉快地撸代码。结果撸到一半发现，真正实现起来并且没有网上的文章说得那么简单，测试发现开源的轮子和demo也有很多地方有Bug，不完善，或者说没有完整地实现后台下载。于是只能靠自己继续深入的研究，但当时确实没有这方面研究地比较透彻文章，而时间方面也不允许，必须得尽快撸个轮子出来使用。所以最后我妥协了，我用了一个比较容易处理的办法，改成用`URLSessionDataTask`实现，虽然不是原生支持后台下载，但我觉得总有一些邪门歪道可以实现的，最后我写出了`Tiercel`，一个对现实妥协的下载框架，但也满足了我的需求，除了不支持后台下载。
+网上一搜就有大量的相关文章和Demo，然后我就开始愉快地撸代码。结果撸到一半发现，真正实现起来并且没有网上的文章说得那么简单，测试发现开源的轮子和Demo也有很多地方有Bug，不完善，或者说没有完整地实现后台下载。于是只能靠自己继续深入的研究，但当时确实没有这方面研究地比较透彻文章，而时间方面也不允许，必须得尽快撸个轮子出来使用。所以最后我妥协了，我用了一个比较容易处理的办法，改成用`URLSessionDataTask`实现，虽然不是原生支持后台下载，但我觉得总有一些邪门歪道可以实现的，最后我写出了`Tiercel`，一个对现实妥协的下载框架，不过已经满足了我的需求。
 
 ## 勿忘初心
 
-因为其实我并没有遇到后台下载硬性需求，所以我一直没有去寻找其他办法实现，而且我觉得如果要做，就必须使用`URLSessionDownloadTask`，实现原生级别的后台下载。但我心里一直都觉得没有实现当初的想法是一个极大的遗憾，于是我最后下定决心，打算把iOS的后台下载研究透彻。
+因为其实我并没有遇到后台下载硬性需求，所以我一直没有寻找其他办法去实现，而且我觉得如果要做，就必须使用`URLSessionDownloadTask`，实现原生级别的后台下载。随着时间的推移，我心里一直都觉得没有完成当初的想法是一个极大的遗憾，于是我最后下定决心，打算把iOS的后台下载研究透彻。
 
 终于，完美支持原生后台下载的[Tiercel 2](https://github.com/Danie1s/Tiercel)诞生了。下面我将详细讲解后台下载的实现和注意事项，希望能够帮助有需要的人。
 
 ## 后台下载
 
-关于后台下载，其实苹果有提供文档---[Downloading Files in the Background](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background)，但还是那句话，实现起来要面对的问题比文档说的要多得多。
+关于后台下载，其实苹果有提供文档---[Downloading Files in the Background](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background)，但实现起来要面对的问题比文档说的要多得多。
 
 ### URLSession
 
@@ -108,11 +108,11 @@ let downloadTask = urlSession.downloadTask(withResumeData: resumeData)
 downloadTask.resume()
 ```
 
-正常情况下，这样就已经可以恢复下载任务，可是现实很残酷，`resumeData`就是需要解决的第一个大坑。
+正常情况下，这样就已经可以恢复下载任务，但实际上并没有那么顺利，`resumeData`就存在各种各样的问题。
 
 ### ResumeData
 
-在iOS中，这个`resumeData`简直就是奇葩的存在，如果你有去研究过它，你会觉得不可思议，因为这个东西一直在变，而且经常有Bug，似乎苹果就是不想让我们去操作它。
+在iOS中，这个`resumeData`简直就是奇葩的存在，如果你有去研究过它，你会觉得不可思议，因为这个东西一直在变，而且经常有Bug，似乎苹果就是不想我们对它进行操作。
 
 #### ResumeData的结构
 
@@ -163,11 +163,11 @@ NSURLSessionResumeServerDownloadDate
   - Bug：从iOS 10.3开始，只要对downloadTask进行 `取消 - 恢复` 操作，使用生成的`resumeData`创建downloadTask，它的`originalRequest`为nil，到目前最新的系统版本（iOS 12.1）仍然一样，虽然不会影响文件的下载，但会影响到下载任务的管理。
   - 解决方法：使用`currentRequest`匹配任务，这里涉及到一个重定向问题，后面会有详细说明。
 
-以上是目前总结出的`resumeData`在不同的系统版本出现的改动和Bug，具体代码可以参考`Tiercel`。
+以上是目前总结出的`resumeData`在不同的系统版本出现的改动和Bug，解决的具体代码可以参考`Tiercel`。
 
 ### 具体表现
 
-支持后台下载的downloadTask已经创建，`resumeData`的问题也已经解决，现在已经可以愉快地开启和恢复下载了，但接下来要面对的是，这个downloadTask的具体表现，这也是实现一个下载框架最重要的环节。
+支持后台下载的downloadTask已经创建，`resumeData`的问题也已经解决，现在已经可以愉快地开启和恢复下载了。接下来要面对的是，这个downloadTask的具体表现，这也是实现一个下载框架最重要的环节。
 
 #### 下载过程中
 
@@ -256,7 +256,7 @@ func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
 }
 ```
 
-至此，下载完成的情况也处理完
+至此，下载完成的情况也处理完毕
 
 #### 下载错误
 
@@ -305,7 +305,7 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
       - iOS 12.1.2 iPhone 6s上是6
       - iOS 12.2 iPhone XS Max上是6
 
-从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少性能的开销。同时对于不同的host，就算`httpMaximumConnectionsPerHost`设置为1，也会有多个任务同时下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是手动判断正在下载的任务数从而进行并发的控制。
+从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少性能的开销。同时对于不同的host，就算`httpMaximumConnectionsPerHost`设置为1，也会有多个任务并发下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是通过判断正在下载的任务数从而进行并发的控制。
 
 ### 前后台切换
 
@@ -323,8 +323,8 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
 ### 注意事项
 
 - 沙盒路径：用Xcode运行和停止项目，可以达到App crash的效果，但是无论是用真机还是模拟器，每用Xcode运行一次，都会改变沙盒路径，这会导致系统对downloadTask相关的文件操作失败，在某些情况系统记录的是上次的项目沙盒路径，最终导致出现无法开启任务下载、找不到文件夹等错误。我刚开始就是遇到这种情况，我并不知道是这个原因，所以觉得无法预测，也无法解决。各位在开发测试的时候，一定要注意。
-- 真机与模拟器：由于iOS后台下载的特性和注意事项实在太多，而且不同的iOS版本之间还存在一定的差别，所以使用模拟器进行开发和测试是一种很方便的选择。但是有些特性在真机和模拟器上表现又会不一样，例如在模拟器上下载任务的并发数是很大的，而在真机上则很小（在iOS 12上是6），所以一定要在真机上进行测试或者校验。
-- 缓存文件，前面说了恢复下载依靠的是resumeData，其实还需要对应的缓存文件，在resumeData里可以得到缓存文件的文件名（在iOS 8获得的是缓存文件路径），因为之前推荐使用`cancelByProducingResumeData`方法暂停任务，那么缓存文件会被移动到沙盒的Tmp文件夹，这个文件夹的数据在某些时候会被系统自动清理掉，所以为了以防万一，最好是自己保存一份。
+- 真机与模拟器：由于iOS后台下载的特性和注意事项实在太多，而且不同的iOS版本之间还存在一定的差别，所以使用模拟器进行开发和测试是一种很方便的选择。但是有些特性在真机和模拟器上表现又会不一样，例如在模拟器上下载任务的并发数是很大的，而在真机上则很小（在iOS 12上是6），所以一定要在真机上进行测试或者校验，以真机的结果为准。
+- 缓存文件：前面说了恢复下载依靠的是`resumeData`，其实还需要对应的缓存文件，在`resumeData`里可以得到缓存文件的文件名（在iOS 8获得的是缓存文件路径），因为之前推荐使用`cancelByProducingResumeData`方法暂停任务，那么缓存文件会被移动到沙盒的Tmp文件夹，这个文件夹的数据在某些时候会被系统自动清理掉，所以为了以防万一，最好是额外保存一份。
 
 ## 最后
 
