@@ -34,6 +34,8 @@ public class TRManager {
 
     private let dataQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.dataQueue")
     
+    private let taskQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.taskQueue")
+    
     private let operationQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.operationQueue")
     
     private let configurationQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.configurationQueue")
@@ -301,23 +303,24 @@ extension TRManager {
             TiercelLog("[manager] URLString error：\(URLString)", identifier: identifier)
             return nil
         }
-
-        var task = fetchTask(URLString) as? TRDownloadTask
-        if task != nil {
-            task?.headers = headers
-            if let fileName = fileName, !fileName.isEmpty {
-                task?.fileName = fileName
-            }
-        } else {
-            task = TRDownloadTask(url,
-                                  headers: headers,
-                                  fileName: fileName,
-                                  cache: cache)
-            task?.manager = self
-            task?.session = session
-            tasks.append(task!)
-        }
+        
+        var task: TRDownloadTask?
         operationQueue.sync {
+            task = fetchTask(URLString) as? TRDownloadTask
+            if task != nil {
+                task?.headers = headers
+                if let fileName = fileName, !fileName.isEmpty {
+                    task?.fileName = fileName
+                }
+            } else {
+                task = TRDownloadTask(url,
+                                      headers: headers,
+                                      fileName: fileName,
+                                      cache: cache)
+                task?.manager = self
+                task?.session = session
+                tasks.append(task!)
+            }
             if !shouldCreatSession {
                 task?.start()
             } else {
@@ -355,12 +358,14 @@ extension TRManager {
         }
 
         var uniqueTasks = [TRDownloadTask]()
-        for (index, URLString) in URLStrings.enumerated() {
-            if !uniqueTasks.contains { $0.URLString == URLString } {
-                let fileName = fileNames?.safeObject(at: index)
-                let header = headers?.safeObject(at: index)
-                if let task = download(URLString, headers: header, fileName: fileName) {
-                    uniqueTasks.append(task)
+        taskQueue.sync {
+            for (index, URLString) in URLStrings.enumerated() {
+                if !uniqueTasks.contains { $0.URLString == URLString } {
+                    let fileName = fileNames?.safeObject(at: index)
+                    let header = headers?.safeObject(at: index)
+                    if let task = download(URLString, headers: header, fileName: fileName) {
+                        uniqueTasks.append(task)
+                    }
                 }
             }
         }
