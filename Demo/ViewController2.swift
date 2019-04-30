@@ -14,7 +14,7 @@ class ViewController2: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = appDelegate.downloadManager2
+        sessionManager = appDelegate.sessionManager2
 
 
         URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg",
@@ -43,7 +43,7 @@ class ViewController2: BaseViewController {
                       "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
                       "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
         
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
 
         setupManager()
 
@@ -55,13 +55,14 @@ class ViewController2: BaseViewController {
     }
 }
 
+
 // MARK: - tap event
 extension ViewController2 {
 
     @IBAction func addDownloadTask(_ sender: Any) {
         guard let URLString = URLStrings.first(where: { !downloadURLStrings.contains($0) }) else { return }
         downloadURLStrings.append(URLString)
-        downloadManager?.download(URLString)
+        sessionManager?.download(URLString)
         let index = downloadURLStrings.count - 1
         tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
         updateUI()
@@ -75,7 +76,7 @@ extension ViewController2 {
         let URLString = downloadURLStrings[index]
         downloadURLStrings.remove(at: index)
         tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        downloadManager?.remove(URLString, completely: false)
+        sessionManager?.remove(URLString, completely: false)
         updateUI()
         
     }

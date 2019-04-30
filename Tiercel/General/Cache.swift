@@ -1,5 +1,5 @@
 //
-//  TRCache.swift
+//  Cache.swift
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
@@ -26,7 +26,7 @@
 
 import UIKit
 
-public class TRCache {
+public class Cache {
         
     private let ioQueue: DispatchQueue
     
@@ -53,12 +53,12 @@ public class TRCache {
     public init(_ name: String) {
         self.identifier = name
         
-        let ioQueueName = "com.Daniels.Tiercel.Cache.ioQueue.\(name)"
+        let ioQueueName = "com.Tiercel.Cache.ioQueue.\(name)"
         ioQueue = DispatchQueue(label: ioQueueName)
         
         let cacheName = "com.Daniels.Tiercel.Cache.\(name)"
         
-        let diskCachePath = TRCache.defaultDiskCachePathClosure(cacheName)
+        let diskCachePath = Cache.defaultDiskCachePathClosure(cacheName)
         
         downloadPath = (diskCachePath as NSString).appendingPathComponent("Downloads")
 
@@ -74,7 +74,7 @@ public class TRCache {
 
 
 // MARK: - file
-extension TRCache {
+extension Cache {
     internal func createDirectory() {
 
         if !fileManager.fileExists(atPath: downloadTmpPath) {
@@ -146,21 +146,23 @@ extension TRCache {
 
 
 // MARK: - retrieve
-extension TRCache {
-    internal func retrieveAllTasks() -> [TRTask]? {
-        let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
-        
-        let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [TRTask]
-        tasks?.forEach({ (task) in
-            task.cache = self
-            if task.status == .waiting || task.status == .running {
-                task.status = .suspended
-            }
-        })
-        return tasks
+extension Cache {
+    internal func retrieveAllTasks() -> [Task]? {
+        return ioQueue.sync {
+            let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
+            
+            let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [Task]
+            tasks?.forEach({ (task) in
+                task.cache = self
+                if task.status == .waiting  {
+                    task.status = .suspended
+                }
+            })
+            return tasks
+        }
     }
 
-    internal func retrieveTmpFile(_ task: TRDownloadTask) {
+    internal func retrieveTmpFile(_ task: DownloadTask) {
         ioQueue.sync {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
@@ -188,15 +190,15 @@ extension TRCache {
 
 
 // MARK: - store
-extension TRCache {
-    internal func storeTasks(_ tasks: [TRTask]) {
+extension Cache {
+    internal func storeTasks(_ tasks: [Task]) {
         ioQueue.sync {
             let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
             NSKeyedArchiver.archiveRootObject(tasks, toFile: path)
         }
     }
     
-    internal func storeFile(_ task: TRDownloadTask) {
+    internal func storeFile(_ task: DownloadTask) {
         ioQueue.sync {
             guard let location = task.tmpFileURL else { return }
             let destination = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
@@ -208,7 +210,7 @@ extension TRCache {
         }
     }
     
-    internal func storeTmpFile(_ task: TRDownloadTask) {
+    internal func storeTmpFile(_ task: DownloadTask) {
         ioQueue.sync {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
@@ -235,8 +237,8 @@ extension TRCache {
 
 
 // MARK: - remove
-extension TRCache {
-    internal func remove(_ task: TRDownloadTask, completely: Bool) {
+extension Cache {
+    internal func remove(_ task: DownloadTask, completely: Bool) {
         removeTmpFile(task)
         
         if completely {
@@ -244,7 +246,7 @@ extension TRCache {
         }
     }
     
-    internal func removeFile(_ task: TRDownloadTask) {
+    internal func removeFile(_ task: DownloadTask) {
         ioQueue.async {
             if task.fileName.isEmpty { return }
             let path = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
@@ -263,7 +265,7 @@ extension TRCache {
     /// 删除保留在本地的缓存文件
     ///
     /// - Parameter task:
-    internal func removeTmpFile(_ task: TRDownloadTask) {
+    internal func removeTmpFile(_ task: DownloadTask) {
         ioQueue.async {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)

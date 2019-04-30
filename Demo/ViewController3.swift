@@ -15,7 +15,7 @@ class ViewController3: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = appDelegate.downloadManager3
+        sessionManager = appDelegate.sessionManager3
 
         URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg",
                       "http://dl1sw.baidu.com/client/20150922/Xcode_7.1_beta.dmg",
@@ -43,7 +43,7 @@ class ViewController3: BaseViewController {
                       "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
                       "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
 
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
         
 //        URLStrings.append(contentsOf: NSArray(contentsOfFile: Bundle.main.path(forResource: "VideoURLStrings.plist", ofType: nil)!) as! [String])
 
@@ -67,7 +67,7 @@ extension ViewController3 {
             
             // 如果同时开启的下载任务过多，会阻塞主线程，所以可以在子线程中开启
             DispatchQueue.global().async {
-                self.downloadManager?.multiDownload(self.downloadURLStrings)
+                self.sessionManager?.multiDownload(self.downloadURLStrings)
                 
                 DispatchQueue.main.async {
                     self.updateUI()

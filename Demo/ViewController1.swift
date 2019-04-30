@@ -22,17 +22,17 @@ class ViewController1: UIViewController {
 
 //    lazy var URLString = "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg"
     lazy var URLString = "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg"
-    var downloadManager = appDelegate.downloadManager1
+    var sessionManager = appDelegate.sessionManager1
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let task = downloadManager.tasks.safeObject(at: 0) as? TRDownloadTask {
+        if let task = sessionManager.tasks.safeObject(at: 0) as? DownloadTask {
             updateUI(task)
         }
     }
 
-    private func updateUI(_ task: TRTask) {
+    private func updateUI(_ task: Task) {
         let per = task.progress.fractionCompleted
         progressLabel.text = "progress： \(String(format: "%.2f", per * 100))%"
         progressView.progress = Float(per)
@@ -56,7 +56,7 @@ class ViewController1: UIViewController {
     }
     
     @IBAction func start(_ sender: UIButton) {
-        downloadManager.download(URLString)?.progress { [weak self] (task) in
+        sessionManager.download(URLString)?.progress { [weak self] (task) in
             self?.updateUI(task)
         }.success { [weak self] (task) in
             self?.updateUI(task)
@@ -77,7 +77,7 @@ class ViewController1: UIViewController {
             if task.status == .removed {
                 // 下载任务移除了
             }
-        }.validateFile(verificationCode: "9e2a3650530b563da297c9246acaad5c", verificationType: .md5, validateHandler: { [weak self] (task) in
+        }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5, { [weak self] (task) in
             self?.updateUI(task)
             if task.validation == .correct {
                 TiercelLog("文件正确")
@@ -88,20 +88,20 @@ class ViewController1: UIViewController {
     }
 
     @IBAction func suspend(_ sender: UIButton) {
-        downloadManager.suspend(URLString)
+        sessionManager.suspend(URLString)
     }
 
 
     @IBAction func cancel(_ sender: UIButton) {
-        downloadManager.cancel(URLString)
+        sessionManager.cancel(URLString)
     }
 
     @IBAction func deleteTask(_ sender: UIButton) {
-        downloadManager.remove(URLString, completely: false)
+        sessionManager.remove(URLString, completely: false)
     }
 
     @IBAction func clearDisk(_ sender: Any) {
-        downloadManager.cache.clearDiskCache()
+        sessionManager.cache.clearDiskCache()
     }
 }
 

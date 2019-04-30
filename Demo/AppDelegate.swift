@@ -16,18 +16,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     
-    let downloadManager1 = TRManager("ViewController1", configuration: TRConfiguration())
+    let sessionManager1 = SessionManager("ViewController1", configuration: SessionConfiguration())
     
-    var downloadManager2: TRManager = {
-        var configuration = TRConfiguration()
+    var sessionManager2: SessionManager = {
+        var configuration = SessionConfiguration()
         configuration.allowsCellularAccess = true
-        let manager = TRManager("ViewController2", configuration: configuration)
+        let manager = SessionManager("ViewController2", configuration: configuration, operationQueue: DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue"))
         return manager
     }()
     
-    let downloadManager3 = TRManager("ViewController3", configuration: TRConfiguration())
+    let sessionManager3 = SessionManager("ViewController3", configuration: SessionConfiguration())
     
-    let downloadManager4 = TRManager("ViewController4", configuration: TRConfiguration())
+    let sessionManager4 = SessionManager("ViewController4", configuration: SessionConfiguration())
 
     
 
@@ -59,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
-        let downloadManagers = [downloadManager1, downloadManager2, downloadManager3, downloadManager4]
+        let downloadManagers = [sessionManager1, sessionManager2, sessionManager3, sessionManager4]
         for manager in downloadManagers {
             if manager.identifier == identifier {
                 manager.completionHandler = completionHandler

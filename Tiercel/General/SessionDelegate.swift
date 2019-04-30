@@ -1,5 +1,5 @@
 //
-//  TRSessionDelegate.swift
+//  SessionDelegate.swift
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
@@ -26,13 +26,13 @@
 
 import UIKit
 
-internal class TRSessionDelegate: NSObject {
-    internal weak var manager: TRManager?
+internal class SessionDelegate: NSObject {
+    internal weak var manager: SessionManager?
 
 }
 
 
-extension TRSessionDelegate: URLSessionDownloadDelegate {
+extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
         manager?.didBecomeInvalidation(withError: error)
     }
@@ -46,7 +46,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let manager = manager,
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-            let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
+            let task = manager.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask()
             else { return }
         task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
     }
@@ -55,7 +55,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let manager = manager,
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-            let task = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
+            let task = manager.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask()
             else { return }
         task.didFinishDownloadingTo(location: location)
     }
@@ -63,7 +63,7 @@ extension TRSessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let manager = manager,
             let currentURLString = task.currentRequest?.url?.absoluteString,
-            let downloadTask = manager.fetchTask(currentURLString: currentURLString) as? TRDownloadTask
+            let downloadTask = manager.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask()
             else { return }
         downloadTask.didComplete(task: task, error: error)
     }

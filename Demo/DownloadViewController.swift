@@ -14,7 +14,7 @@ class DownloadViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        downloadManager = appDelegate.downloadManager4
+        sessionManager = appDelegate.sessionManager4
 
         setupManager()
 
@@ -22,7 +22,7 @@ class DownloadViewController: BaseViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
         downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
         updateUI()
         tableView.reloadData()
@@ -35,7 +35,7 @@ class DownloadViewController: BaseViewController {
 extension DownloadViewController {
 
     @IBAction func deleteDownloadTask(_ sender: Any) {
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
         let count = downloadManager.tasks.count
         guard count > 0 else { return }
 

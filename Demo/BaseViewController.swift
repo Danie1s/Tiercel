@@ -24,7 +24,7 @@ class BaseViewController: UIViewController {
     // 由于执行删除running的task，结果是异步回调的，所以最好是用downloadURLStrings作为数据源
     lazy var downloadURLStrings = [String]()
 
-    var downloadManager: TRManager?
+    var sessionManager: SessionManager?
 
     var URLStrings: [String] = []
 
@@ -44,13 +44,13 @@ class BaseViewController: UIViewController {
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
 
-        TRManager.logLevel = .detailed
+        SessionManager.logLevel = .detailed
         
         updateSwicth()
     }
 
     func updateUI() {
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
         totalTasksLabel.text = "总任务：\(downloadManager.completedTasks.count)/\(downloadManager.tasks.count)"
         totalSpeedLabel.text = "总速度：\(downloadManager.speed.tr.convertSpeedToString())"
         timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemaining.tr.convertTimeToString())"
@@ -60,7 +60,7 @@ class BaseViewController: UIViewController {
     }
     
     func updateSwicth() {
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
         taskLimitSwitch.isOn = downloadManager.configuration.maxConcurrentTasksLimit < 3
         cellularAccessSwitch.isOn = downloadManager.configuration.allowsCellularAccess
     }
@@ -68,7 +68,7 @@ class BaseViewController: UIViewController {
     func setupManager() {
 
         // 设置manager的回调
-        downloadManager?.progress { [weak self] (manager) in
+        sessionManager?.progress { [weak self] (manager) in
                 self?.updateUI()
 
             }.success{ [weak self] (manager) in
@@ -76,7 +76,7 @@ class BaseViewController: UIViewController {
                 // 下载任务成功了
             }.failure { [weak self] (manager) in
                 guard let self = self,
-                    let downloadManager = self.downloadManager
+                    let downloadManager = self.sessionManager
                     else { return }
                 self.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
                 self.tableView.reloadData()
@@ -100,24 +100,24 @@ class BaseViewController: UIViewController {
 
 extension BaseViewController {
     @IBAction func totalStart(_ sender: Any) {
-        downloadManager?.totalStart()
+        sessionManager?.totalStart()
         tableView.reloadData()
     }
 
     @IBAction func totalSuspend(_ sender: Any) {
-        downloadManager?.totalSuspend()
+        sessionManager?.totalSuspend()
     }
 
     @IBAction func totalCancel(_ sender: Any) {
-        downloadManager?.totalCancel()
+        sessionManager?.totalCancel()
     }
 
     @IBAction func totalDelete(_ sender: Any) {
-        downloadManager?.totalRemove(completely: false)
+        sessionManager?.totalRemove(completely: false)
     }
 
     @IBAction func clearDisk(_ sender: Any) {
-        guard let downloadManager = downloadManager else { return  }
+        guard let downloadManager = sessionManager else { return  }
         downloadManager.cache.clearDiskCache()
         updateUI()
     }
@@ -126,16 +126,16 @@ extension BaseViewController {
     @IBAction func taskLimit(_ sender: UISwitch) {
         let isTaskLimit = sender.isOn
         if isTaskLimit {
-            downloadManager?.configuration.maxConcurrentTasksLimit = 2
+            sessionManager?.configuration.maxConcurrentTasksLimit = 2
         } else {
-            downloadManager?.configuration.maxConcurrentTasksLimit = Int.max
+            sessionManager?.configuration.maxConcurrentTasksLimit = Int.max
         }
         updateSwicth()
         
     }
     
     @IBAction func cellularAccess(_ sender: UISwitch) {
-        downloadManager?.configuration.allowsCellularAccess = sender.isOn
+        sessionManager?.configuration.allowsCellularAccess = sender.isOn
         updateSwicth()
     }
 }
@@ -153,14 +153,14 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         cell.tapClosure = { [weak self] cell in
             guard let indexPath = self?.tableView.indexPath(for: cell),
                 let URLString = self?.downloadURLStrings.safeObject(at: indexPath.row),
-                let task = self?.downloadManager?.fetchTask(URLString)
+                let task = self?.sessionManager?.fetchTask(URLString)
                 else { return }
             
             switch task.status {
             case .running:
-                self?.downloadManager?.suspend(URLString)
+                self?.sessionManager?.suspend(URLString)
             case .waiting, .suspended, .failed:
-                self?.downloadManager?.start(URLString)
+                self?.sessionManager?.start(URLString)
             default: break
             }
         }
@@ -171,7 +171,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     // 每个cell中的状态更新，应该在willDisplay中执行
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let URLString = downloadURLStrings.safeObject(at: indexPath.row),
-            let task = downloadManager?.fetchTask(URLString)
+            let task = sessionManager?.fetchTask(URLString)
             else { return }
         
         var image: UIImage = #imageLiteral(resourceName: "suspend")
@@ -220,7 +220,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     // 由于cell是循环利用的，不在可视范围内的cell，不应该去更新cell的状态
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let URLString = downloadURLStrings.safeObject(at: indexPath.row),
-            let task = downloadManager?.fetchTask(URLString)
+            let task = sessionManager?.fetchTask(URLString)
             else { return }
 
         task.progress { _ in }.success({ _ in }).failure({ _ in})

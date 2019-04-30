@@ -1,8 +1,8 @@
 //
-//  URLSession+ResumeData.swift
+//  SessionConfiguration.swift
 //  Tiercel
 //
-//  Created by Daniels on 2019/1/22.
+//  Created by Daniels on 2019/1/3.
 //  Copyright © 2019 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,27 +24,41 @@
 //  THE SOFTWARE.
 //
 
-import Foundation
+import UIKit
 
-extension URLSession {
-    
-    /// 把有bug的resumeData修复，然后创建task
-    ///
-    /// - Parameter resumeData:
-    /// - Returns:
-    internal func correctedDownloadTask(withResumeData resumeData: Data) -> URLSessionDownloadTask {
-        
-        let task = downloadTask(withResumeData: resumeData)
-        
-        if let resumeDictionary = ResumeDataHelper.getResumeDictionary(resumeData) {
-            if task.originalRequest == nil, let originalReqData = resumeDictionary[NSURLSessionResumeOriginalRequest] as? Data, let originalRequest = NSKeyedUnarchiver.unarchiveObject(with: originalReqData) as? NSURLRequest {
-                task.setValue(originalRequest, forKey: "originalRequest")
-            }
-            if task.currentRequest == nil, let currentReqData = resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data, let currentRequest = NSKeyedUnarchiver.unarchiveObject(with: currentReqData) as? NSURLRequest {
-                task.setValue(currentRequest, forKey: "currentRequest")
+public struct SessionConfiguration {
+    // 请求超时时间
+    public var timeoutIntervalForRequest: TimeInterval = 60.0
+
+    // 最大并发数
+    private var _maxConcurrentTasksLimit: Int = MaxConcurrentTasksLimit
+    public var maxConcurrentTasksLimit: Int {
+        get {
+            return _maxConcurrentTasksLimit
+        }
+        set {
+            if newValue > MaxConcurrentTasksLimit {
+                _maxConcurrentTasksLimit = MaxConcurrentTasksLimit
+            } else if newValue < 1 {
+                _maxConcurrentTasksLimit = 1
+            } else {
+                _maxConcurrentTasksLimit = newValue
             }
         }
-        
-        return task
+    }
+
+    // 是否允许蜂窝网络下载
+    public var allowsCellularAccess: Bool = false
+
+    public init() {
+
+    }
+}
+
+var MaxConcurrentTasksLimit: Int {
+    if #available(iOS 11.0, *) {
+        return 6
+    } else {
+        return 3
     }
 }

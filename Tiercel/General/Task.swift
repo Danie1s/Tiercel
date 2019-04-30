@@ -1,5 +1,5 @@
 //
-//  TRTask.swift
+//  Task.swift
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
@@ -26,7 +26,7 @@
 
 import Foundation
 
-extension TRTask {
+extension Task {
     public enum TRValidation: Int {
         case unkown
         case correct
@@ -34,11 +34,11 @@ extension TRTask {
     }
 }
 
-public class TRTask: NSObject, NSCoding {
+public class Task: NSObject, NSCoding {
 
-    internal weak var manager: TRManager?
+    internal weak var manager: SessionManager?
 
-    internal var cache: TRCache
+    internal var cache: Cache
 
     internal var session: URLSession?
     
@@ -46,43 +46,45 @@ public class TRTask: NSObject, NSCoding {
 
     internal var verificationCode: String?
     
-    internal var verificationType: TRVerificationType = .md5
+    internal var verificationType: FileVerificationType = .md5
     
-    internal var progressHandler: TRHandler<TRTask>?
+    internal var progressExecuter: Executer<Task>?
     
-    internal var successHandler: TRHandler<TRTask>?
+    internal var successExecuter: Executer<Task>?
     
-    internal var failureHandler: TRHandler<TRTask>?
+    internal var failureExecuter: Executer<Task>?
     
-    internal var controlHandler: TRHandler<TRTask>?
+    internal var controlExecuter: Executer<Task>?
+    
+    internal var operationQueue: DispatchQueue
 
-    internal let queue = DispatchQueue(label: "com.Daniels.Tiercel.Task.queue")
+    internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
 
     internal var request: URLRequest?
     
     private var _isRemoveCompletely = false
     internal var isRemoveCompletely: Bool {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _isRemoveCompletely
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _isRemoveCompletely = newValue
             }
         }
     }
 
-    private var _status: TRStatus = .waiting
-    public var status: TRStatus {
+    private var _status: Status = .waiting
+    public var status: Status {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _status
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _status = newValue
             }
         }
@@ -91,12 +93,12 @@ public class TRTask: NSObject, NSCoding {
     private var _validation: TRValidation = .unkown
     public var validation: TRValidation {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _validation
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _validation = newValue
             }
         }
@@ -109,12 +111,12 @@ public class TRTask: NSObject, NSCoding {
     private var _currentURLString: String
     internal var currentURLString: String {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _currentURLString
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _currentURLString = newValue
             }
         }
@@ -126,12 +128,12 @@ public class TRTask: NSObject, NSCoding {
     private var _startDate: Double = 0
     public internal(set) var startDate: Double {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _startDate
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _startDate = newValue
             }
         }
@@ -140,12 +142,12 @@ public class TRTask: NSObject, NSCoding {
     private var _endDate: Double = 0
     public internal(set) var endDate: Double {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _endDate
             }
         }
         set {
-            return queue.sync {
+            return dataQueue.sync {
                 _endDate = newValue
             }
         }
@@ -155,12 +157,12 @@ public class TRTask: NSObject, NSCoding {
     private var _speed: Int64 = 0
     public internal(set) var speed: Int64 {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _speed
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _speed = newValue
             }
         }
@@ -170,12 +172,12 @@ public class TRTask: NSObject, NSCoding {
     private var _fileName: String
     public internal(set) var fileName: String {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _fileName
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _fileName = newValue
             }
         }
@@ -184,12 +186,12 @@ public class TRTask: NSObject, NSCoding {
     private var _timeRemaining: Int64 = 0
     public internal(set) var timeRemaining: Int64 {
         get {
-            return queue.sync {
+            return dataQueue.sync {
                 _timeRemaining
             }
         }
         set {
-            return queue.sync {
+            dataQueue.sync {
                 _timeRemaining = newValue
             }
         }
@@ -200,10 +202,12 @@ public class TRTask: NSObject, NSCoding {
 
     internal init(_ url: URL,
                   headers: [String: String]? = nil,
-                  cache: TRCache) {
+                  cache: Cache,
+                  operationQueue:DispatchQueue) {
         self.cache = cache
         self.url = url
         self.URLString = url.absoluteString
+        self.operationQueue = operationQueue
         _currentURLString = url.absoluteString
         _fileName = url.tr.fileName
         super.init()
@@ -226,11 +230,12 @@ public class TRTask: NSObject, NSCoding {
     }
     
     public required init?(coder aDecoder: NSCoder) {
-        cache = TRCache("default")
+        cache = Cache("default")
         URLString = aDecoder.decodeObject(forKey: "URLString") as! String
         url = URL(string: URLString)!
         _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
+        operationQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
 
         headers = aDecoder.decodeObject(forKey: "headers") as? [String: String]
@@ -241,9 +246,9 @@ public class TRTask: NSObject, NSCoding {
         verificationCode = aDecoder.decodeObject(forKey: "verificationCode") as? String
 
         let statusString = aDecoder.decodeObject(forKey: "status") as! String
-        status = TRStatus(rawValue: statusString)!
+        status = Status(rawValue: statusString)!
         let verificationTypeInt = aDecoder.decodeInteger(forKey: "verificationType")
-        verificationType = TRVerificationType(rawValue: verificationTypeInt)!
+        verificationType = FileVerificationType(rawValue: verificationTypeInt)!
 
         let validationType = aDecoder.decodeInteger(forKey: "validation")
         validation = TRValidation(rawValue: validationType)!
@@ -262,17 +267,17 @@ public class TRTask: NSObject, NSCoding {
     }
     
 
-    internal func suspend(_ handler: TRHandler<TRTask>? = nil) {
+    internal func suspend(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
         
         
     }
     
-    internal func cancel(_ handler: TRHandler<TRTask>? = nil) {
+    internal func cancel(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
         
         
     }
     
-    internal func remove(completely: Bool = false, _ handler: TRHandler<TRTask>? = nil) {
+    internal func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
         
     }
     
@@ -280,61 +285,65 @@ public class TRTask: NSObject, NSCoding {
         
     }
     
-    internal func asDownloadTask() -> TRDownloadTask? {
-        return self as? TRDownloadTask
+    internal func asDownloadTask() -> DownloadTask? {
+        return self as? DownloadTask
     }
     
 }
 
-extension TRTask {
+extension Task {
     @discardableResult
-    public func progress(_ handler: @escaping TRHandler<TRTask>) -> Self {
-        progressHandler = handler
-        return self
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
+        return operationQueue.sync {
+            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            return self
+        }
+
     }
 
     @discardableResult
-    public func success(_ handler: @escaping TRHandler<TRTask>) -> Self {
-        successHandler = handler
-        if status == .succeeded {
-            DispatchQueue.main.tr.safeAsync {
-                self.successHandler?(self)
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
+        return operationQueue.sync {
+            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            if status == .succeeded {
+                successExecuter?.execute(self)
             }
+            return self
         }
-        return self
+
     }
 
     @discardableResult
-    public func failure(_ handler: @escaping TRHandler<TRTask>) -> Self {
-        failureHandler = handler
-        if status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .failed  {
-            DispatchQueue.main.tr.safeAsync {
-                self.failureHandler?(self)
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
+        return operationQueue.sync {
+            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            if status == .suspended ||
+                status == .canceled ||
+                status == .removed ||
+                status == .failed  {
+                failureExecuter?.execute(self)
             }
+            return self
         }
-        return self
     }
 }
 
-extension Array where Element == TRTask {
+extension Array where Element == Task {
     @discardableResult
-    public func progress(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.progress(handler) }
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
+        self.forEach { $0.progress(onMainQueue: onMainQueue, handler) }
         return self
     }
 
     @discardableResult
-    public func success(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.success(handler) }
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
+        self.forEach { $0.success(onMainQueue: onMainQueue, handler) }
         return self
     }
 
     @discardableResult
-    public func failure(_ handler: @escaping TRHandler<TRTask>) -> [Element] {
-        self.forEach { $0.failure(handler) }
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
+        self.forEach { $0.failure(onMainQueue: onMainQueue, handler) }
         return self
     }
 }

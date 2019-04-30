@@ -1,5 +1,5 @@
 //
-//  TRResumeDataHelper.swift
+//  ResumeDataHelper.swift
 //  Tiercel
 //
 //  Created by Daniels on 2019/1/7.
@@ -35,7 +35,7 @@ internal let NSURLSessionResumeInfoLocalPath = "NSURLSessionResumeInfoLocalPath"
 internal let NSURLSessionResumeBytesReceived = "NSURLSessionResumeBytesReceived"
 
 
-internal class TRResumeDataHelper {
+internal class ResumeDataHelper {
     
     internal class func handleResumeData(_ data: Data) -> Data? {
         if #available(iOS 11.3, *) {
@@ -110,7 +110,7 @@ internal class TRResumeDataHelper {
     }
     
     internal class func getTmpFileName(_ data: Data) -> String? {
-        guard let resumeDictionary = TRResumeDataHelper.getResumeDictionary(data), let version = resumeDictionary[NSURLSessionResumeInfoVersion] as? Int else { return nil }
+        guard let resumeDictionary = ResumeDataHelper.getResumeDictionary(data), let version = resumeDictionary[NSURLSessionResumeInfoVersion] as? Int else { return nil }
         if version > 1 {
             return resumeDictionary[NSURLSessionResumeInfoTempFileName] as? String
         } else {

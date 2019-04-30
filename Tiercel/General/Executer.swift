@@ -1,8 +1,8 @@
 //
-//  TRConfiguration.swift
+//  Executer.swift
 //  Tiercel
 //
-//  Created by Daniels on 2019/1/3.
+//  Created by Daniels on 2019/4/30.
 //  Copyright © 2019 Daniels. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,41 +24,27 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
-public struct TRConfiguration {
-    // 请求超时时间
-    public var timeoutIntervalForRequest: TimeInterval = 60.0
+public typealias Handler<T> = (T) -> ()
 
-    // 最大并发数
-    private var _maxConcurrentTasksLimit: Int = MaxConcurrentTasksLimit
-    public var maxConcurrentTasksLimit: Int {
-        get {
-            return _maxConcurrentTasksLimit
-        }
-        set {
-            if newValue > MaxConcurrentTasksLimit {
-                _maxConcurrentTasksLimit = MaxConcurrentTasksLimit
-            } else if newValue < 1 {
-                _maxConcurrentTasksLimit = 1
-            } else {
-                _maxConcurrentTasksLimit = newValue
+public struct Executer<T> {
+    private let onMainQueue: Bool
+    private let handler: Handler<T>?
+
+    public init(onMainQueue: Bool, handler: Handler<T>?) {
+        self.onMainQueue = onMainQueue
+        self.handler = handler
+    }
+    
+
+    public func execute(_ object: T) {
+        if onMainQueue {
+            DispatchQueue.main.tr.safeAsync {
+                self.handler?(object)
             }
+        } else {
+            handler?(object)
         }
-    }
-
-    // 是否允许蜂窝网络下载
-    public var allowsCellularAccess: Bool = false
-
-    public init() {
-
-    }
-}
-
-var MaxConcurrentTasksLimit: Int {
-    if #available(iOS 11.0, *) {
-        return 6
-    } else {
-        return 3
     }
 }

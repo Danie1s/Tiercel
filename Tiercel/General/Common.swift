@@ -1,5 +1,5 @@
 //
-//  TRCommon.swift
+//  Common.swift
 //  Tiercel
 //
 //  Created by Daniels on 2018/3/16.
@@ -27,7 +27,7 @@
 import Foundation
 
 
-public enum TRStatus: String {
+public enum Status: String {
     case waiting
     case running
     case suspended
@@ -36,20 +36,19 @@ public enum TRStatus: String {
     case removed
     case succeeded
 
-    // 预操作标记，解决操作运行中的任务是异步回调而导致的问题
     case willSuspend
     case willCancel
     case willRemove
 }
 
 
-public enum TRLogLevel {
+public enum LogLevel {
     case detailed
     case simple
     case none
 }
 
-public typealias TRHandler<T> = (T) -> ()
+
 
 
 public struct TiercelWrapper<Base> {
@@ -73,7 +72,7 @@ extension TiercelCompatible {
 
 public func TiercelLog<T>(_ message: T, identifier: String? = nil, URLString: String? = nil, file: String = #file, line: Int = #line) {
 
-    switch TRManager.logLevel {
+    switch SessionManager.logLevel {
     case .detailed:
         print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""

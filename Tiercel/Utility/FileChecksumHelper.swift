@@ -1,5 +1,5 @@
 //
-//  TRResumeDataHelper.swift
+//  FileChecksumHelper.swift
 //  Tiercel
 //
 //  Created by Daniels on 2019/1/22.
@@ -26,22 +26,22 @@
 
 import Foundation
 
-public enum TRVerificationType : Int {
+public enum FileVerificationType : Int {
     case md5
     case sha1
     case sha256
     case sha512
 }
 
-public class TRChecksumHelper {
+public class FileChecksumHelper {
     
-    private static let ioQueue: DispatchQueue = DispatchQueue(label: "com.Daniels.Tiercel.Checksum", attributes: .concurrent)
+    private static let ioQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.FileChecksumHelper.ioQueue", attributes: .concurrent)
     
     public class func validateFile(_ filePath: String,
-                                   verificationCode: String,
-                                   verificationType: TRVerificationType,
-                                   completion: @escaping (Bool) -> ()) {
-        if verificationCode.isEmpty {
+                                   code: String,
+                                   type: FileVerificationType,
+                                   _ completion: @escaping (Bool) -> ()) {
+        if code.isEmpty {
             TiercelLog("verification code is empty")
             completion(false)
             return
@@ -57,7 +57,7 @@ public class TRChecksumHelper {
             do {
                 let data = try Data(contentsOf: url, options: .mappedIfSafe)
                 var string: String
-                switch verificationType {
+                switch type {
                 case .md5:
                     string = data.tr.md5
                 case .sha1:
@@ -67,7 +67,7 @@ public class TRChecksumHelper {
                 case .sha512:
                     string = data.tr.sha512
                 }
-                let isCorrect = string.lowercased() == verificationCode.lowercased()
+                let isCorrect = string.lowercased() == code.lowercased()
                 completion(isCorrect)
             } catch {
                 TiercelLog("can't read data, error: \(error)")
