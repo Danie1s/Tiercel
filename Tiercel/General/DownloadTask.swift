@@ -308,14 +308,14 @@ extension DownloadTask {
                              onMainQueue: Bool = true,
                              _ handler: @escaping Handler<DownloadTask>) -> Self {
         return operationQueue.sync {
-            if self.verificationCode == verificationCode &&
-                self.verificationType == verificationType &&
+            if verificationCode == code &&
+                verificationType == type &&
                 validation != .unkown {
                 shouldValidateFile = false
             } else {
                 shouldValidateFile = true
-                self.verificationCode = verificationCode
-                self.verificationType = verificationType
+                verificationCode = code
+                verificationType = type
             }
             self.validateExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
             if let manager = manager {
@@ -344,13 +344,13 @@ extension DownloadTask {
 // MARK: - info
 extension DownloadTask {
 
-    internal func updateSpeedAndTimeRemaining(_ cost: TimeInterval) {
+    internal func updateSpeedAndTimeRemaining(_ interval: TimeInterval) {
 
         let dataCount = progress.completedUnitCount
         let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
 
         if dataCount > lastData {
-            speed = Int64(Double(dataCount - lastData) / cost)
+            speed = Int64(Double(dataCount - lastData) / interval)
             updateTimeRemaining()
         }
         progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
@@ -375,7 +375,7 @@ extension DownloadTask {
     internal func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
-        manager?.updateSpeedAndTimeRemaining()
+//        manager?.updateSpeedAndTimeRemaining()
         if SessionManager.isControlNetworkActivityIndicator {
             DispatchQueue.main.tr.safeAsync {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true

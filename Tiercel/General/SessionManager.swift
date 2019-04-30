@@ -53,6 +53,8 @@ public class SessionManager {
             }
         }
     }
+
+    private var timer: DispatchSourceTimer?
     
     public let cache: Cache
     
@@ -176,7 +178,7 @@ public class SessionManager {
         _progress.totalUnitCount = tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
         return _progress
     }
-    
+
     private var _speed: Int64 = 0
     public private(set) var speed: Int64 {
         get {
@@ -190,8 +192,8 @@ public class SessionManager {
             }
         }
     }
-    
-    
+
+
     private var _timeRemaining: Int64 = 0
     public private(set) var timeRemaining: Int64 {
         get {
@@ -205,7 +207,7 @@ public class SessionManager {
             }
         }
     }
-        
+
     private var progressExecuter: Executer<SessionManager>?
     
     private var successExecuter: Executer<SessionManager>?
@@ -235,6 +237,12 @@ public class SessionManager {
             createSession()
             matchStatus()
         }
+    }
+
+    public func invalidate() {
+        session?.invalidateAndCancel()
+        session = nil
+        invalidateTimer()
     }
 
 
@@ -272,20 +280,17 @@ public class SessionManager {
             //  处理mananger状态
             let isRunning = self.tasks.filter { $0.status == .running }.count > 0
             if isRunning {
-                TiercelLog("[manager] running", identifier: self.identifier)
-                self.status = .running
+                self.didStart()
                 return
             }
 
-            let isCompleted = self.tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
-            if isCompleted {
-                let isSucceeded = self.tasks.filter { $0.status == .failed }.isEmpty
-                self.status = isSucceeded ? .succeeded : .failed
-            } else {
-                self.status = .suspended
+            if !self.shouldComplete() {
+                self.shouldSuspend()
             }
         }
     }
+
+
 }
 
 
@@ -467,7 +472,6 @@ extension SessionManager {
         }
     }
     
-    
     public func totalSuspend(onMainQueue: Bool = true, _ handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status == .running || self.status == .waiting else { return }
@@ -503,7 +507,7 @@ extension SessionManager {
     
     internal func didStart() {
         if status != .running {
-            progress.setUserInfoObject(Date().timeIntervalSince1970, forKey: .estimatedTimeRemainingKey)
+            createTimer()
             status = .running
             TiercelLog("[manager] running", identifier: identifier)
             progressExecuter?.execute(self)
@@ -532,24 +536,13 @@ extension SessionManager {
     
     internal func completed() {
         cache.storeTasks(tasks)
-        
-        // 处理移除状态
-        if shouldRemove() {
-            return
-        }
-        
-        // 处理取消状态
-        if shouldCancel() {
-            return
-        }
 
-        // 处理所有任务结束后的状态
-        if shouldComplete() {
-            return
-        }
+        if shouldRemove() ||
+            shouldCancel() ||
+            shouldComplete() ||
+            shouldSuspend() {
 
-        // 处理暂停状态
-        if shouldSuspend() {
+            invalidateTimer()
             return
         }
 
@@ -590,7 +583,7 @@ extension SessionManager {
             return true
         }
         timeRemaining = 0
-        
+
         progressExecuter?.execute(self)
         
         // 成功或者失败
@@ -606,7 +599,8 @@ extension SessionManager {
         }
         return true
     }
-    
+
+    @discardableResult
     private func shouldSuspend() -> Bool {
         let isSuspended = tasks.filter { $0.status != .suspended && $0.status != .succeeded && $0.status != .failed }.isEmpty
 
@@ -642,40 +636,39 @@ extension SessionManager {
     }
 }
 
-
+let refreshInterval: Double = 0.8
 // MARK: - info
 extension SessionManager {
-    internal func updateSpeedAndTimeRemaining() {
-        
-        // 当前已经完成的大小
-        let currentData = progress.completedUnitCount
-        let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
-        
-        let currentTime = Date().timeIntervalSince1970
-        let lastTime: Double = progress.userInfo[.estimatedTimeRemainingKey] as? Double ?? 0
+    private func createTimer() {
+        if timer == nil {
+            timer = DispatchSource.makeTimerSource(flags: .strict, queue: operationQueue)
+            timer?.schedule(deadline: .now(), repeating: refreshInterval)
+            timer?.setEventHandler(handler: { [weak self] in
+                guard let self = self else { return }
+                self.updateSpeedAndTimeRemaining()
+            })
+            timer?.resume()
+        }
+    }
 
-        let costTime = currentTime - lastTime
-        
-        // costTime作为速度刷新的频率，也作为计算实时速度的时间段
-        if costTime <= 0.8 && speed != 0 {
-            return
-        }
-        
-        if currentData > lastData {
-            speed = Int64(Double(currentData - lastData) / costTime)
-            updateTimeRemaining()
-        }
+    private func invalidateTimer() {
+        timer?.cancel()
+        timer = nil
+    }
+
+    internal func updateSpeedAndTimeRemaining() {
+
+        var result: Int64 = 0
+        let interval = refreshInterval
         tasks.forEach({ (task) in
-            if let task = task.asDownloadTask() {
-                task.updateSpeedAndTimeRemaining(costTime)
+            if let task = task.asDownloadTask(), task.status == .running {
+                task.updateSpeedAndTimeRemaining(interval)
+                result += task.speed
             }
         })
         
-        // 把当前已经完成的大小保存在fileCompletedCountKey，作为下一次的lastData
-        progress.setUserInfoObject(currentData, forKey: .fileCompletedCountKey)
-        
-        // 把当前的时间保存在estimatedTimeRemainingKey，作为下一次的lastTime
-        progress.setUserInfoObject(currentTime, forKey: .estimatedTimeRemainingKey)
+        speed = result
+        updateTimeRemaining()
         
     }
     
