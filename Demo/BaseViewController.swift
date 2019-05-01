@@ -196,11 +196,13 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             }
             .success { [weak cell] (task) in
                 cell?.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                cell?.updateProgress(task)
                 // 下载任务成功了
 
             }
             .failure { [weak cell] (task) in
                 cell?.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
+                cell?.updateProgress(task)
                 if task.status == .suspended {
                     // 下载任务暂停了
                 }

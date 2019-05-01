@@ -76,8 +76,10 @@ extension ViewController2 {
         let URLString = downloadURLStrings[index]
         downloadURLStrings.remove(at: index)
         tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        sessionManager?.remove(URLString, completely: false)
-        updateUI()
+        sessionManager?.remove(URLString, completely: false,  { [weak self] _ in
+            self?.updateUI()
+        })
+
         
     }
 }
