@@ -175,7 +175,7 @@ task?.progress(onMainQueue: true, { (task) in
 }
 ```
 
-下载任务的管理和操作。**在Tiercel中，URLString是下载任务的唯一标识，如果需要对下载任务进行操作，则使用SessionManager实例对URLString进行操作。**暂停下载、取消下载、移除下载的操作可以添加回调，并且可以选择是否在主线程上执行该回调。
+下载任务的管理和操作。**在Tiercel中，URLString是下载任务的唯一标识，如果需要对下载任务进行操作，则使用SessionManager实例对URLString进行操作。** 暂停下载、取消下载、移除下载的操作可以添加回调，并且可以选择是否在主线程上执行该回调。
 
 ```swift
 let URLString = "http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"
