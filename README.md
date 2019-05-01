@@ -386,7 +386,23 @@ configuration.timeoutIntervalForRequest = 60
 sessionManager.configuration = configuration
 ```
 
-**注意：建议在SessionManager初始化的时候传入已经修改好的`SessionConfiguration`实例，参考Demo。Tiercel也支持在任务下载中修改配置，但是不建议修改`configuration`后马上开启任务下载，即不要在同一个代码块里修改`configuration`后开启任务下载，这样很容易造成错误，如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
+**注意：建议在SessionManager初始化的时候传入已经修改好的`SessionConfiguration`实例，参考Demo。Tiercel也支持在任务下载中修改配置，但是不建议修改`configuration`后马上开启任务下载，即不要在同一个代码块里修改`configuration`后开启任务下载，这样很容易造成错误。**
+
+```swift
+// 不要这样操作
+sessionManager.configuration.allowsCellularAccess = true
+let task = sessionManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
+```
+
+**如果实在需要进行这种操作，请修改`configuration`后，设置1秒以上的延迟再开启任务下载。**
+
+```swift
+// 如果实在需要，请延迟开启任务
+sessionManager.configuration.allowsCellularAccess = true
+DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+		let task = sessionManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
+}
+```
 
 
 
