@@ -400,7 +400,7 @@ let task = sessionManager.download("http://api.gfs100.cn/upload/20171219/2017121
 // 如果实在需要，请延迟开启任务
 sessionManager.configuration.allowsCellularAccess = true
 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-		let task = sessionManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
+    let task = sessionManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
 }
 ```
 
