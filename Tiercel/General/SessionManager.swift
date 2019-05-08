@@ -689,27 +689,37 @@ extension SessionManager {
 extension SessionManager {
     @discardableResult
     public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        return self
+        return operationQueue.sync {
+            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            return self
+        }
     }
     
     @discardableResult
     public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .succeeded {
-            successExecuter?.execute(self)
+        operationQueue.sync {
+            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        }
+        operationQueue.async {
+            if self.status == .succeeded {
+                self.successExecuter?.execute(self)
+            }
         }
         return self
     }
     
     @discardableResult
     public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .failed  {
-            failureExecuter?.execute(self)
+        operationQueue.sync {
+            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        }
+        operationQueue.async {
+            if self.status == .suspended ||
+                self.status == .canceled ||
+                self.status == .removed ||
+                self.status == .failed  {
+                self.failureExecuter?.execute(self)
+            }
         }
         return self
     }

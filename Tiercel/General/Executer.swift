@@ -39,12 +39,14 @@ public struct Executer<T> {
     
 
     public func execute(_ object: T) {
-        if onMainQueue {
-            DispatchQueue.main.tr.safeAsync {
-                self.handler?(object)
+        if let handler = handler {
+            if onMainQueue {
+                DispatchQueue.main.tr.safeAsync {
+                    handler(object)
+                }
+            } else {
+                handler(object)
             }
-        } else {
-            handler?(object)
         }
     }
 }

@@ -131,7 +131,7 @@ extension Cache {
     
     
     
-    public func clearDiskCache() {
+    public func clearDiskCache(onMainQueue: Bool = true, _ handler: Handler<Cache>? = nil) {
         ioQueue.async {
             guard self.fileManager.fileExists(atPath: self.downloadPath) else { return }
             do {
@@ -140,6 +140,9 @@ extension Cache {
                 TiercelLog("removeItem error: \(error)", identifier: self.identifier)
             }
             self.createDirectory()
+            if let handler = handler {
+                Executer(onMainQueue: onMainQueue, handler: handler).execute(self)
+            }
         }
     }
 }
