@@ -40,6 +40,10 @@ public class Cache {
     
     private let fileManager = FileManager.default
     
+    private let encoder = PropertyListEncoder()
+    
+    private let decoder = PropertyListDecoder()
+    
     private final class func defaultDiskCachePathClosure(_ cacheName: String) -> String {
         let dstPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
         return (dstPath as NSString).appendingPathComponent(cacheName)
@@ -152,16 +156,34 @@ extension Cache {
 extension Cache {
     internal func retrieveAllTasks() -> [Task]? {
         return ioQueue.sync {
-            let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
-            
-            let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [Task]
-            tasks?.forEach({ (task) in
-                task.cache = self
-                if task.status == .waiting  {
-                    task.status = .suspended
+            var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
+            if fileManager.fileExists(atPath: path) {
+                do {
+                    let url = URL(fileURLWithPath: path)
+                    let data = try Data(contentsOf: url)
+                    let tasks = try decoder.decode([DownloadTask].self, from: data)
+                    tasks.forEach { (task) in
+                        task.cache = self
+                        if task.status == .waiting  {
+                            task.status = .suspended
+                        }
+                    }
+                    return tasks
+                } catch  {
+                    TiercelLog("retrieveAllTasks error: \(error)", identifier: identifier)
+                    return nil
                 }
-            })
-            return tasks
+            } else {
+                path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
+                let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [Task]
+                tasks?.forEach { (task) in
+                    task.cache = self
+                    if task.status == .waiting  {
+                        task.status = .suspended
+                    }
+                }
+                return tasks
+            }
         }
     }
 
@@ -196,8 +218,14 @@ extension Cache {
 extension Cache {
     internal func storeTasks(_ tasks: [Task]) {
         ioQueue.sync {
-            let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
-            NSKeyedArchiver.archiveRootObject(tasks, toFile: path)
+            do {
+                let data = try encoder.encode(tasks)
+                let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
+                let url = URL(fileURLWithPath: path)
+                try data.write(to: url)
+            } catch {
+                TiercelLog("storeTasks error: \(error)", identifier: identifier)
+            }
         }
     }
     

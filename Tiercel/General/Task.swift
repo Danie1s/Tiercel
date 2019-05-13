@@ -34,7 +34,22 @@ extension Task {
     }
 }
 
-public class Task: NSObject, NSCoding {
+public class Task: NSObject, NSCoding, Codable {
+    
+    private enum CodingKeys: CodingKey {
+        case URLString
+        case currentURLString
+        case fileName
+        case headers
+        case startDate
+        case endDate
+        case totalBytes
+        case completedBytes
+        case verificationCode
+        case status
+        case verificationType
+        case validation
+    }
 
     internal weak var manager: SessionManager?
 
@@ -214,6 +229,52 @@ public class Task: NSObject, NSCoding {
         self.headers = headers
     }
     
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(URLString, forKey: .URLString)
+        try container.encode(currentURLString, forKey: .currentURLString)
+        try container.encode(fileName, forKey: .fileName)
+        try container.encodeIfPresent(headers, forKey: .headers)
+        try container.encode(startDate, forKey: .startDate)
+        try container.encode(endDate, forKey: .endDate)
+        try container.encode(progress.totalUnitCount, forKey: .totalBytes)
+        try container.encode(progress.completedUnitCount, forKey: .completedBytes)
+        try container.encode(status.rawValue, forKey: .status)
+        try container.encodeIfPresent(verificationCode, forKey: .verificationCode)
+        try container.encode(verificationType.rawValue, forKey: .verificationType)
+        try container.encode(validation.rawValue, forKey: .validation)
+        
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        cache = Cache("default")
+        URLString = try container.decode(String.self, forKey: .URLString)
+        url = URL(string: URLString)!
+        _currentURLString = try container.decode(String.self, forKey: .currentURLString)
+        _fileName = try container.decode(String.self, forKey: .fileName)
+        operationQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
+        super.init()
+        
+        headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
+        startDate = try container.decode(Double.self, forKey: .startDate)
+        endDate = try container.decode(Double.self, forKey: .endDate)
+        progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)
+        progress.completedUnitCount = try container.decode(Int64.self, forKey: .completedBytes)
+        verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
+        
+        let statusString = try container.decode(String.self, forKey: .status)
+        status = Status(rawValue: statusString)!
+        let verificationTypeInt = try container.decode(Int.self, forKey: .verificationType)
+        verificationType = FileVerificationType(rawValue: verificationTypeInt)!
+        
+        let validationType = try container.decode(Int.self, forKey: .validation)
+        validation = TRValidation(rawValue: validationType)!
+        
+    }
+    
+    @available(*, deprecated, message: "Use encode(to:) instead.")
     public func encode(with aCoder: NSCoder) {
         aCoder.encode(URLString, forKey: "URLString")
         aCoder.encode(currentURLString, forKey: "currentURLString")
@@ -229,6 +290,7 @@ public class Task: NSObject, NSCoding {
         aCoder.encode(validation.rawValue, forKey: "validation")
     }
     
+    @available(*, deprecated, message: "Use init(from:) instead.")
     public required init?(coder aDecoder: NSCoder) {
         cache = Cache("default")
         URLString = aDecoder.decodeObject(forKey: "URLString") as! String

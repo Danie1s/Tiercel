@@ -28,6 +28,10 @@ import UIKit
 
 public class DownloadTask: Task {
     
+    private enum CodingKeys: CodingKey {
+        case resumeData
+    }
+    
     internal var task: URLSessionDownloadTask? {
         willSet {
             task?.removeObserver(self, forKeyPath: "currentRequest")
@@ -104,11 +108,28 @@ public class DownloadTask: Task {
                                                object: nil)
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try super.encode(to: encoder)
+        try container.encodeIfPresent(resumeData, forKey: .resumeData)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let superDecoder = try container.superDecoder()
+        try super.init(from: superDecoder)
+        resumeData = try container.decodeIfPresent(Data.self, forKey: .resumeData)
+        guard let resumeData = resumeData else { return }
+        tmpFileName = ResumeDataHelper.getTmpFileName(resumeData)
+    }
+    
+    @available(*, deprecated, message: "Use encode(to:) instead.")
     public override func encode(with aCoder: NSCoder) {
         super.encode(with: aCoder)
         aCoder.encode(resumeData, forKey: "resumeData")
     }
     
+    @available(*, deprecated, message: "Use init(from:) instead.")
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         resumeData = aDecoder.decodeObject(forKey: "resumeData") as? Data
