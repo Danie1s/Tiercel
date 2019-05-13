@@ -34,7 +34,7 @@ extension Task {
     }
 }
 
-public class Task: NSObject, NSCoding, Codable {
+public class Task<T>: NSObject, NSCoding, Codable {
     
     private enum CodingKeys: CodingKey {
         case URLString
@@ -63,13 +63,15 @@ public class Task: NSObject, NSCoding, Codable {
     
     internal var verificationType: FileVerificationType = .md5
     
-    internal var progressExecuter: Executer<Task>?
+    internal var progressExecuter: Executer<T>?
     
-    internal var successExecuter: Executer<Task>?
+    internal var successExecuter: Executer<T>?
     
-    internal var failureExecuter: Executer<Task>?
+    internal var failureExecuter: Executer<T>?
     
-    internal var controlExecuter: Executer<Task>?
+    internal var controlExecuter: Executer<T>?
+
+    internal var validateExecuter: Executer<T>?
     
     internal var operationQueue: DispatchQueue
 
@@ -327,89 +329,8 @@ public class Task: NSObject, NSCoding, Codable {
         }
         self.request = request
     }
-    
-
-    internal func suspend(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
-        
-        
-    }
-    
-    internal func cancel(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
-        
-        
-    }
-    
-    internal func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
-        
-    }
-    
-    internal func completed() {
-        
-    }
-    
-    internal func asDownloadTask() -> DownloadTask? {
-        return self as? DownloadTask
-    }
-    
 }
 
-extension Task {
-    @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
-        return operationQueue.sync {
-            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-            return self
-        }
 
-    }
 
-    @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
-         operationQueue.sync {
-            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .succeeded {
-                self.successExecuter?.execute(self)
-            }
-        }
-        return self
 
-    }
-
-    @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
-        operationQueue.sync {
-            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .suspended ||
-                self.status == .canceled ||
-                self.status == .removed ||
-                self.status == .failed  {
-                self.failureExecuter?.execute(self)
-            }
-        }
-        return self
-    }
-}
-
-extension Array where Element == Task {
-    @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
-        self.forEach { $0.progress(onMainQueue: onMainQueue, handler) }
-        return self
-    }
-
-    @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
-        self.forEach { $0.success(onMainQueue: onMainQueue, handler) }
-        return self
-    }
-
-    @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
-        self.forEach { $0.failure(onMainQueue: onMainQueue, handler) }
-        return self
-    }
-}

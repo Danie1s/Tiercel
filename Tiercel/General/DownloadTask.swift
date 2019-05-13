@@ -26,7 +26,7 @@
 
 import UIKit
 
-public class DownloadTask: Task {
+public class DownloadTask: Task<DownloadTask> {
     
     private enum CodingKeys: CodingKey {
         case resumeData
@@ -87,8 +87,7 @@ public class DownloadTask: Task {
         }
     }
     
-    internal var validateExecuter: Executer<DownloadTask>?
-    
+
     internal init(_ url: URL,
                   headers: [String: String]? = nil,
                   fileName: String? = nil,
@@ -110,7 +109,8 @@ public class DownloadTask: Task {
     
     public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try super.encode(to: encoder)
+        let superEncoder = container.superEncoder()
+        try super.encode(to: superEncoder)
         try container.encodeIfPresent(resumeData, forKey: .resumeData)
     }
     
@@ -166,7 +166,7 @@ public class DownloadTask: Task {
     }
     
 
-    internal override func suspend(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func suspend(onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         guard status == .running || status == .waiting else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
 
@@ -186,7 +186,7 @@ public class DownloadTask: Task {
         }
     }
     
-    internal override func cancel(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func cancel(onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         guard status != .succeeded else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
@@ -203,7 +203,7 @@ public class DownloadTask: Task {
     }
 
 
-    internal override func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         self.isRemoveCompletely = completely
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
@@ -219,7 +219,7 @@ public class DownloadTask: Task {
         }
     }
     
-    internal override func completed() {
+    internal func completed() {
         guard status != .succeeded else { return }
         status = .succeeded
         endDate = Date().timeIntervalSince1970
@@ -472,10 +472,67 @@ extension DownloadTask {
     }
 }
 
+extension DownloadTask {
+    @discardableResult
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> Self {
+        return operationQueue.sync {
+            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            return self
+        }
 
+    }
+
+    @discardableResult
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> Self {
+        operationQueue.sync {
+            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        }
+        operationQueue.async {
+            if self.status == .succeeded {
+                self.successExecuter?.execute(self)
+            }
+        }
+        return self
+
+    }
+
+    @discardableResult
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> Self {
+        operationQueue.sync {
+            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        }
+        operationQueue.async {
+            if self.status == .suspended ||
+                self.status == .canceled ||
+                self.status == .removed ||
+                self.status == .failed  {
+                self.failureExecuter?.execute(self)
+            }
+        }
+        return self
+    }
+}
 
 
 extension Array where Element == DownloadTask {
+    @discardableResult
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> [Element] {
+        self.forEach { $0.progress(onMainQueue: onMainQueue, handler) }
+        return self
+    }
+
+    @discardableResult
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> [Element] {
+        self.forEach { $0.success(onMainQueue: onMainQueue, handler) }
+        return self
+    }
+
+    @discardableResult
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> [Element] {
+        self.forEach { $0.failure(onMainQueue: onMainQueue, handler) }
+        return self
+    }
+
     public func validateFile(codes: [String],
                              type: FileVerificationType,
                              onMainQueue: Bool = true,
@@ -487,5 +544,3 @@ extension Array where Element == DownloadTask {
         return self
     }
 }
-
-

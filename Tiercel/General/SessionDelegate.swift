@@ -46,7 +46,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let manager = manager,
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-            let task = manager.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask()
+            let task = manager.fetchTask(withCurrentURLString: currentURLString)
             else { return }
         task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
     }
@@ -55,7 +55,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let manager = manager,
             let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-            let task = manager.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask()
+            let task = manager.fetchTask(withCurrentURLString: currentURLString)
             else { return }
         task.didFinishDownloadingTo(location: location)
     }
@@ -63,7 +63,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let manager = manager,
             let currentURLString = task.currentRequest?.url?.absoluteString,
-            let downloadTask = manager.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask()
+            let downloadTask = manager.fetchTask(withCurrentURLString: currentURLString)
             else { return }
         downloadTask.didComplete(task: task, error: error)
     }

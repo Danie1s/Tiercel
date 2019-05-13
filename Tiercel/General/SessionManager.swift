@@ -126,8 +126,8 @@ public class SessionManager {
     }
     
     
-    private var _tasks: [Task] = []
-    public private(set) var tasks: [Task] {
+    private var _tasks: [DownloadTask] = []
+    public private(set) var tasks: [DownloadTask] {
         get {
             return dataQueue.sync {
                 _tasks
@@ -140,8 +140,8 @@ public class SessionManager {
         }
     }
     
-    private var _runningTasks = [Task]()
-    private var runningTasks: [Task] {
+    private var _runningTasks = [DownloadTask]()
+    private var runningTasks: [DownloadTask] {
         get {
             return dataQueue.sync {
                 _runningTasks
@@ -154,8 +154,8 @@ public class SessionManager {
         }
     }
     
-    private var _waitingTasks = [Task]()
-    private var waitingTasks: [Task] {
+    private var _waitingTasks = [DownloadTask]()
+    private var waitingTasks: [DownloadTask] {
         get {
             return dataQueue.sync {
                 _waitingTasks
@@ -168,7 +168,7 @@ public class SessionManager {
         }
     }
     
-    public var completedTasks: [Task] {
+    public var completedTasks: [DownloadTask] {
         return tasks.filter { $0.status == .succeeded }
     }
 
@@ -226,7 +226,7 @@ public class SessionManager {
         self._configuration = configuration
         self.operationQueue = operationQueue
         cache = Cache(identifier)
-        tasks = cache.retrieveAllTasks() ?? [Task]()
+        tasks = cache.retrieveAllTasks() ?? [DownloadTask]()
         tasks.forEach {
             $0.manager = self
             $0.operationQueue = operationQueue
@@ -270,7 +270,7 @@ public class SessionManager {
             downloadTasks.forEach { downloadTask in
                 if downloadTask.state == .running,
                     let currentURLString = downloadTask.currentRequest?.url?.absoluteString,
-                    let task = self.fetchTask(withCurrentURLString: currentURLString)?.asDownloadTask() {
+                    let task = self.fetchTask(withCurrentURLString: currentURLString) {
                     task.status = .running
                     task.task = downloadTask
                     TiercelLog("[downloadTask] runing", identifier: self.identifier, URLString: task.URLString)
@@ -317,7 +317,7 @@ extension SessionManager {
         
         var task: DownloadTask?
         operationQueue.sync {
-            task = fetchTask(URLString)?.asDownloadTask()
+            task = fetchTask(URLString)
             if task != nil {
                 task?.headers = headers
                 if let fileName = fileName, !fileName.isEmpty {
@@ -384,11 +384,11 @@ extension SessionManager {
 // MARK: - single task control
 extension SessionManager {
     
-    public func fetchTask(_ URLString: String) -> Task? {
+    public func fetchTask(_ URLString: String) -> DownloadTask? {
         return tasks.first { $0.URLString == URLString }
     }
     
-    internal func fetchTask(withCurrentURLString: String) -> Task? {
+    internal func fetchTask(withCurrentURLString: String) -> DownloadTask? {
         return tasks.first { $0.currentURLString == withCurrentURLString }
     }
     
@@ -410,7 +410,7 @@ extension SessionManager {
         }
     }
     
-    public func start(_ task: Task) {
+    public func start(_ task: DownloadTask) {
         operationQueue.async {
             if !self.shouldCreatSession {
                 task.start()
@@ -425,7 +425,7 @@ extension SessionManager {
 
     
     /// 暂停任务，会触发sessionDelegate的完成回调
-    public func suspend(_ URLString: String, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    public func suspend(_ URLString: String, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let task = self.fetchTask(URLString) else { return }
             task.suspend(onMainQueue: onMainQueue, handler)
@@ -437,7 +437,7 @@ extension SessionManager {
     /// 其他状态的任务都可以被取消，被取消的任务会被移除
     /// 会删除还没有下载完成的缓存文件
     /// 会触发sessionDelegate的完成回调
-    public func cancel(_ URLString: String, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    public func cancel(_ URLString: String, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let task = self.fetchTask(URLString) else { return }
             task.cancel(onMainQueue: onMainQueue, handler)
@@ -454,7 +454,7 @@ extension SessionManager {
     /// - Parameters:
     ///   - URLString: URLString
     ///   - completely: 是否删除下载完成的文件
-    public func remove(_ URLString: String, completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    public func remove(_ URLString: String, completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let task = self.fetchTask(URLString) else { return }
             task.remove(completely: completely, onMainQueue: onMainQueue, handler)
@@ -661,7 +661,7 @@ extension SessionManager {
         var result: Int64 = 0
         let interval = refreshInterval
         tasks.forEach({ (task) in
-            if let task = task.asDownloadTask(), task.status == .running {
+            if task.status == .running {
                 task.updateSpeedAndTimeRemaining(interval)
                 result += task.speed
             }

@@ -154,7 +154,7 @@ extension Cache {
 
 // MARK: - retrieve
 extension Cache {
-    internal func retrieveAllTasks() -> [Task]? {
+    internal func retrieveAllTasks() -> [DownloadTask] {
         return ioQueue.sync {
             var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
             if fileManager.fileExists(atPath: path) {
@@ -171,18 +171,22 @@ extension Cache {
                     return tasks
                 } catch  {
                     TiercelLog("retrieveAllTasks error: \(error)", identifier: identifier)
-                    return nil
+                    return [DownloadTask]()
                 }
             } else {
                 path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
-                let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [Task]
-                tasks?.forEach { (task) in
-                    task.cache = self
-                    if task.status == .waiting  {
-                        task.status = .suspended
+                if let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [DownloadTask] {
+                    tasks.forEach { (task) in
+                        task.cache = self
+                        if task.status == .waiting  {
+                            task.status = .suspended
+                        }
                     }
+                    storeTasks(tasks)
+                    try? fileManager.removeItem(atPath: path)
+                    return tasks
                 }
-                return tasks
+                return [DownloadTask]()
             }
         }
     }
@@ -216,7 +220,7 @@ extension Cache {
 
 // MARK: - store
 extension Cache {
-    internal func storeTasks(_ tasks: [Task]) {
+    internal func storeTasks(_ tasks: [DownloadTask]) {
         ioQueue.sync {
             do {
                 let data = try encoder.encode(tasks)
@@ -262,8 +266,6 @@ extension Cache {
             }
         }
     }
-    
-    
 }
 
 

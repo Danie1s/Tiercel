@@ -27,12 +27,12 @@ class ViewController1: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let task = sessionManager.tasks.safeObject(at: 0) as? DownloadTask {
+        if let task = sessionManager.tasks.safeObject(at: 0) {
             updateUI(task)
         }
     }
 
-    private func updateUI(_ task: Task) {
+    private func updateUI(_ task: DownloadTask) {
         let per = task.progress.fractionCompleted
         progressLabel.text = "progress： \(String(format: "%.2f", per * 100))%"
         progressView.progress = Float(per)
