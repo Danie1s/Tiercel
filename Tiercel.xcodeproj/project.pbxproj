@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		E10B78A721E73C3E00DFF2B3 /* ResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */; };
 		E10B78A821E73C3E00DFF2B3 /* SessionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */; };
+		E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14405228A95FC00B4CD6D /* URLConvertible.swift */; };
+		E1A14408228A9CA100B4CD6D /* TiercelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14407228A9CA100B4CD6D /* TiercelError.swift */; };
 		E1C1DD3E206C91EF003665A9 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1C1DD3C206C91EF003665A9 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E1C1DD4A206C9241003665A9 /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD44206C9241003665A9 /* DownloadTask.swift */; };
 		E1C1DD4B206C9241003665A9 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD45206C9241003665A9 /* Cache.swift */; };
@@ -72,6 +74,8 @@
 /* Begin PBXFileReference section */
 		E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumeDataHelper.swift; sourceTree = "<group>"; };
 		E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionConfiguration.swift; sourceTree = "<group>"; };
+		E1A14405228A95FC00B4CD6D /* URLConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConvertible.swift; sourceTree = "<group>"; };
+		E1A14407228A9CA100B4CD6D /* TiercelError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TiercelError.swift; sourceTree = "<group>"; };
 		E1C1DD39206C91EF003665A9 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C1DD3C206C91EF003665A9 /* Tiercel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tiercel.h; sourceTree = "<group>"; };
 		E1C1DD3D206C91EF003665A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -208,6 +212,8 @@
 				E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */,
 				E1C1DD48206C9241003665A9 /* SessionManager.swift */,
 				E1C1DD49206C9241003665A9 /* SessionDelegate.swift */,
+				E1A14405228A95FC00B4CD6D /* URLConvertible.swift */,
+				E1A14407228A9CA100B4CD6D /* TiercelError.swift */,
 			);
 			path = General;
 			sourceTree = "<group>";
@@ -359,6 +365,8 @@
 				E10B78A821E73C3E00DFF2B3 /* SessionConfiguration.swift in Sources */,
 				E1C1DD4F206C9241003665A9 /* SessionDelegate.swift in Sources */,
 				E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */,
+				E1A14408228A9CA100B4CD6D /* TiercelError.swift in Sources */,
+				E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -154,7 +154,7 @@ public class DownloadTask: Task<DownloadTask> {
         cache.createDirectory()
         
         if cache.fileExists(fileName: fileName) {
-            TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", url: url)
             if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePath(fileName: fileName)!), let length = fileInfo[.size] as? Int64 {
                 progress.totalUnitCount = length
             }
@@ -177,7 +177,7 @@ public class DownloadTask: Task<DownloadTask> {
 
         if status == .waiting {
             status = .suspended
-            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
             progressExecuter?.execute(self)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
@@ -195,7 +195,7 @@ public class DownloadTask: Task<DownloadTask> {
         } else {
             status = .willCancel
             didCancelOrRemove()
-            TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
             manager?.completed()
@@ -212,7 +212,7 @@ public class DownloadTask: Task<DownloadTask> {
         } else {
             status = .willRemove
             didCancelOrRemove()
-            TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
             manager?.completed()
@@ -225,12 +225,15 @@ public class DownloadTask: Task<DownloadTask> {
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
-        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", URLString: URLString)
+        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", url: url)
         progressExecuter?.execute(self)
         successExecuter?.execute(self)
         validateFile()
     }
     
+    override func executeHandler(_ executer: Executer<DownloadTask>?) {
+        executer?.execute(self)
+    }
 
 
     fileprivate func validateFile() {
@@ -264,13 +267,13 @@ extension DownloadTask {
                 startToDownload()
             } else {
                 status = .waiting
-                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, URLString: URLString)
+                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, url: url)
             }
         case .succeeded:
             completed()
             manager.completed()
         case .running:
-            TiercelLog("[downloadTask] running", identifier: manager.identifier, URLString: URLString)
+            TiercelLog("[downloadTask] running", identifier: manager.identifier, url: url)
         default: break
         }
     }
@@ -300,7 +303,7 @@ extension DownloadTask {
             startDate = Date().timeIntervalSince1970
         }
         status = .running
-        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", URLString: URLString)
+        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", url: url)
         progressExecuter?.execute(self)
         manager?.didStart()
     }
@@ -317,7 +320,7 @@ extension DownloadTask {
         }
         cache.remove(self, completely: isRemoveCompletely)
         
-        manager?.didCancelOrRemove(URLString)
+        manager?.didCancelOrRemove(url.absoluteString)
     }
 }
 
@@ -357,7 +360,7 @@ extension DownloadTask {
 extension DownloadTask {
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let change = change, let newRequest = change[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
-            currentURLString = url.absoluteString
+            currentURL = url
         }
     }
 }
@@ -396,7 +399,6 @@ extension DownloadTask {
     internal func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
-//        manager?.updateSpeedAndTimeRemaining()
         if SessionManager.isControlNetworkActivityIndicator {
             DispatchQueue.main.tr.safeAsync {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -441,27 +443,27 @@ extension DownloadTask {
             switch status {
             case .suspended:
                 status = .suspended
-                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
+                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
 
             case .willSuspend:
                 status = .suspended
-                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
+                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
                 progressExecuter?.execute(self)
                 controlExecuter?.execute(self)
                 failureExecuter?.execute(self)
             case .willCancel, .willRemove:
                 didCancelOrRemove()
                 if status == .canceled {
-                    TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
+                    TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
                 }
                 if status == .removed {
-                    TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", URLString: URLString)
+                    TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
                 }
                 controlExecuter?.execute(self)
                 failureExecuter?.execute(self)
             default:
                 status = .failed
-                TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", URLString: URLString)
+                TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", url: url)
                 progressExecuter?.execute(self)
                 failureExecuter?.execute(self)
             }
@@ -471,48 +473,6 @@ extension DownloadTask {
         manager?.completed()
     }
 }
-
-extension DownloadTask {
-    @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> Self {
-        return operationQueue.sync {
-            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-            return self
-        }
-
-    }
-
-    @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> Self {
-        operationQueue.sync {
-            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .succeeded {
-                self.successExecuter?.execute(self)
-            }
-        }
-        return self
-
-    }
-
-    @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> Self {
-        operationQueue.sync {
-            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .suspended ||
-                self.status == .canceled ||
-                self.status == .removed ||
-                self.status == .failed  {
-                self.failureExecuter?.execute(self)
-            }
-        }
-        return self
-    }
-}
-
 
 extension Array where Element == DownloadTask {
     @discardableResult

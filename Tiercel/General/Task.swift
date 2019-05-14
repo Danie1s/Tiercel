@@ -37,8 +37,8 @@ extension Task {
 public class Task<T>: NSObject, NSCoding, Codable {
     
     private enum CodingKeys: CodingKey {
-        case URLString
-        case currentURLString
+        case url
+        case currentURL
         case fileName
         case headers
         case startDate
@@ -121,20 +121,18 @@ public class Task<T>: NSObject, NSCoding, Codable {
         }
     }
 
-    internal let url: URL
+    public let url: URL
     
-    public let URLString: String
-    
-    private var _currentURLString: String
-    internal var currentURLString: String {
+    private var _currentURL: URL
+    internal var currentURL: URL {
         get {
             return dataQueue.sync {
-                _currentURLString
+                _currentURL
             }
         }
         set {
             dataQueue.sync {
-                _currentURLString = newValue
+                _currentURL = newValue
             }
         }
     }
@@ -223,9 +221,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
                   operationQueue:DispatchQueue) {
         self.cache = cache
         self.url = url
-        self.URLString = url.absoluteString
         self.operationQueue = operationQueue
-        _currentURLString = url.absoluteString
+        _currentURL = url
         _fileName = url.tr.fileName
         super.init()
         self.headers = headers
@@ -233,8 +230,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(URLString, forKey: .URLString)
-        try container.encode(currentURLString, forKey: .currentURLString)
+        try container.encode(url.absoluteString, forKey: .url)
+        try container.encode(currentURL.absoluteString, forKey: .currentURL)
         try container.encode(fileName, forKey: .fileName)
         try container.encodeIfPresent(headers, forKey: .headers)
         try container.encode(startDate, forKey: .startDate)
@@ -252,9 +249,10 @@ public class Task<T>: NSObject, NSCoding, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         cache = Cache("default")
-        URLString = try container.decode(String.self, forKey: .URLString)
-        url = URL(string: URLString)!
-        _currentURLString = try container.decode(String.self, forKey: .currentURLString)
+        let URLString = try container.decode(String.self, forKey: .url)
+        url = try URLString.asURL()
+        let currentURLString = try container.decode(String.self, forKey: .currentURL)
+        _currentURL = try currentURLString.asURL()
         _fileName = try container.decode(String.self, forKey: .fileName)
         operationQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
@@ -278,8 +276,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
     
     @available(*, deprecated, message: "Use encode(to:) instead.")
     public func encode(with aCoder: NSCoder) {
-        aCoder.encode(URLString, forKey: "URLString")
-        aCoder.encode(currentURLString, forKey: "currentURLString")
+//        aCoder.encode(URLString, forKey: "URLString")
+        aCoder.encode(currentURL, forKey: "currentURLString")
         aCoder.encode(fileName, forKey: "fileName")
         aCoder.encode(headers, forKey: "headers")
         aCoder.encode(startDate, forKey: "startDate")
@@ -295,9 +293,10 @@ public class Task<T>: NSObject, NSCoding, Codable {
     @available(*, deprecated, message: "Use init(from:) instead.")
     public required init?(coder aDecoder: NSCoder) {
         cache = Cache("default")
-        URLString = aDecoder.decodeObject(forKey: "URLString") as! String
-        url = URL(string: URLString)!
-        _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
+        let URLString = aDecoder.decodeObject(forKey: "URLString") as! String
+        url = try! URLString.asURL()
+        let currentURLSting = aDecoder.decodeObject(forKey: "currentURLString") as! String
+        _currentURL = try! currentURLSting.asURL()
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         operationQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
@@ -329,8 +328,52 @@ public class Task<T>: NSObject, NSCoding, Codable {
         }
         self.request = request
     }
+    
+    internal func executeHandler(_ Executer: Executer<T>?) {
+        
+    }
+    
 }
 
 
+extension Task {
+    @discardableResult
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+        return operationQueue.sync {
+            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            return self
+        }
 
+    }
+
+    @discardableResult
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+        operationQueue.sync {
+            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        }
+        operationQueue.async {
+            if self.status == .succeeded {
+                self.executeHandler(self.successExecuter)
+            }
+        }
+        return self
+
+    }
+
+    @discardableResult
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+        operationQueue.sync {
+            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        }
+        operationQueue.async {
+            if self.status == .suspended ||
+                self.status == .canceled ||
+                self.status == .removed ||
+                self.status == .failed  {
+                self.executeHandler(self.failureExecuter)
+            }
+        }
+        return self
+    }
+}
 

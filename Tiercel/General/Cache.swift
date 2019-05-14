@@ -117,19 +117,23 @@ extension Cache {
         return fileManager.fileExists(atPath: path)
     }
     
-    public func filePath(URLString: String) -> String? {
-        guard let url = URL(string: URLString) else { return nil }
-        let fileName = url.tr.fileName
-        return filePath(fileName: fileName)
+    public func filePath(url: URLConvertible) -> String? {
+        do {
+            let validURL = try url.asURL()
+            let fileName = validURL.tr.fileName
+            return filePath(fileName: fileName)
+        } catch {
+            return nil
+        }
     }
     
-    public func fileURL(URLString: String) -> URL? {
-        guard let path = filePath(URLString: URLString) else { return nil }
+    public func fileURL(url: URLConvertible) -> URL? {
+        guard let path = filePath(url: url) else { return nil }
         return URL(fileURLWithPath: path)
     }
     
-    public func fileExists(URLString: String) -> Bool {
-        guard let path = filePath(URLString: URLString) else { return false }
+    public func fileExists(url: URLConvertible) -> Bool {
+        guard let path = filePath(url: url) else { return false }
         return fileManager.fileExists(atPath: path)
     }
     
@@ -157,37 +161,27 @@ extension Cache {
     internal func retrieveAllTasks() -> [DownloadTask] {
         return ioQueue.sync {
             var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
+            var tasks: [DownloadTask]
             if fileManager.fileExists(atPath: path) {
                 do {
                     let url = URL(fileURLWithPath: path)
                     let data = try Data(contentsOf: url)
-                    let tasks = try decoder.decode([DownloadTask].self, from: data)
-                    tasks.forEach { (task) in
-                        task.cache = self
-                        if task.status == .waiting  {
-                            task.status = .suspended
-                        }
-                    }
-                    return tasks
+                    tasks = try decoder.decode([DownloadTask].self, from: data)
                 } catch  {
                     TiercelLog("retrieveAllTasks error: \(error)", identifier: identifier)
                     return [DownloadTask]()
                 }
             } else {
                 path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
-                if let tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [DownloadTask] {
-                    tasks.forEach { (task) in
-                        task.cache = self
-                        if task.status == .waiting  {
-                            task.status = .suspended
-                        }
-                    }
-                    storeTasks(tasks)
-                    try? fileManager.removeItem(atPath: path)
-                    return tasks
-                }
-                return [DownloadTask]()
+                tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [DownloadTask] ?? [DownloadTask]()
             }
+            tasks.forEach { (task) in
+                task.cache = self
+                if task.status == .waiting  {
+                    task.status = .suspended
+                }
+            }
+            return tasks
         }
     }
 
@@ -224,9 +218,11 @@ extension Cache {
         ioQueue.sync {
             do {
                 let data = try encoder.encode(tasks)
-                let path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
+                var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
                 let url = URL(fileURLWithPath: path)
                 try data.write(to: url)
+                path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
+                try? fileManager.removeItem(atPath: path)
             } catch {
                 TiercelLog("storeTasks error: \(error)", identifier: identifier)
             }
