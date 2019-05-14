@@ -27,7 +27,7 @@
 import UIKit
 
 public class Cache {
-        
+
     private let ioQueue: DispatchQueue
     
     public let downloadPath: String
@@ -42,7 +42,7 @@ public class Cache {
     
     private let encoder = PropertyListEncoder()
     
-    private let decoder = PropertyListDecoder()
+    internal let decoder = PropertyListDecoder()
     
     private final class func defaultDiskCachePathClosure(_ cacheName: String) -> String {
         let dstPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
@@ -55,6 +55,7 @@ public class Cache {
     /// - Parameters:
     ///   - name: 不同的name，代表不同的下载模块，对应的文件放在不同的地方
     public init(_ name: String) {
+
         self.identifier = name
         
         let ioQueueName = "com.Tiercel.Cache.ioQueue.\(name)"
@@ -71,6 +72,8 @@ public class Cache {
         downloadFilePath = (downloadPath as NSString).appendingPathComponent("File")
         
         createDirectory()
+
+        decoder.userInfo[.cache] = self
         
     }
 

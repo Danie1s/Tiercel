@@ -226,6 +226,7 @@ public class SessionManager {
         self._configuration = configuration
         self.operationQueue = operationQueue
         cache = Cache(identifier)
+        cache.decoder.userInfo[.cache] = operationQueue
         tasks = cache.retrieveAllTasks()
         tasks.forEach {
             $0.manager = self
@@ -301,7 +302,7 @@ extension SessionManager {
     /// 开启一个下载任务
     ///
     /// - Parameters:
-    ///   - url:
+    ///   - url: URLConvertible
     ///   - headers: headers
     ///   - fileName: 下载文件的文件名，如果传nil，则默认为url的md5加上文件扩展名
     /// - Returns: 如果url有效，则返回对应的task；如果url无效，则返回nil
@@ -314,10 +315,10 @@ extension SessionManager {
             var task: DownloadTask?
             operationQueue.sync {
                 task = fetchTask(validURL)
-                if task != nil {
-                    task?.headers = headers
+                if let task = task {
+                    task.headers = headers
                     if let fileName = fileName, !fileName.isEmpty {
-                        task?.fileName = fileName
+                        task.fileName = fileName
                     }
                 } else {
                     task = DownloadTask(validURL,
@@ -331,9 +332,7 @@ extension SessionManager {
                 }
                 cache.storeTasks(tasks)
             }
-            
             start(task!)
-            
             return task
         } catch {
             TiercelLog("[manager] url error：\(url)", identifier: identifier)
@@ -346,7 +345,7 @@ extension SessionManager {
     /// 批量开启多个下载任务, 所有任务都会并发下载
     ///
     /// - Parameters:
-    ///   - urls:
+    ///   - urls: [URLConvertible]
     ///   - headers: headers
     ///   - fileNames: 下载文件的文件名，如果传nil，则默认为url的md5加上文件扩展名
     /// - Returns: 返回url数组中有效url对应的task数组
@@ -370,17 +369,11 @@ extension SessionManager {
 
         multiDownloadQueue.sync {
             for (index, url) in urls.enumerated() {
-                do {
-                    let validURL = try url.asURL()
-                    if !uniqueTasks.contains { $0.url == validURL } {
-                        let fileName = fileNames?.safeObject(at: index)
-                        let header = headers?.safeObject(at: index)
-                        if let task = download(validURL, headers: header, fileName: fileName) {
-                            uniqueTasks.append(task)
-                        }
-                    }
-                } catch {
-                    continue
+                let fileName = fileNames?.safeObject(at: index)
+                let header = headers?.safeObject(at: index)
+                if let task = download(url, headers: header, fileName: fileName),
+                    !uniqueTasks.contains { $0.url == task.url }{
+                    uniqueTasks.append(task)
                 }
             }
         }

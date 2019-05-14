@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		E10B78A721E73C3E00DFF2B3 /* ResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */; };
 		E10B78A821E73C3E00DFF2B3 /* SessionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */; };
+		E18F465B228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */; };
+		E18F465C228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */; };
 		E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14405228A95FC00B4CD6D /* URLConvertible.swift */; };
 		E1A14408228A9CA100B4CD6D /* TiercelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14407228A9CA100B4CD6D /* TiercelError.swift */; };
 		E1C1DD3E206C91EF003665A9 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1C1DD3C206C91EF003665A9 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -74,6 +76,7 @@
 /* Begin PBXFileReference section */
 		E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumeDataHelper.swift; sourceTree = "<group>"; };
 		E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionConfiguration.swift; sourceTree = "<group>"; };
+		E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+Cache.swift"; sourceTree = "<group>"; };
 		E1A14405228A95FC00B4CD6D /* URLConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConvertible.swift; sourceTree = "<group>"; };
 		E1A14407228A9CA100B4CD6D /* TiercelError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TiercelError.swift; sourceTree = "<group>"; };
 		E1C1DD39206C91EF003665A9 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -197,6 +200,7 @@
 				E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */,
 				E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */,
 				E1C6A3D922775F23009C0935 /* OperationQueue+DispatchQueue.swift */,
+				E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -353,6 +357,7 @@
 				E10B78A721E73C3E00DFF2B3 /* ResumeDataHelper.swift in Sources */,
 				E1D8EF9C21F6CEFB004B70C5 /* URLSession+ResumeData.swift in Sources */,
 				E1D8EFA421F6D2B3004B70C5 /* Array+Safe.swift in Sources */,
+				E18F465B228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */,
 				E1C1DD4E206C9241003665A9 /* SessionManager.swift in Sources */,
 				E1C6A3D522775C33009C0935 /* Executer.swift in Sources */,
 				E1D8EF9A21F6CE5C004B70C5 /* Data+Hash.swift in Sources */,
@@ -379,6 +384,7 @@
 				E1C1DD6F206C937B003665A9 /* ViewController3.swift in Sources */,
 				E1C1DD74206C9385003665A9 /* DownloadViewController.swift in Sources */,
 				E1C1DD75206C9385003665A9 /* DownloadTaskCell.swift in Sources */,
+				E18F465C228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */,
 				E1C1DD76206C9385003665A9 /* BaseViewController.swift in Sources */,
 				E1C1DD6E206C937B003665A9 /* ListViewCell.swift in Sources */,
 				E1C1DD6B206C937B003665A9 /* ViewController2.swift in Sources */,
@@ -583,7 +589,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = Y3437T5EGX;
+				DEVELOPMENT_TEAM = 938M2GJR4V;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -602,7 +608,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = Y3437T5EGX;
+				DEVELOPMENT_TEAM = 938M2GJR4V;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

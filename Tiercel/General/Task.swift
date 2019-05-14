@@ -55,6 +55,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
 
     internal var cache: Cache
 
+    internal var operationQueue: DispatchQueue
+
     internal var session: URLSession?
     
     internal var headers: [String: String]?
@@ -72,8 +74,6 @@ public class Task<T>: NSObject, NSCoding, Codable {
     internal var controlExecuter: Executer<T>?
 
     internal var validateExecuter: Executer<T>?
-    
-    internal var operationQueue: DispatchQueue
 
     internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
 
@@ -230,8 +230,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(url.absoluteString, forKey: .url)
-        try container.encode(currentURL.absoluteString, forKey: .currentURL)
+        try container.encode(url, forKey: .url)
+        try container.encode(currentURL, forKey: .currentURL)
         try container.encode(fileName, forKey: .fileName)
         try container.encodeIfPresent(headers, forKey: .headers)
         try container.encode(startDate, forKey: .startDate)
@@ -247,16 +247,13 @@ public class Task<T>: NSObject, NSCoding, Codable {
     
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        cache = Cache("default")
-        let URLString = try container.decode(String.self, forKey: .url)
-        url = try URLString.asURL()
-        let currentURLString = try container.decode(String.self, forKey: .currentURL)
-        _currentURL = try currentURLString.asURL()
+        url = try container.decode(URL.self, forKey: .url)
+        _currentURL = try container.decode(URL.self, forKey: .currentURL)
         _fileName = try container.decode(String.self, forKey: .fileName)
-        operationQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
+        cache = decoder.userInfo[.cache] as? Cache ?? Cache("default")
+        operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
-        
+
         headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
         startDate = try container.decode(Double.self, forKey: .startDate)
         endDate = try container.decode(Double.self, forKey: .endDate)
@@ -271,13 +268,13 @@ public class Task<T>: NSObject, NSCoding, Codable {
         
         let validationType = try container.decode(Int.self, forKey: .validation)
         validation = TRValidation(rawValue: validationType)!
-        
+
     }
     
     @available(*, deprecated, message: "Use encode(to:) instead.")
     public func encode(with aCoder: NSCoder) {
-//        aCoder.encode(URLString, forKey: "URLString")
-        aCoder.encode(currentURL, forKey: "currentURLString")
+        aCoder.encode(url.absoluteString, forKey: "url")
+        aCoder.encode(currentURL.absoluteString, forKey: "currentURL")
         aCoder.encode(fileName, forKey: "fileName")
         aCoder.encode(headers, forKey: "headers")
         aCoder.encode(startDate, forKey: "startDate")
