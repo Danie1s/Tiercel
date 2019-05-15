@@ -27,7 +27,7 @@
 import Foundation
 
 extension Task {
-    public enum TRValidation: Int {
+    public enum Validation: Int {
         case unkown
         case correct
         case incorrect
@@ -107,8 +107,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
         }
     }
     
-    private var _validation: TRValidation = .unkown
-    public var validation: TRValidation {
+    private var _validation: Validation = .unkown
+    public var validation: Validation {
         get {
             return dataQueue.sync {
                 _validation
@@ -267,7 +267,7 @@ public class Task<T>: NSObject, NSCoding, Codable {
         verificationType = FileVerificationType(rawValue: verificationTypeInt)!
         
         let validationType = try container.decode(Int.self, forKey: .validation)
-        validation = TRValidation(rawValue: validationType)!
+        validation = Validation(rawValue: validationType)!
 
     }
     
@@ -311,7 +311,7 @@ public class Task<T>: NSObject, NSCoding, Codable {
         verificationType = FileVerificationType(rawValue: verificationTypeInt)!
 
         let validationType = aDecoder.decodeInteger(forKey: "validation")
-        validation = TRValidation(rawValue: validationType)!
+        validation = Validation(rawValue: validationType)!
     }
 
 
@@ -373,4 +373,5 @@ extension Task {
         return self
     }
 }
+
 

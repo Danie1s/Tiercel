@@ -226,7 +226,7 @@ public class SessionManager {
         self._configuration = configuration
         self.operationQueue = operationQueue
         cache = Cache(identifier)
-        cache.decoder.userInfo[.cache] = operationQueue
+        cache.decoder.userInfo[.operationQueue] = operationQueue
         tasks = cache.retrieveAllTasks()
         tasks.forEach {
             $0.manager = self
@@ -236,7 +236,7 @@ public class SessionManager {
         shouldCreatSession = true
         operationQueue.sync {
             createSession()
-            matchStatus()
+            updateStatus()
         }
     }
 
@@ -262,7 +262,7 @@ public class SessionManager {
         completion?()
     }
     
-    private func matchStatus() {
+    private func updateStatus() {
         if self.tasks.isEmpty {
             return
         }
@@ -317,8 +317,8 @@ extension SessionManager {
                 task = fetchTask(validURL)
                 if let task = task {
                     task.headers = headers
-                    if let fileName = fileName, !fileName.isEmpty {
-                        task.fileName = fileName
+                    if let fileName = fileName {
+                        task.updateFileName(fileName)
                     }
                 } else {
                     task = DownloadTask(validURL,

@@ -257,6 +257,14 @@ public class DownloadTask: Task<DownloadTask> {
     }
 }
 
+extension DownloadTask {
+    internal func updateFileName(_ newFileName: String) {
+        guard !fileName.isEmpty else { return }
+        cache.updateFileName(self, newFileName)
+        fileName = newFileName
+    }
+}
+
 // MARK: - status handle
 extension DownloadTask {
     private func prepareToStart() {

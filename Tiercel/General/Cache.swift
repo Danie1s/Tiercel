@@ -163,7 +163,7 @@ extension Cache {
 extension Cache {
     internal func retrieveAllTasks() -> [DownloadTask] {
         return ioQueue.sync {
-            var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
+            var path = (downloadPath as NSString).appendingPathComponent("\(identifier)_Tasks.plist")
             var tasks: [DownloadTask]
             if fileManager.fileExists(atPath: path) {
                 do {
@@ -175,7 +175,7 @@ extension Cache {
                     return [DownloadTask]()
                 }
             } else {
-                path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
+                path = (downloadPath as NSString).appendingPathComponent("\(identifier)Tasks.plist")
                 tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [DownloadTask] ?? [DownloadTask]()
             }
             tasks.forEach { (task) in
@@ -191,19 +191,19 @@ extension Cache {
     internal func retrieveTmpFile(_ task: DownloadTask) {
         ioQueue.sync {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
-            let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
+            let path1 = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
-            guard self.fileManager.fileExists(atPath: path1) else { return }
+            guard fileManager.fileExists(atPath: path1) else { return }
 
-            if self.fileManager.fileExists(atPath: path2) {
+            if fileManager.fileExists(atPath: path2) {
                 do {
-                    try self.fileManager.removeItem(atPath: path1)
+                    try fileManager.removeItem(atPath: path1)
                 } catch {
                     TiercelLog("removeItem error: \(error)", identifier: identifier)
                 }
             } else {
                 do {
-                    try self.fileManager.moveItem(atPath: path1, toPath: path2)
+                    try fileManager.moveItem(atPath: path1, toPath: path2)
                 } catch {
                     TiercelLog("moveItem error: \(error)", identifier: identifier)
                 }
@@ -221,10 +221,10 @@ extension Cache {
         ioQueue.sync {
             do {
                 let data = try encoder.encode(tasks)
-                var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
+                var path = (downloadPath as NSString).appendingPathComponent("\(identifier)_Tasks.plist")
                 let url = URL(fileURLWithPath: path)
                 try data.write(to: url)
-                path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
+                path = (downloadPath as NSString).appendingPathComponent("\(identifier)Tasks.plist")
                 try? fileManager.removeItem(atPath: path)
             } catch {
                 TiercelLog("storeTasks error: \(error)", identifier: identifier)
@@ -235,9 +235,9 @@ extension Cache {
     internal func storeFile(_ task: DownloadTask) {
         ioQueue.sync {
             guard let location = task.tmpFileURL else { return }
-            let destination = (self.downloadFilePath as NSString).appendingPathComponent(task.fileName)
+            let destination = (downloadFilePath as NSString).appendingPathComponent(task.fileName)
             do {
-                try self.fileManager.moveItem(at: location, to: URL(fileURLWithPath: destination))
+                try fileManager.moveItem(at: location, to: URL(fileURLWithPath: destination))
             } catch {
                 TiercelLog("moveItem error: \(error)", identifier: identifier)
             }
@@ -248,19 +248,31 @@ extension Cache {
         ioQueue.sync {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
-            let destination = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
-            if self.fileManager.fileExists(atPath: destination) {
+            let destination = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
+            if fileManager.fileExists(atPath: destination) {
                 do {
-                    try self.fileManager.removeItem(atPath: destination)
+                    try fileManager.removeItem(atPath: destination)
                 } catch {
                     TiercelLog("removeItem error: \(error)", identifier: identifier)
                 }
             }
-            if self.fileManager.fileExists(atPath: tmpPath) {
+            if fileManager.fileExists(atPath: tmpPath) {
                 do {
-                    try self.fileManager.copyItem(atPath: tmpPath, toPath: destination)
+                    try fileManager.copyItem(atPath: tmpPath, toPath: destination)
                 } catch {
                     TiercelLog("copyItem error: \(error)", identifier: identifier)
+                }
+            }
+        }
+    }
+    
+    internal func updateFileName(_ task: DownloadTask, _ newFileName: String) {
+        ioQueue.sync {
+            if fileManager.fileExists(atPath: task.filePath) {
+                do {
+                    try fileManager.moveItem(atPath: task.filePath, toPath: filePath(fileName: newFileName)!)
+                } catch {
+                    TiercelLog("updateFileName error: \(error)", identifier: identifier)
                 }
             }
         }
@@ -302,7 +314,7 @@ extension Cache {
             guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
-            [path1, path2].forEach({ (path) in
+            [path1, path2].forEach { (path) in
                 if self.fileManager.fileExists(atPath: path) {
                     do {
                         try self.fileManager.removeItem(atPath: path)
@@ -310,7 +322,7 @@ extension Cache {
                         TiercelLog("removeItem error: \(error)", identifier: self.identifier)
                     }
                 }
-            })
+            }
 
         }
     }

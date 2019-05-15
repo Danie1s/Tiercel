@@ -94,7 +94,8 @@ internal class ResumeDataHelper {
             do {
                 resumeDictionary = try keyedUnarchiver.decodeTopLevelObject(of: NSMutableDictionary.self, forKey: "NSKeyedArchiveRootObjectKey") ?? nil
                 if resumeDictionary == nil {
-                    resumeDictionary = try keyedUnarchiver.decodeTopLevelObject(of: NSMutableDictionary.self, forKey: NSKeyedArchiveRootObjectKey)            }
+                    resumeDictionary = try keyedUnarchiver.decodeTopLevelObject(of: NSMutableDictionary.self, forKey: NSKeyedArchiveRootObjectKey)
+                }
             } catch {}
             keyedUnarchiver.finishDecoding()
             
@@ -102,7 +103,7 @@ internal class ResumeDataHelper {
         
         if resumeDictionary == nil {
             do {
-                resumeDictionary = try PropertyListSerialization.propertyList(from: data, options: PropertyListSerialization.ReadOptions(), format: nil) as? NSMutableDictionary;
+                resumeDictionary = try PropertyListSerialization.propertyList(from: data, options: PropertyListSerialization.ReadOptions(), format: nil) as? NSMutableDictionary
             } catch {}
         }
         
