@@ -144,10 +144,10 @@ func application(_ application: UIApplication, handleEventsForBackgroundURLSessi
 一行代码开启下载
 
 ```swift
-// 创建下载任务并且开启下载，同时返回可选类型的DownloadTask实例，如果URLString无效，则返回nil
+// 创建下载任务并且开启下载，同时返回可选类型的DownloadTask实例，如果url无效，则返回nil
 let task = sessionManager.download("http://api.gfs100.cn/upload/20171219/201712191530562229.mp4")
 
-// 批量创建下载任务并且开启下载，返回有效URLString对应的任务数组，URLStrings需要跟fileNames一一对应
+// 批量创建下载任务并且开启下载，返回有效url对应的任务数组，url需要跟fileNames一一对应
 let tasks = sessionManager.multiDownload(URLStrings)
 ```
 
@@ -175,12 +175,12 @@ task?.progress(onMainQueue: true, { (task) in
 }
 ```
 
-下载任务的管理和操作。**在Tiercel中，URLString是下载任务的唯一标识，如果需要对下载任务进行操作，则使用SessionManager实例对URLString进行操作。** 暂停下载、取消下载、移除下载的操作可以添加回调，并且可以选择是否在主线程上执行该回调。
+下载任务的管理和操作。**在Tiercel中，url是下载任务的唯一标识，如果需要对下载任务进行操作，则使用SessionManager实例对url进行操作。** 暂停下载、取消下载、移除下载的操作可以添加回调，并且可以选择是否在主线程上执行该回调。
 
 ```swift
 let URLString = "http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"
 
-// 创建下载任务并且开启下载，同时返回可选类型的DownloadTask实例，如果URLString无效，则返回nil
+// 创建下载任务并且开启下载，同时返回可选类型的DownloadTask实例，如果url无效，则返回nil
 let task = sessionManager.download(URLString)
 // 根据URLString查找下载任务，返回可选类型的Task实例，如果不存在，则返回nil
 let task = sessionManager.fetchTask(URLString)
@@ -408,19 +408,19 @@ DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
 
 ### DownloadTask
 
-DownloadTask是Tiercel中的下载任务类，继承自Task。**在Tiercel中，URLString是下载任务的唯一标识，URLString代表着任务，如果需要对下载任务进行操作，则使用SessionManager实例对URLString进行操作。** 所以DownloadTask实例都是由SessionManager实例创建，单独创建没有意义。
+DownloadTask是Tiercel中的下载任务类，继承自Task。**在Tiercel中，url是下载任务的唯一标识，url代表着任务，如果需要对下载任务进行操作，则使用SessionManager实例对url进行操作。** 所以DownloadTask实例都是由SessionManager实例创建，单独创建没有意义。
 
 主要属性
 
 ```swift
 // 保存到沙盒的下载文件的文件名，如果在下载的时候没有设置，则默认为url的md5加上文件扩展名
 public internal(set) var fileName: String
-// 下载任务对应的URLString
-public let URLString: String
+// 下载任务对应的url
+public let url: URL
 // 下载任务的状态
-public var status: TRStatus
+public var status: Status
 // 下载文件的校验状态
-public var validation: TRValidation
+public var validation: Validation
 // 下载任务的进度
 public var progress: Progress = Progress()
 // 下载任务的开始日期

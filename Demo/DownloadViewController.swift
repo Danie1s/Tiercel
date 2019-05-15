@@ -23,7 +23,7 @@ class DownloadViewController: BaseViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         guard let downloadManager = sessionManager else { return  }
-        downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+        downloadURLStrings = downloadManager.tasks.map({ $0.url.absoluteString })
         updateUI()
         tableView.reloadData()
     }

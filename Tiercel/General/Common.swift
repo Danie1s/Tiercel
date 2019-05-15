@@ -70,22 +70,22 @@ extension TiercelCompatible {
 }
 
 
-public func TiercelLog<T>(_ message: T, identifier: String? = nil, URLString: String? = nil, file: String = #file, line: Int = #line) {
+public func TiercelLog<T>(_ message: T, identifier: String? = nil, url: URLConvertible? = nil, file: String = #file, line: Int = #line) {
 
     switch SessionManager.logLevel {
     case .detailed:
         print("***************TiercelLog****************")
         let threadNum = (Thread.current.description as NSString).components(separatedBy: "{").last?.components(separatedBy: ",").first ?? ""
 
-        var log = "Source     :  \((file as NSString).lastPathComponent)[\(line)]\n" +
-                  "Thread     :  \(threadNum)\n"
-        if identifier != nil {
-            log += "identifier :  \(identifier!)\n"
+        var log =  "Source     :  \((file as NSString).lastPathComponent)[\(line)]\n" +
+                   "Thread     :  \(threadNum)\n"
+        if let identifier = identifier {
+            log += "identifier :  \(identifier)\n"
         }
-        if URLString != nil {
-            log += "URLString  :  \(URLString!)\n"
+        if let url = url {
+            log += "url        :  \(url)\n"
         }
-        log += "Info       :  \(message)"
+        log +=     "Info       :  \(message)"
         print(log)
         print("")
     case .simple: print(message)

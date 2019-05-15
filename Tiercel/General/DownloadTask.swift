@@ -26,7 +26,11 @@
 
 import UIKit
 
-public class DownloadTask: Task {
+public class DownloadTask: Task<DownloadTask> {
+    
+    private enum CodingKeys: CodingKey {
+        case resumeData
+    }
     
     internal var task: URLSessionDownloadTask? {
         willSet {
@@ -83,8 +87,7 @@ public class DownloadTask: Task {
         }
     }
     
-    internal var validateExecuter: Executer<DownloadTask>?
-    
+
     internal init(_ url: URL,
                   headers: [String: String]? = nil,
                   fileName: String? = nil,
@@ -104,11 +107,29 @@ public class DownloadTask: Task {
                                                object: nil)
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        let superEncoder = container.superEncoder()
+        try super.encode(to: superEncoder)
+        try container.encodeIfPresent(resumeData, forKey: .resumeData)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let superDecoder = try container.superDecoder()
+        try super.init(from: superDecoder)
+        resumeData = try container.decodeIfPresent(Data.self, forKey: .resumeData)
+        guard let resumeData = resumeData else { return }
+        tmpFileName = ResumeDataHelper.getTmpFileName(resumeData)
+    }
+    
+    @available(*, deprecated, message: "Use encode(to:) instead.")
     public override func encode(with aCoder: NSCoder) {
         super.encode(with: aCoder)
         aCoder.encode(resumeData, forKey: "resumeData")
     }
     
+    @available(*, deprecated, message: "Use init(from:) instead.")
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         resumeData = aDecoder.decodeObject(forKey: "resumeData") as? Data
@@ -133,7 +154,7 @@ public class DownloadTask: Task {
         cache.createDirectory()
         
         if cache.fileExists(fileName: fileName) {
-            TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", url: url)
             if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePath(fileName: fileName)!), let length = fileInfo[.size] as? Int64 {
                 progress.totalUnitCount = length
             }
@@ -145,7 +166,7 @@ public class DownloadTask: Task {
     }
     
 
-    internal override func suspend(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func suspend(onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         guard status == .running || status == .waiting else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
 
@@ -156,7 +177,7 @@ public class DownloadTask: Task {
 
         if status == .waiting {
             status = .suspended
-            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
             progressExecuter?.execute(self)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
@@ -165,7 +186,7 @@ public class DownloadTask: Task {
         }
     }
     
-    internal override func cancel(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func cancel(onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         guard status != .succeeded else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
@@ -174,7 +195,7 @@ public class DownloadTask: Task {
         } else {
             status = .willCancel
             didCancelOrRemove()
-            TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
             manager?.completed()
@@ -182,7 +203,7 @@ public class DownloadTask: Task {
     }
 
 
-    internal override func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         self.isRemoveCompletely = completely
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
@@ -191,25 +212,28 @@ public class DownloadTask: Task {
         } else {
             status = .willRemove
             didCancelOrRemove()
-            TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", URLString: URLString)
+            TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
             manager?.completed()
         }
     }
     
-    internal override func completed() {
+    internal func completed() {
         guard status != .succeeded else { return }
         status = .succeeded
         endDate = Date().timeIntervalSince1970
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
-        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", URLString: URLString)
+        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", url: url)
         progressExecuter?.execute(self)
         successExecuter?.execute(self)
         validateFile()
     }
     
+    override func executeHandler(_ executer: Executer<DownloadTask>?) {
+        executer?.execute(self)
+    }
 
 
     fileprivate func validateFile() {
@@ -233,6 +257,14 @@ public class DownloadTask: Task {
     }
 }
 
+extension DownloadTask {
+    internal func updateFileName(_ newFileName: String) {
+        guard !fileName.isEmpty else { return }
+        cache.updateFileName(self, newFileName)
+        fileName = newFileName
+    }
+}
+
 // MARK: - status handle
 extension DownloadTask {
     private func prepareToStart() {
@@ -243,13 +275,13 @@ extension DownloadTask {
                 startToDownload()
             } else {
                 status = .waiting
-                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, URLString: URLString)
+                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, url: url)
             }
         case .succeeded:
             completed()
             manager.completed()
         case .running:
-            TiercelLog("[downloadTask] running", identifier: manager.identifier, URLString: URLString)
+            TiercelLog("[downloadTask] running", identifier: manager.identifier, url: url)
         default: break
         }
     }
@@ -279,7 +311,7 @@ extension DownloadTask {
             startDate = Date().timeIntervalSince1970
         }
         status = .running
-        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", URLString: URLString)
+        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", url: url)
         progressExecuter?.execute(self)
         manager?.didStart()
     }
@@ -296,7 +328,7 @@ extension DownloadTask {
         }
         cache.remove(self, completely: isRemoveCompletely)
         
-        manager?.didCancelOrRemove(URLString)
+        manager?.didCancelOrRemove(url.absoluteString)
     }
 }
 
@@ -336,7 +368,7 @@ extension DownloadTask {
 extension DownloadTask {
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let change = change, let newRequest = change[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
-            currentURLString = url.absoluteString
+            currentURL = url
         }
     }
 }
@@ -375,7 +407,6 @@ extension DownloadTask {
     internal func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
-//        manager?.updateSpeedAndTimeRemaining()
         if SessionManager.isControlNetworkActivityIndicator {
             DispatchQueue.main.tr.safeAsync {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -420,27 +451,27 @@ extension DownloadTask {
             switch status {
             case .suspended:
                 status = .suspended
-                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
+                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
 
             case .willSuspend:
                 status = .suspended
-                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", URLString: URLString)
+                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
                 progressExecuter?.execute(self)
                 controlExecuter?.execute(self)
                 failureExecuter?.execute(self)
             case .willCancel, .willRemove:
                 didCancelOrRemove()
                 if status == .canceled {
-                    TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", URLString: URLString)
+                    TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
                 }
                 if status == .removed {
-                    TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", URLString: URLString)
+                    TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
                 }
                 controlExecuter?.execute(self)
                 failureExecuter?.execute(self)
             default:
                 status = .failed
-                TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", URLString: URLString)
+                TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", url: url)
                 progressExecuter?.execute(self)
                 failureExecuter?.execute(self)
             }
@@ -451,10 +482,25 @@ extension DownloadTask {
     }
 }
 
-
-
-
 extension Array where Element == DownloadTask {
+    @discardableResult
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> [Element] {
+        self.forEach { $0.progress(onMainQueue: onMainQueue, handler) }
+        return self
+    }
+
+    @discardableResult
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> [Element] {
+        self.forEach { $0.success(onMainQueue: onMainQueue, handler) }
+        return self
+    }
+
+    @discardableResult
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<DownloadTask>) -> [Element] {
+        self.forEach { $0.failure(onMainQueue: onMainQueue, handler) }
+        return self
+    }
+
     public func validateFile(codes: [String],
                              type: FileVerificationType,
                              onMainQueue: Bool = true,
@@ -466,5 +512,3 @@ extension Array where Element == DownloadTask {
         return self
     }
 }
-
-

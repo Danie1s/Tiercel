@@ -17,8 +17,8 @@ class ViewController2: BaseViewController {
         sessionManager = appDelegate.sessionManager2
 
 
-        URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/OfficeMac/Microsoft_Office_2016_16.10.18021001_Installer.pkg",
-                      "http://dl1sw.baidu.com/client/20150922/Xcode_7.1_beta.dmg",
+        URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Microsoft_Office_16.24.19041401_Installer.pkg",
+                      "http://m6.pc6.com/xuh6/navicatpre12115.zip",
                       "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.5.2.dmg",
                       "http://m4.pc6.com/cjh3/VicomsoftFTPClient.dmg",
                       "https://qd.myapp.com/myapp/qqteam/pcqq/QQ9.0.8_2.exe",
@@ -47,7 +47,7 @@ class ViewController2: BaseViewController {
 
         setupManager()
 
-        downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+        downloadURLStrings = downloadManager.tasks.map({ $0.url.absoluteString })
 
         updateUI()
         tableView.reloadData()

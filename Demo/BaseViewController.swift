@@ -78,7 +78,7 @@ class BaseViewController: UIViewController {
                 guard let self = self,
                     let downloadManager = self.sessionManager
                     else { return }
-                self.downloadURLStrings = downloadManager.tasks.map({ $0.URLString })
+                self.downloadURLStrings = downloadManager.tasks.map({ $0.url.absoluteString })
                 self.tableView.reloadData()
                 self.updateUI()
                 

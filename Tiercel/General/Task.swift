@@ -27,18 +27,35 @@
 import Foundation
 
 extension Task {
-    public enum TRValidation: Int {
+    public enum Validation: Int {
         case unkown
         case correct
         case incorrect
     }
 }
 
-public class Task: NSObject, NSCoding {
+public class Task<T>: NSObject, NSCoding, Codable {
+    
+    private enum CodingKeys: CodingKey {
+        case url
+        case currentURL
+        case fileName
+        case headers
+        case startDate
+        case endDate
+        case totalBytes
+        case completedBytes
+        case verificationCode
+        case status
+        case verificationType
+        case validation
+    }
 
     internal weak var manager: SessionManager?
 
     internal var cache: Cache
+
+    internal var operationQueue: DispatchQueue
 
     internal var session: URLSession?
     
@@ -48,15 +65,15 @@ public class Task: NSObject, NSCoding {
     
     internal var verificationType: FileVerificationType = .md5
     
-    internal var progressExecuter: Executer<Task>?
+    internal var progressExecuter: Executer<T>?
     
-    internal var successExecuter: Executer<Task>?
+    internal var successExecuter: Executer<T>?
     
-    internal var failureExecuter: Executer<Task>?
+    internal var failureExecuter: Executer<T>?
     
-    internal var controlExecuter: Executer<Task>?
-    
-    internal var operationQueue: DispatchQueue
+    internal var controlExecuter: Executer<T>?
+
+    internal var validateExecuter: Executer<T>?
 
     internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
 
@@ -90,8 +107,8 @@ public class Task: NSObject, NSCoding {
         }
     }
     
-    private var _validation: TRValidation = .unkown
-    public var validation: TRValidation {
+    private var _validation: Validation = .unkown
+    public var validation: Validation {
         get {
             return dataQueue.sync {
                 _validation
@@ -104,20 +121,18 @@ public class Task: NSObject, NSCoding {
         }
     }
 
-    internal let url: URL
+    public let url: URL
     
-    public let URLString: String
-    
-    private var _currentURLString: String
-    internal var currentURLString: String {
+    private var _currentURL: URL
+    internal var currentURL: URL {
         get {
             return dataQueue.sync {
-                _currentURLString
+                _currentURL
             }
         }
         set {
             dataQueue.sync {
-                _currentURLString = newValue
+                _currentURL = newValue
             }
         }
     }
@@ -206,17 +221,60 @@ public class Task: NSObject, NSCoding {
                   operationQueue:DispatchQueue) {
         self.cache = cache
         self.url = url
-        self.URLString = url.absoluteString
         self.operationQueue = operationQueue
-        _currentURLString = url.absoluteString
+        _currentURL = url
         _fileName = url.tr.fileName
         super.init()
         self.headers = headers
     }
     
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(url, forKey: .url)
+        try container.encode(currentURL, forKey: .currentURL)
+        try container.encode(fileName, forKey: .fileName)
+        try container.encodeIfPresent(headers, forKey: .headers)
+        try container.encode(startDate, forKey: .startDate)
+        try container.encode(endDate, forKey: .endDate)
+        try container.encode(progress.totalUnitCount, forKey: .totalBytes)
+        try container.encode(progress.completedUnitCount, forKey: .completedBytes)
+        try container.encode(status.rawValue, forKey: .status)
+        try container.encodeIfPresent(verificationCode, forKey: .verificationCode)
+        try container.encode(verificationType.rawValue, forKey: .verificationType)
+        try container.encode(validation.rawValue, forKey: .validation)
+        
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        url = try container.decode(URL.self, forKey: .url)
+        _currentURL = try container.decode(URL.self, forKey: .currentURL)
+        _fileName = try container.decode(String.self, forKey: .fileName)
+        cache = decoder.userInfo[.cache] as? Cache ?? Cache("default")
+        operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
+        super.init()
+
+        headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
+        startDate = try container.decode(Double.self, forKey: .startDate)
+        endDate = try container.decode(Double.self, forKey: .endDate)
+        progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)
+        progress.completedUnitCount = try container.decode(Int64.self, forKey: .completedBytes)
+        verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
+        
+        let statusString = try container.decode(String.self, forKey: .status)
+        status = Status(rawValue: statusString)!
+        let verificationTypeInt = try container.decode(Int.self, forKey: .verificationType)
+        verificationType = FileVerificationType(rawValue: verificationTypeInt)!
+        
+        let validationType = try container.decode(Int.self, forKey: .validation)
+        validation = Validation(rawValue: validationType)!
+
+    }
+    
+    @available(*, deprecated, message: "Use encode(to:) instead.")
     public func encode(with aCoder: NSCoder) {
-        aCoder.encode(URLString, forKey: "URLString")
-        aCoder.encode(currentURLString, forKey: "currentURLString")
+        aCoder.encode(url.absoluteString, forKey: "url")
+        aCoder.encode(currentURL.absoluteString, forKey: "currentURL")
         aCoder.encode(fileName, forKey: "fileName")
         aCoder.encode(headers, forKey: "headers")
         aCoder.encode(startDate, forKey: "startDate")
@@ -229,11 +287,13 @@ public class Task: NSObject, NSCoding {
         aCoder.encode(validation.rawValue, forKey: "validation")
     }
     
+    @available(*, deprecated, message: "Use init(from:) instead.")
     public required init?(coder aDecoder: NSCoder) {
         cache = Cache("default")
-        URLString = aDecoder.decodeObject(forKey: "URLString") as! String
-        url = URL(string: URLString)!
-        _currentURLString = aDecoder.decodeObject(forKey: "currentURLString") as! String
+        let URLString = aDecoder.decodeObject(forKey: "URLString") as! String
+        url = try! URLString.asURL()
+        let currentURLSting = aDecoder.decodeObject(forKey: "currentURLString") as! String
+        _currentURL = try! currentURLSting.asURL()
         _fileName = aDecoder.decodeObject(forKey: "fileName") as! String
         operationQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
@@ -251,7 +311,7 @@ public class Task: NSObject, NSCoding {
         verificationType = FileVerificationType(rawValue: verificationTypeInt)!
 
         let validationType = aDecoder.decodeInteger(forKey: "validation")
-        validation = TRValidation(rawValue: validationType)!
+        validation = Validation(rawValue: validationType)!
     }
 
 
@@ -266,34 +326,16 @@ public class Task: NSObject, NSCoding {
         self.request = request
     }
     
-
-    internal func suspend(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
+    internal func executeHandler(_ Executer: Executer<T>?) {
         
-        
-    }
-    
-    internal func cancel(onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
-        
-        
-    }
-    
-    internal func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<Task>? = nil) {
-        
-    }
-    
-    internal func completed() {
-        
-    }
-    
-    internal func asDownloadTask() -> DownloadTask? {
-        return self as? DownloadTask
     }
     
 }
 
+
 extension Task {
     @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
         return operationQueue.sync {
             progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
             return self
@@ -302,13 +344,13 @@ extension Task {
     }
 
     @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
-         operationQueue.sync {
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+        operationQueue.sync {
             successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         }
         operationQueue.async {
             if self.status == .succeeded {
-                self.successExecuter?.execute(self)
+                self.executeHandler(self.successExecuter)
             }
         }
         return self
@@ -316,7 +358,7 @@ extension Task {
     }
 
     @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> Self {
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
         operationQueue.sync {
             failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         }
@@ -325,29 +367,11 @@ extension Task {
                 self.status == .canceled ||
                 self.status == .removed ||
                 self.status == .failed  {
-                self.failureExecuter?.execute(self)
+                self.executeHandler(self.failureExecuter)
             }
         }
         return self
     }
 }
 
-extension Array where Element == Task {
-    @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
-        self.forEach { $0.progress(onMainQueue: onMainQueue, handler) }
-        return self
-    }
 
-    @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
-        self.forEach { $0.success(onMainQueue: onMainQueue, handler) }
-        return self
-    }
-
-    @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<Task>) -> [Element] {
-        self.forEach { $0.failure(onMainQueue: onMainQueue, handler) }
-        return self
-    }
-}
