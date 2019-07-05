@@ -1,5 +1,5 @@
 <div align=center>
-<img src="https://github.com/Danie1s/Tiercel/blob/master/Images/logo.png"/>
+<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/logo.png"/>
 </div>
 
 [![Version](https://img.shields.io/cocoapods/v/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
@@ -100,9 +100,9 @@ If you prefer not to use any of the aforementioned dependency managers, you can 
 
 To run the example project, clone the repo, and run `Tiercel.xcodeproj` .
 
-<img src="https://github.com/Danie1s/Tiercel/blob/master/Images/1.gif" width="50%" height="50%">
+<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/1.gif" width="50%" height="50%">
 
-<img src="https://github.com/Danie1s/Tiercel/blob/master/Images/2.gif" width="50%" height="50%">
+<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/2.gif" width="50%" height="50%">
 
 ## Usage
 

@@ -208,8 +208,8 @@ NSURLSessionResumeServerDownloadDate
 - 在前台：跟普通的downloadTask一样，调用相关的session代理方法
 - 在后台：当`Background Sessions`里面所有的任务（注意是所有任务，不单单是下载任务）都完成后，会调用`AppDelegate`的`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，激活App，然后跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
 - crash或者App被系统关闭：当`Background Sessions`里面所有的任务（注意是所有任务，不单单是下载任务）都完成后，会自动启动App，调用`AppDelegate`的`application(_:didFinishLaunchingWithOptions:)`方法，然后调用`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
-- 代码引起的crash或者App被系统关闭，打开App打开App保持前台，当所有的任务都完成后才创建对应的`Background Sessions`：没有创建session时，只会调用`AppDelegate`的`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
-- 代码引起的crash或者App被系统关闭，打开App，创建对应的`Background Sessions`后所有任务才完成：跟在前台的时候一样
+- crash或者App被系统关闭，打开App保持前台，当所有的任务都完成后才创建对应的`Background Sessions`：没有创建session时，只会调用`AppDelegate`的`application(_:handleEventsForBackgroundURLSession:completionHandler:)`方法，当创建了对应的`Background Sessions`后，才会跟在前台时一样，调用相关的session代理方法，最后再调用`urlSessionDidFinishEvents(forBackgroundURLSession:) `方法
+- crash或者App被系统关闭，打开App，创建对应的`Background Sessions`后所有任务才完成：跟在前台的时候一样
 
 总结：
 
@@ -305,7 +305,7 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
       - iOS 12.1.2 iPhone 6s上是6
       - iOS 12.2 iPhone XS Max上是6
 
-从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少性能的开销。同时对于不同的host，就算`httpMaximumConnectionsPerHost`设置为1，也会有多个任务并发下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是通过判断正在下载的任务数从而进行并发的控制。
+从以上几点可以得出结论，由于支持后台下载的`URLSession`的特性，系统会限制并发任务的数量，以减少资源的开销。同时对于不同的host，就算`httpMaximumConnectionsPerHost`设置为1，也会有多个任务并发下载，所以不能使用`httpMaximumConnectionsPerHost`来控制下载任务的并发数。[Tiercel 2](https://github.com/Danie1s/Tiercel)是通过判断正在下载的任务数从而进行并发的控制。
 
 ### 前后台切换
 
