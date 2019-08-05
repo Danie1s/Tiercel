@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A41DEDA122F7DACE009CB004 /* Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A41DEDA022F7DACE009CB004 /* Delegate.swift */; };
 		E10B78A721E73C3E00DFF2B3 /* ResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */; };
 		E10B78A821E73C3E00DFF2B3 /* SessionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */; };
 		E18F465B228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */; };
@@ -74,6 +75,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A41DEDA022F7DACE009CB004 /* Delegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Delegate.swift; sourceTree = "<group>"; };
 		E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumeDataHelper.swift; sourceTree = "<group>"; };
 		E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionConfiguration.swift; sourceTree = "<group>"; };
 		E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+Cache.swift"; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 			children = (
 				E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */,
 				E1D8EF9421F6B916004B70C5 /* FileChecksumHelper.swift */,
+				A41DEDA022F7DACE009CB004 /* Delegate.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -372,6 +375,7 @@
 				E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */,
 				E1A14408228A9CA100B4CD6D /* TiercelError.swift in Sources */,
 				E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */,
+				A41DEDA122F7DACE009CB004 /* Delegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
