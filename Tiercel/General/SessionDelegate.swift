@@ -41,7 +41,7 @@ internal class SessionDelegate: NSObject {
     
     public let onCompleted = Delegate<(URLSessionTask, Error?), Void>()
     
-    public let onDidDownloadData = Delegate<DownloadDataInfo, Void>()
+    public let onDataReceived = Delegate<DownloadDataInfo, Void>()
 
 }
 
@@ -56,7 +56,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     }
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        onDidDownloadData.call((downloadTask, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite))
+        onDataReceived.call((downloadTask, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite))
     }
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {

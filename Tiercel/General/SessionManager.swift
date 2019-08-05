@@ -28,6 +28,8 @@ import UIKit
 
 public class SessionManager {
     
+    public static let `default` = SessionManager("default")
+    
     public static var logLevel: LogLevel = .detailed
 
     public static var isControlNetworkActivityIndicator = true
@@ -219,7 +221,7 @@ public class SessionManager {
     
     
     public init(_ identifier: String,
-                configuration: SessionConfiguration,
+                configuration: SessionConfiguration = SessionConfiguration(),
                 operationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
@@ -254,13 +256,12 @@ public class SessionManager {
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
         sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
         let sessionDelegate = SessionDelegate()
-        let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1, underlyingQueue: operationQueue, name: "com.Tiercel.SessionManager.delegateQueue")
-        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
+        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
         tasks.forEach { $0.session = session }
         shouldCreatSession = false
         completion?()
         
-        sessionDelegate.onDidDownloadData.delegate(on: self) { (self, downloadInfo) in
+        sessionDelegate.onDataReceived.delegate(on: self) { (self, downloadInfo) in
             let (downloadTask, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) = downloadInfo
             guard let currentURL = downloadTask.currentRequest?.url,
                 let task = self.fetchTask(currentURL: currentURL) else { return }
