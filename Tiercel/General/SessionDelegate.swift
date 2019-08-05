@@ -27,46 +27,43 @@
 import UIKit
 
 internal class SessionDelegate: NSObject {
-    internal weak var manager: SessionManager?
+    
+    typealias DownloadDataInfo = (task:URLSessionDownloadTask,
+        bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64)
+    
+    public let onInvaliddation = Delegate<Error?, Void>()
+    
+    public let onFinishEventsForBackgroundSession = Delegate<URLSession, Void>()
+    
+    public let onFinishDownload = Delegate<(URLSessionDownloadTask, URL), Void>()
+    
+    public let onCompleted = Delegate<(URLSessionTask, Error?), Void>()
+    
+    public let onDidDownloadData = Delegate<DownloadDataInfo, Void>()
 
 }
 
 
 extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        manager?.didBecomeInvalidation(withError: error)
+        onInvaliddation.call(error)
     }
-    
     
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        manager?.didFinishEvents(forBackgroundURLSession: session)
+        onFinishEventsForBackgroundSession.call(session)
     }
-    
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        guard let manager = manager,
-            let currentURL = downloadTask.currentRequest?.url,
-            let task = manager.fetchTask(currentURL: currentURL)
-            else { return }
-        task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
+        onDidDownloadData.call((downloadTask, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite))
     }
     
-    
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        guard let manager = manager,
-            let currentURL = downloadTask.currentRequest?.url,
-            let task = manager.fetchTask(currentURL: currentURL)
-            else { return }
-        task.didFinishDownloadingTo(location: location)
+        onFinishDownload.call((downloadTask, location))
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        guard let manager = manager,
-            let currentURL = task.currentRequest?.url,
-            let downloadTask = manager.fetchTask(currentURL: currentURL)
-            else { return }
-        downloadTask.didComplete(task: task, error: error)
+        onCompleted.call((task, error))
     }
-    
-    
 }

@@ -254,12 +254,36 @@ public class SessionManager {
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
         sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
         let sessionDelegate = SessionDelegate()
-        sessionDelegate.manager = self
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1, underlyingQueue: operationQueue, name: "com.Tiercel.SessionManager.delegateQueue")
         session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
         tasks.forEach { $0.session = session }
         shouldCreatSession = false
         completion?()
+        
+        sessionDelegate.onDidDownloadData.delegate(on: self) { (self, downloadInfo) in
+            let (downloadTask, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite) = downloadInfo
+            guard let currentURL = downloadTask.currentRequest?.url,
+                let task = self.fetchTask(currentURL: currentURL) else { return }
+            task.didWriteData(bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
+        }
+        sessionDelegate.onCompleted.delegate(on: self) { (self, info) in
+            let (task, error) = info
+            guard let currentURL = task.currentRequest?.url,
+                let downloadTask = self.fetchTask(currentURL: currentURL) else { return }
+            downloadTask.didComplete(task: task, error: error)
+        }
+        sessionDelegate.onFinishDownload.delegate(on: self) { (self, info) in
+            let (downloadTask, location) = info
+            guard let currentURL = downloadTask.currentRequest?.url,
+                let task = self.fetchTask(currentURL: currentURL) else { return }
+            task.didFinishDownloadingTo(location: location)
+        }
+        sessionDelegate.onFinishEventsForBackgroundSession.delegate(on: self) { (self, session) in
+            self.didFinishEvents(forBackgroundURLSession: session)
+        }
+        sessionDelegate.onInvaliddation.delegate(on: self) { (self, error) in
+            self.didBecomeInvalidation(withError: error)
+        }
     }
     
     private func updateStatus() {
