@@ -372,7 +372,7 @@ extension SessionManager {
                 let fileName = fileNames?.safeObject(at: index)
                 let header = headers?.safeObject(at: index)
                 if let task = download(url, headers: header, fileName: fileName),
-                    !uniqueTasks.contains { $0.url == task.url }{
+                    !uniqueTasks.contains { $0.url == task.url } {
                     uniqueTasks.append(task)
                 }
             }
@@ -385,21 +385,13 @@ extension SessionManager {
 extension SessionManager {
     
     public func fetchTask(_ url: URLConvertible) -> DownloadTask? {
-        do {
-            let validURL = try url.asURL()
-            return tasks.first { $0.url == validURL }
-        } catch {
-            return nil
-        }
+        let validURL = try? url.asURL()
+        return tasks.first { $0.url == validURL }
     }
     
     internal func fetchTask(currentURL: URLConvertible) -> DownloadTask? {
-        do {
-            let validURL = try currentURL.asURL()
-            return tasks.first { $0.currentURL == validURL }
-        } catch {
-            return nil
-        }
+        let validURL = try? currentURL.asURL()
+        return tasks.first { $0.currentURL == validURL }
     }
     
     

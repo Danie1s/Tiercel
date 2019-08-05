@@ -46,8 +46,7 @@ public class DownloadTask: Task<DownloadTask> {
     }
 
     public var pathExtension: String? {
-        let pathExtension = (filePath as NSString).pathExtension
-        return pathExtension.isEmpty ? nil : pathExtension
+        return (filePath as NSString).pathExtension
     }
 
     internal var tmpFileURL: URL?
@@ -155,7 +154,8 @@ public class DownloadTask: Task<DownloadTask> {
         
         if cache.fileExists(fileName: fileName) {
             TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", url: url)
-            if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePath(fileName: fileName)!), let length = fileInfo[.size] as? Int64 {
+            if let fileInfo = try? FileManager.default.attributesOfItem(atPath: cache.filePath(fileName: fileName)!),
+                let length = fileInfo[.size] as? Int64 {
                 progress.totalUnitCount = length
             }
             completed()
