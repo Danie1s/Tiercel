@@ -90,17 +90,17 @@ public class BridgeTask: NSObject {
         return self
     }
     
-        @objc(validateFile:type:onMainQueue:handler:)
-        public func validateFile(code: String,
-                                 type: FileVerificationType,
-                                 onMainQueue: Bool = true,
-                                 _ handler: @escaping TaskHandler) -> Self {
-    
-            self.task?.validateFile(code: code, type: type, onMainQueue: onMainQueue, { (task) in
-                handler(task.conversion())
-            })
-            return self
-        }
+    @objc(validateFile:type:onMainQueue:handler:)
+    public func validateFile(code: String,
+                             type: FileVerificationType,
+                             onMainQueue: Bool = true,
+                             _ handler: @escaping TaskHandler) -> Self {
+
+        self.task?.validateFile(code: code, type: type, onMainQueue: onMainQueue, { (task) in
+            handler(task.conversion())
+        })
+        return self
+    }
     
     deinit {
         
