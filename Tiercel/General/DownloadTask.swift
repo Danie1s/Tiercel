@@ -512,3 +512,39 @@ extension Array where Element == DownloadTask {
         return self
     }
 }
+// MARK: conversion
+extension DownloadTask {
+    
+    public func conversion() -> BridgeTask {
+        let bridgetask = BridgeTask()
+        bridgetask.task          = self
+        bridgetask.cache         = self.cache
+        bridgetask.fileName      = self.fileName
+        bridgetask.filePath      = self.filePath
+        bridgetask.headers       = self.headers
+        bridgetask.url           = self.url
+        bridgetask.progress      = self.progress
+        bridgetask.status        = self.statusConversion(self.status)
+        bridgetask.validation    = self.validation
+        bridgetask.speed         = self.speed
+        bridgetask.startDate     = self.startDate
+        bridgetask.endDate       = self.endDate
+        bridgetask.timeRemaining = self.timeRemaining
+        bridgetask.error         = self.error
+        return bridgetask
+    }
+    
+    internal func statusConversion(_ state: Status) -> BridgeStatus {
+        let eunm: [Status:BridgeStatus] = [.waiting:        .waiting,
+                                           .running:        .running,
+                                           .suspended:      .suspended,
+                                           .canceled:       .canceled,
+                                           .failed:         .failed,
+                                           .removed:        .removed,
+                                           .succeeded:      .succeeded,
+                                           .willSuspend:    .willSuspend,
+                                           .willCancel:     .willCancel,
+                                           .willRemove:     .willRemove]
+        return eunm[state]!
+    }
+}

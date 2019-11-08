@@ -26,13 +26,13 @@
 
 import Foundation
 
-extension Task {
-    public enum Validation: Int {
-        case unkown
-        case correct
-        case incorrect
-    }
-}
+//extension Task {
+//    public enum Validation: Int {
+//        case unkown
+//        case correct
+//        case incorrect
+//    }
+//}
 
 public class Task<T>: NSObject, NSCoding, Codable {
     

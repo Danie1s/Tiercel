@@ -26,7 +26,8 @@
 
 import UIKit
 
-public struct SessionConfiguration {
+@objc
+public class SessionConfiguration: NSObject {
     // 请求超时时间
     public var timeoutIntervalForRequest: TimeInterval = 60.0
 
@@ -49,9 +50,16 @@ public struct SessionConfiguration {
 
     // 是否允许蜂窝网络下载
     public var allowsCellularAccess: Bool = false
+    
+    @objc(initWithMaxTasksLimit:cellularAccess:)
+    public convenience init(_ maxTasksLimit:Int, cellularAccess: Bool) {
+        self.init()
+        maxConcurrentTasksLimit = maxTasksLimit
+        allowsCellularAccess = cellularAccess
+    }
 
-    public init() {
-
+    public override init() {
+        super.init()
     }
 }
 

@@ -26,13 +26,14 @@
 
 import UIKit
 
-public class SessionManager {
+@objc
+public class SessionManager: NSObject {
     
     public static var logLevel: LogLevel = .detailed
 
     public static var isControlNetworkActivityIndicator = true
 
-    public let operationQueue: DispatchQueue
+    public var operationQueue: DispatchQueue = DispatchQueue.init(label: "com.Tiercel.SessionManager.operation")
 
     private let dataQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.dataQueue")
 
@@ -56,9 +57,9 @@ public class SessionManager {
 
     private var timer: DispatchSourceTimer?
     
-    public let cache: Cache
+    public var cache = Cache("")
     
-    public let identifier: String
+    public var identifier = String("")
     
     public var completionHandler: (() -> Void)?
 
@@ -76,7 +77,7 @@ public class SessionManager {
         }
     }
     
-    private var _configuration: SessionConfiguration {
+    private var _configuration: SessionConfiguration? {
         didSet {
             guard !shouldCreatSession else { return }
             shouldCreatSession = true
@@ -94,7 +95,7 @@ public class SessionManager {
     public var configuration: SessionConfiguration {
         get {
             return configurationQueue.sync {
-                _configuration
+                _configuration!
             }
         }
         set {
@@ -217,10 +218,11 @@ public class SessionManager {
     private var controlExecuter: Executer<SessionManager>?
 
     
-    
-    public init(_ identifier: String,
+    @objc(initWithIdentifier:configuration:operationQueue:)
+    public convenience init(_ identifier: String,
                 configuration: SessionConfiguration,
                 operationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")) {
+        self.init()
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
         self._configuration = configuration
@@ -238,6 +240,10 @@ public class SessionManager {
             createSession()
             updateStatus()
         }
+    }
+    
+    public override init() {
+        super.init()
     }
 
     public func invalidate() {

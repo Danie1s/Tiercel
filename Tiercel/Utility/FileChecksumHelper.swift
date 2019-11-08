@@ -26,6 +26,7 @@
 
 import Foundation
 
+@objc(FileVerificationType)
 public enum FileVerificationType : Int {
     case md5
     case sha1

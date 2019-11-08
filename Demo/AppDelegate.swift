@@ -29,7 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let sessionManager4 = SessionManager("ViewController4", configuration: SessionConfiguration())
 
-    
+    @objc
+    let sessionManager5 = BridgeSessionManager("OCViewController",
+                                               configuration: SessionConfiguration.init(10, cellularAccess: true))
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
