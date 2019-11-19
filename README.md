@@ -8,7 +8,7 @@
 [![Support](https://img.shields.io/badge/support-iOS%208%2B%20-brightgreen.svg?style=flat)](https://www.apple.com/nl/ios/)
 [![License](https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 
-Tiercel是一个简单易用且功能丰富的纯Swift下载框架，支持原生级别后台下载，拥有强大的任务管理功能，满足下载类APP的大部分需求。
+Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持原生级别后台下载，拥有强大的任务管理功能，可以满足下载类 APP 的大部分需求
 
 - [Features](#features)
 - [Requirements](#requirements)
@@ -43,6 +43,8 @@ target '<Your Target Name>' do
 end
 ```
 
+如果你的开发语言是 Objectiv-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
+
 ## Features:
 
 - [x] 支持原生级别的后台下载
@@ -56,25 +58,27 @@ end
 - [x] 支持文件校验
 - [x] 线程安全
 
-## Requirements
+
+
+## 环境要求
 
 - iOS 8.0+
 - Xcode 10.2+
 - Swift 5.0+
 
-## Installation
+
+
+## 安装
 
 ### CocoaPods
 
-[CocoaPods](http://cocoapods.org) is a dependency manager for Cocoa projects. You can install it with the following command:
+Tiercel 支持 CocoaPods 集成，首先需要使用以下命令安装CocoaPod：
 
 ```bash
 $ gem install cocoapods
 ```
 
-> CocoaPods 1.1+ is required to build Tiercel.
-
-To integrate Tiercel into your Xcode project using CocoaPods, specify it in your `Podfile`:
+在`Podfile`文件中
 
 ```ruby
 source 'https://github.com/CocoaPods/Specs.git'
@@ -86,19 +90,21 @@ target '<Your Target Name>' do
 end
 ```
 
-Then, run the following command:
+最后运行命令
 
 ```bash
 $ pod install
 ```
 
-### Manually
+### 手动集成
 
-If you prefer not to use any of the aforementioned dependency managers, you can integrate Tiercel into your project manually.
+Tiercel 也支持手动集成，只需把本项目文件夹中的`Tiercel`文件夹拖进需要集成的项目即可
 
-## Example
 
-To run the example project, clone the repo, and run `Tiercel.xcodeproj` .
+
+## Demo
+
+打开本项目文件夹中 `Tiercel.xcodeproj` ，可以直接运行 Demo
 
 <img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/1.gif" width="50%" height="50%">
 
