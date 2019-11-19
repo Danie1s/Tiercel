@@ -43,7 +43,7 @@ target '<Your Target Name>' do
 end
 ```
 
-如果你的开发语言是 Objectiv-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
+如果你的开发语言是 Objective-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
 
 ## Features:
 
