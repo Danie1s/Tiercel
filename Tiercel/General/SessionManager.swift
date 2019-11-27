@@ -285,7 +285,10 @@ public class SessionManager {
                 return
             }
 
-            if !self.shouldComplete() {
+            let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
+            let isCompleted = isSucceeded ? isSucceeded : self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+            
+            if !self.shouldComplete(isCompleted, isSucceeded) {
                 self.shouldSuspend()
             }
         }
@@ -372,7 +375,7 @@ extension SessionManager {
                 let fileName = fileNames?.safeObject(at: index)
                 let header = headers?.safeObject(at: index)
                 if let task = download(url, headers: header, fileName: fileName),
-                    !uniqueTasks.contains { $0.url == task.url }{
+                    !uniqueTasks.contains { $0.url == task.url } {
                     uniqueTasks.append(task)
                 }
             }
@@ -545,10 +548,13 @@ extension SessionManager {
     
     internal func completed() {
         cache.storeTasks(tasks)
+                
+        let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
+        let isCompleted = isSucceeded ? isSucceeded : tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
 
         if shouldRemove() ||
-            shouldCancel() ||
-            shouldComplete() ||
+            shouldCancel(isSucceeded) ||
+            shouldComplete(isCompleted, isSucceeded) ||
             shouldSuspend() {
 
             invalidateTimer()
@@ -571,11 +577,10 @@ extension SessionManager {
         return true
     }
     
-    private func shouldCancel() -> Bool {
+    private func shouldCancel(_ isSucceeded: Bool) -> Bool {
         guard status == .willCancel else { return false }
         
-        let isCancel = tasks.filter { $0.status != .succeeded }.isEmpty
-        guard isCancel else { return true }
+        guard isSucceeded else { return true }
         status = .canceled
         TiercelLog("[manager] canceled", identifier: identifier)
         controlExecuter?.execute(self)
@@ -583,9 +588,7 @@ extension SessionManager {
         return true
     }
     
-    private func shouldComplete() -> Bool {
-        
-        let isCompleted = tasks.filter { $0.status != .succeeded && $0.status != .failed }.isEmpty
+    private func shouldComplete(_ isCompleted: Bool, _ isSucceeded: Bool) -> Bool {
         guard isCompleted else { return false }
 
         if status == .succeeded || status == .failed {
@@ -596,7 +599,6 @@ extension SessionManager {
         progressExecuter?.execute(self)
         
         // 成功或者失败
-        let isSucceeded = tasks.filter { $0.status == .failed }.isEmpty
         if isSucceeded {
             status = .succeeded
             TiercelLog("[manager] succeeded", identifier: identifier)
@@ -611,7 +613,7 @@ extension SessionManager {
 
     @discardableResult
     private func shouldSuspend() -> Bool {
-        let isSuspended = tasks.filter { $0.status != .suspended && $0.status != .succeeded && $0.status != .failed }.isEmpty
+        let isSuspended = tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
 
         if isSuspended {
             if status == .suspended {
@@ -636,12 +638,9 @@ extension SessionManager {
     }
     
     private func startNextTask() {
-        let waitingTasks = tasks.filter { $0.status == .waiting }
-        if waitingTasks.isEmpty {
-            return
-        }
+        guard let waitingTask = tasks.first (where: { $0.status == .waiting }) else { return }
         TiercelLog("[manager] start to download the next task", identifier: identifier)
-        waitingTasks.forEach { $0.start() }
+        waitingTask.start()
     }
 }
 
