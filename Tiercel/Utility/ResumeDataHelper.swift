@@ -35,9 +35,9 @@ internal let NSURLSessionResumeInfoLocalPath = "NSURLSessionResumeInfoLocalPath"
 internal let NSURLSessionResumeBytesReceived = "NSURLSessionResumeBytesReceived"
 
 
-internal class ResumeDataHelper {
+internal enum ResumeDataHelper {
     
-    internal class func handleResumeData(_ data: Data) -> Data? {
+    internal static func handleResumeData(_ data: Data) -> Data? {
         if #available(iOS 11.3, *) {
             return data
         } else if #available(iOS 11.0, *) {
@@ -58,7 +58,7 @@ internal class ResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    private class func deleteResumeByteRange(_ data: Data) -> Data? {
+    private static func deleteResumeByteRange(_ data: Data) -> Data? {
         guard let resumeDictionary = getResumeDictionary(data) else { return nil }
         resumeDictionary.removeObject(forKey: NSURLSessionResumeByteRange)
         let result = try? PropertyListSerialization.data(fromPropertyList: resumeDictionary, format: PropertyListSerialization.PropertyListFormat.xml, options: PropertyListSerialization.WriteOptions())
@@ -70,7 +70,7 @@ internal class ResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    private class func correctResumeData(_ data: Data) -> Data? {
+    private static func correctResumeData(_ data: Data) -> Data? {
         guard let resumeDictionary = getResumeDictionary(data) else { return nil }
         
         resumeDictionary[NSURLSessionResumeCurrentRequest] = correct(requestData: resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data)
@@ -85,7 +85,7 @@ internal class ResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    internal class func getResumeDictionary(_ data: Data) -> NSMutableDictionary? {
+    internal static func getResumeDictionary(_ data: Data) -> NSMutableDictionary? {
         // In beta versions, resumeData is NSKeyedArchive encoded instead of plist
         var resumeDictionary: NSMutableDictionary?
         if #available(OSX 10.11, iOS 9.0, *) {
@@ -110,7 +110,7 @@ internal class ResumeDataHelper {
         return resumeDictionary
     }
     
-    internal class func getTmpFileName(_ data: Data) -> String? {
+    internal static func getTmpFileName(_ data: Data) -> String? {
         guard let resumeDictionary = ResumeDataHelper.getResumeDictionary(data), let version = resumeDictionary[NSURLSessionResumeInfoVersion] as? Int else { return nil }
         if version > 1 {
             return resumeDictionary[NSURLSessionResumeInfoTempFileName] as? String
@@ -127,7 +127,7 @@ internal class ResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    private class func correct(requestData data: Data?) -> Data? {
+    private static func correct(requestData data: Data?) -> Data? {
         guard let data = data else {
             return nil
         }

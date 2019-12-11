@@ -33,11 +33,11 @@ public enum FileVerificationType : Int {
     case sha512
 }
 
-public class FileChecksumHelper {
+public enum FileChecksumHelper {
     
     private static let ioQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.FileChecksumHelper.ioQueue", attributes: .concurrent)
     
-    public class func validateFile(_ filePath: String,
+    public static func validateFile(_ filePath: String,
                                    code: String,
                                    type: FileVerificationType,
                                    _ completion: @escaping (Bool) -> ()) {
