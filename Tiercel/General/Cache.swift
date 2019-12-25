@@ -54,7 +54,7 @@ public class Cache {
     ///
     /// - Parameters:
     ///   - name: 不同的name，代表不同的下载模块，对应的文件放在不同的地方
-    public init(_ name: String) {
+    public init(_ name: String, _ downloadPath: String? = nil, _ downloadTmpPath: String? = nil, _ downloadFilePath: String? = nil) {
 
         self.identifier = name
         
@@ -65,11 +65,13 @@ public class Cache {
         
         let diskCachePath = Cache.defaultDiskCachePathClosure(cacheName)
         
-        downloadPath = (diskCachePath as NSString).appendingPathComponent("Downloads")
-
-        downloadTmpPath = (downloadPath as NSString).appendingPathComponent("Tmp")
+        let cachePath = downloadPath ?? (diskCachePath as NSString).appendingPathComponent("Downloads")
         
-        downloadFilePath = (downloadPath as NSString).appendingPathComponent("File")
+        self.downloadPath = cachePath
+
+        self.downloadTmpPath = downloadTmpPath ?? (cachePath as NSString).appendingPathComponent("Tmp")
+        
+        self.downloadFilePath = downloadFilePath ?? (cachePath as NSString).appendingPathComponent("File")
         
         createDirectory()
 
@@ -83,6 +85,14 @@ public class Cache {
 // MARK: - file
 extension Cache {
     internal func createDirectory() {
+        
+        if !fileManager.fileExists(atPath: downloadPath) {
+            do {
+                try fileManager.createDirectory(atPath: downloadPath, withIntermediateDirectories: true, attributes: nil)
+            } catch  {
+                TiercelLog("createDirectory error: \(error)", identifier: identifier)
+            }
+        }
 
         if !fileManager.fileExists(atPath: downloadTmpPath) {
             do {

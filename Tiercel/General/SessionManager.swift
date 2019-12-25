@@ -220,14 +220,15 @@ public class SessionManager {
     
     public init(_ identifier: String,
                 configuration: SessionConfiguration,
-                operationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")) {
+                operationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue"),
+                cache: Cache? = nil) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
         self._configuration = configuration
         self.operationQueue = operationQueue
-        cache = Cache(identifier)
-        cache.decoder.userInfo[.operationQueue] = operationQueue
-        tasks = cache.retrieveAllTasks()
+        self.cache = cache ?? Cache(identifier)
+        self.cache.decoder.userInfo[.operationQueue] = operationQueue
+        tasks = self.cache.retrieveAllTasks()
         tasks.forEach {
             $0.manager = self
             $0.operationQueue = operationQueue
