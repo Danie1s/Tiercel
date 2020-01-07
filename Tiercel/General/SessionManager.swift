@@ -249,6 +249,7 @@ public class SessionManager {
 
     private func createSession(_ completion: (() -> ())? = nil) {
         guard shouldCreatSession else { return }
+        shouldCreatSession = false
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
         sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
@@ -258,7 +259,6 @@ public class SessionManager {
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1, underlyingQueue: operationQueue, name: "com.Tiercel.SessionManager.delegateQueue")
         session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
         tasks.forEach { $0.session = session }
-        shouldCreatSession = false
         completion?()
     }
     
@@ -413,7 +413,7 @@ extension SessionManager {
         operationQueue.async {
             guard let task = self.fetchTask(url) else { return }
             if !self.shouldCreatSession {
-                task.start()
+                task.prepare()
             } else {
                 task.status = .suspended
                 if !self.waitingTasks.contains(task) {
@@ -426,7 +426,7 @@ extension SessionManager {
     public func start(_ task: DownloadTask) {
         operationQueue.async {
             if !self.shouldCreatSession {
-                task.start()
+                task.prepare()
             } else {
                 task.status = .suspended
                 if !self.waitingTasks.contains(task) {
@@ -546,7 +546,7 @@ extension SessionManager {
         }
     }
     
-    internal func completed() {
+    internal func process() {
         cache.storeTasks(tasks)
                 
         let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
@@ -640,7 +640,7 @@ extension SessionManager {
     private func startNextTask() {
         guard let waitingTask = tasks.first (where: { $0.status == .waiting }) else { return }
         TiercelLog("[manager] start to download the next task", identifier: identifier)
-        waitingTask.start()
+        waitingTask.prepare()
     }
 }
 
@@ -739,9 +739,9 @@ extension SessionManager {
     internal func didBecomeInvalidation(withError error: Error?) {
         createSession { [weak self] in
             guard let self = self else { return }
-            self.runningTasks.forEach { $0.start() }
+            self.runningTasks.forEach { $0.prepare() }
             self.runningTasks.removeAll()
-            self.waitingTasks.forEach { $0.start() }
+            self.waitingTasks.forEach { $0.prepare() }
             self.waitingTasks.removeAll()
         }
     }

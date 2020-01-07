@@ -164,23 +164,87 @@ public class DownloadTask: Task<DownloadTask> {
             self.task?.resume()
         }
     }
+
+
+    internal override func execute(_ executer: Executer<DownloadTask>?) {
+        executer?.execute(self)
+    }
     
+
+}
+
+
 // MARK: - control
-    internal override func start() {
+extension DownloadTask {
+
+    internal func prepare() {
         cache.createDirectory()
-        
+
         if cache.fileExists(fileName: fileName) {
             TiercelLog("[downloadTask] file already exists", identifier: manager?.identifier ?? "", url: url)
             if let fileInfo = try? FileManager().attributesOfItem(atPath: cache.filePath(fileName: fileName)!), let length = fileInfo[.size] as? Int64 {
                 progress.totalUnitCount = length
             }
-            completed()
-            manager?.completed()
+            succeeded()
+            manager?.process()
             return
         }
-        prepareToStart()
+        download()
     }
-    
+
+    private func download() {
+        guard let manager = manager else { return }
+        switch status {
+        case .waiting, .suspended, .failed:
+            if manager.shouldRun {
+                start()
+            } else {
+                status = .waiting
+                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, url: url)
+            }
+        case .succeeded:
+            succeeded()
+            manager.process()
+        case .running:
+            TiercelLog("[downloadTask] running", identifier: manager.identifier, url: url)
+        default: break
+        }
+    }
+
+
+    private func start() {
+        if let resumeData = resumeData {
+            cache.retrieveTmpFile(self)
+            if #available(iOS 10.2, *) {
+                task = session?.downloadTask(withResumeData: resumeData)
+            } else if #available(iOS 10.0, *) {
+                task = session?.correctedDownloadTask(withResumeData: resumeData)
+            } else {
+                task = session?.downloadTask(withResumeData: resumeData)
+            }
+        } else {
+            var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
+            if let headers = headers {
+                for (key, value) in headers {
+                    request.setValue(value, forHTTPHeaderField: key)
+                }
+            }
+            task = session?.downloadTask(with: request)
+        }
+        speed = 0
+        progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
+
+        task?.resume()
+
+        if startDate == 0 {
+            startDate = Date().timeIntervalSince1970
+        }
+        status = .running
+        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", url: url)
+        progressExecuter?.execute(self)
+        manager?.didStart()
+    }
+
 
     internal func suspend(onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         guard status == .running || status == .waiting else { return }
@@ -198,10 +262,10 @@ public class DownloadTask: Task<DownloadTask> {
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
 
-            manager?.completed()
+            manager?.process()
         }
     }
-    
+
     internal func cancel(onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
         guard status != .succeeded else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
@@ -214,7 +278,7 @@ public class DownloadTask: Task<DownloadTask> {
             TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
-            manager?.completed()
+            manager?.process()
         }
     }
 
@@ -231,26 +295,16 @@ public class DownloadTask: Task<DownloadTask> {
             TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
-            manager?.completed()
+            manager?.process()
         }
     }
-    
-    internal func completed() {
-        guard status != .succeeded else { return }
-        status = .succeeded
-        endDate = Date().timeIntervalSince1970
-        progress.completedUnitCount = progress.totalUnitCount
-        timeRemaining = 0
-        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", url: url)
-        progressExecuter?.execute(self)
-        successExecuter?.execute(self)
-        validateFile()
-    }
-    
-    override func executeHandler(_ executer: Executer<DownloadTask>?) {
-        executer?.execute(self)
-    }
 
+
+    internal func updateFileName(_ newFileName: String) {
+        guard !fileName.isEmpty else { return }
+        cache.updateFileName(self, newFileName)
+        fileName = newFileName
+    }
 
     fileprivate func validateFile() {
         guard let validateHandler = self.validateExecuter else { return }
@@ -271,66 +325,14 @@ public class DownloadTask: Task<DownloadTask> {
             validateHandler.execute(self)
         }
     }
+
 }
 
-extension DownloadTask {
-    internal func updateFileName(_ newFileName: String) {
-        guard !fileName.isEmpty else { return }
-        cache.updateFileName(self, newFileName)
-        fileName = newFileName
-    }
-}
+
 
 // MARK: - status handle
 extension DownloadTask {
-    private func prepareToStart() {
-        guard let manager = manager else { return }
-        switch status {
-        case .waiting, .suspended, .failed:
-            if manager.shouldRun {
-                startToDownload()
-            } else {
-                status = .waiting
-                TiercelLog("[downloadTask] waiting", identifier: manager.identifier, url: url)
-            }
-        case .succeeded:
-            completed()
-            manager.completed()
-        case .running:
-            TiercelLog("[downloadTask] running", identifier: manager.identifier, url: url)
-        default: break
-        }
-    }
-    
-    private func startToDownload() {
-        
-        if let resumeData = resumeData {
-            cache.retrieveTmpFile(self)
-            if #available(iOS 10.2, *) {
-                task = session?.downloadTask(withResumeData: resumeData)
-            } else if #available(iOS 10.0, *) {
-                task = session?.correctedDownloadTask(withResumeData: resumeData)
-            } else {
-                task = session?.downloadTask(withResumeData: resumeData)
-            }
-        } else {
-            super.start()
-            guard let request = request else { return  }
-            task = session?.downloadTask(with: request)
-        }
-        speed = 0
-        progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
-        
-        task?.resume()
-        
-        if startDate == 0 {
-            startDate = Date().timeIntervalSince1970
-        }
-        status = .running
-        TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", url: url)
-        progressExecuter?.execute(self)
-        manager?.didStart()
-    }
+
     
     private func didCancelOrRemove() {
         
@@ -345,6 +347,68 @@ extension DownloadTask {
         cache.remove(self, completely: isRemoveCompletely)
         
         manager?.didCancelOrRemove(url.absoluteString)
+    }
+
+
+    internal func succeeded() {
+        guard status != .succeeded else { return }
+        status = .succeeded
+        endDate = Date().timeIntervalSince1970
+        progress.completedUnitCount = progress.totalUnitCount
+        timeRemaining = 0
+        TiercelLog("[downloadTask] completed", identifier: manager?.identifier ?? "", url: url)
+        progressExecuter?.execute(self)
+        successExecuter?.execute(self)
+        validateFile()
+    }
+
+    private func detectStatus(error: Error?, statusCode: Int) {
+        if statusCode != 200 {
+            status = .failed
+        }
+
+        if let error = error {
+            self.error = error
+
+            if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
+                self.resumeData = ResumeDataHelper.handleResumeData(resumeData)
+                cache.storeTmpFile(self)
+            }
+            if let _ = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
+                status = .suspended
+            }
+            if let urlError = error as? URLError, urlError.code != URLError.cancelled {
+                status = .failed
+            }
+        }
+
+        switch status {
+        case .suspended:
+            status = .suspended
+            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
+
+        case .willSuspend:
+            status = .suspended
+            TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
+            progressExecuter?.execute(self)
+            controlExecuter?.execute(self)
+            failureExecuter?.execute(self)
+        case .willCancel, .willRemove:
+            didCancelOrRemove()
+            if status == .canceled {
+                TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
+            }
+            if status == .removed {
+                TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
+            }
+            controlExecuter?.execute(self)
+            failureExecuter?.execute(self)
+        default:
+            status = .failed
+            TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", url: url)
+            progressExecuter?.execute(self)
+            failureExecuter?.execute(self)
+        }
     }
 }
 
@@ -418,7 +482,7 @@ extension DownloadTask {
     }
 }
 
-// MARK: - download callback
+// MARK: - callback
 extension DownloadTask {
     internal func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
@@ -453,57 +517,21 @@ extension DownloadTask {
         progress.completedUnitCount = task.countOfBytesReceived
         progress.setUserInfoObject(task.countOfBytesReceived, forKey: .fileCompletedCountKey)
 
-        let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -1
- 
-        
-        if let error = error {
-            self.error = error
-        
-            if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
-                self.resumeData = ResumeDataHelper.handleResumeData(resumeData)
-                cache.storeTmpFile(self)
-            }
-            if let _ = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
-                status = .suspended
-            }
-            if let urlError = error as? URLError, urlError.code != URLError.cancelled {
-                status = .failed
-            }
-            
-            switch status {
-            case .suspended:
-                status = .suspended
-                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
 
-            case .willSuspend:
-                status = .suspended
-                TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
-                progressExecuter?.execute(self)
-                controlExecuter?.execute(self)
-                failureExecuter?.execute(self)
-            case .willCancel, .willRemove:
-                didCancelOrRemove()
-                if status == .canceled {
-                    TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
-                }
-                if status == .removed {
-                    TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
-                }
-                controlExecuter?.execute(self)
-                failureExecuter?.execute(self)
-            default:
-                status = .failed
-                TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", url: url)
-                progressExecuter?.execute(self)
-                failureExecuter?.execute(self)
-            }
+        let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -1
+
+        if error == nil && statusCode == 200 {
+            succeeded()
         } else {
-            completed()
+            detectStatus(error: error, statusCode: statusCode)
         }
-        
-        manager?.completed()
+
+        manager?.process()
     }
+
 }
+
+
 
 extension Array where Element == DownloadTask {
     @discardableResult

@@ -76,8 +76,6 @@ public class Task<T>: NSObject, NSCoding, Codable {
     internal var validateExecuter: Executer<T>?
 
     internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
-
-    internal var request: URLRequest?
     
     private var _isRemoveCompletely = false
     internal var isRemoveCompletely: Bool {
@@ -315,18 +313,8 @@ public class Task<T>: NSObject, NSCoding, Codable {
     }
 
 
-
-    internal func start() {
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
-        if let headers = headers {
-            for (key, value) in headers {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-        }
-        self.request = request
-    }
     
-    internal func executeHandler(_ Executer: Executer<T>?) {
+    internal func execute(_ Executer: Executer<T>?) {
         
     }
     
@@ -350,7 +338,7 @@ extension Task {
         }
         operationQueue.async {
             if self.status == .succeeded {
-                self.executeHandler(self.successExecuter)
+                self.execute(self.successExecuter)
             }
         }
         return self
@@ -367,7 +355,7 @@ extension Task {
                 self.status == .canceled ||
                 self.status == .removed ||
                 self.status == .failed  {
-                self.executeHandler(self.failureExecuter)
+                self.execute(self.failureExecuter)
             }
         }
         return self
