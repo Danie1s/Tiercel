@@ -249,7 +249,6 @@ public class SessionManager {
 
     private func createSession(_ completion: (() -> ())? = nil) {
         guard shouldCreatSession else { return }
-        shouldCreatSession = false
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
         sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
@@ -259,6 +258,7 @@ public class SessionManager {
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1, underlyingQueue: operationQueue, name: "com.Tiercel.SessionManager.delegateQueue")
         session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
         tasks.forEach { $0.session = session }
+        shouldCreatSession = false
         completion?()
     }
     
