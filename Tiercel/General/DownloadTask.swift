@@ -40,6 +40,22 @@ public class DownloadTask: Task<DownloadTask> {
             task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         }
     }
+    
+    public var originalRequest: URLRequest? {
+        task?.originalRequest
+    }
+
+    public var currentRequest: URLRequest? {
+        task?.currentRequest
+    }
+
+    public var response: URLResponse? {
+        task?.response
+    }
+    
+    public var statusCode: Int? {
+        (task?.response as? HTTPURLResponse)?.statusCode
+    }
 
     public var filePath: String {
         return cache.filePath(fileName: fileName)!
@@ -408,7 +424,7 @@ extension DownloadTask {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
         if SessionManager.isControlNetworkActivityIndicator {
-            DispatchQueue.main.tr.safeAsync {
+            DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
         }
@@ -417,7 +433,10 @@ extension DownloadTask {
     }
     
     
-    internal func didFinishDownloadingTo(location: URL) {
+    internal func didFinishDownloading(task: URLSessionDownloadTask, to location: URL) {
+        guard let statusCode = (task.response as? HTTPURLResponse)?.statusCode,
+            statusCode == 200
+            else { return }
         self.tmpFileURL = location
         cache.storeFile(self)
         cache.removeTmpFile(self)
@@ -425,7 +444,7 @@ extension DownloadTask {
     
     internal func didComplete(task: URLSessionTask, error: Error?) {
         if SessionManager.isControlNetworkActivityIndicator {
-            DispatchQueue.main.tr.safeAsync {
+            DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }
         }
@@ -434,6 +453,9 @@ extension DownloadTask {
         progress.completedUnitCount = task.countOfBytesReceived
         progress.setUserInfoObject(task.countOfBytesReceived, forKey: .fileCompletedCountKey)
 
+        let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -1
+ 
+        
         if let error = error {
             self.error = error
         
@@ -478,6 +500,7 @@ extension DownloadTask {
         } else {
             completed()
         }
+        
         manager?.completed()
     }
 }

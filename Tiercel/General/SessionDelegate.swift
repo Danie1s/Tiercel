@@ -57,7 +57,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
             let currentURL = downloadTask.currentRequest?.url,
             let task = manager.fetchTask(currentURL: currentURL)
             else { return }
-        task.didFinishDownloadingTo(location: location)
+        task.didFinishDownloading(task: downloadTask, to: location)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {

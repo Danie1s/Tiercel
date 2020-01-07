@@ -65,7 +65,10 @@ public protocol TiercelCompatible {
 
 extension TiercelCompatible {
     public var tr: TiercelWrapper<Self> {
-        get { return TiercelWrapper(self) }
+        get { TiercelWrapper(self) }
+    }
+    public static var tr: TiercelWrapper<Self>.Type {
+        get { TiercelWrapper<Self>.self }
     }
 }
 

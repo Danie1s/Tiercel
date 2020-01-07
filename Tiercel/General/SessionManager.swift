@@ -747,7 +747,7 @@ extension SessionManager {
     }
     
     internal func didFinishEvents(forBackgroundURLSession session: URLSession) {
-        DispatchQueue.main.tr.safeAsync {
+        DispatchQueue.tr.executeOnMain {
             self.completionHandler?()
             self.completionHandler = nil
         }

@@ -28,11 +28,10 @@ import Foundation
 
 extension DispatchQueue: TiercelCompatible {}
 extension TiercelWrapper where Base: DispatchQueue {
-    internal func safeAsync(_ block: @escaping ()->()) {
+
+    public static func executeOnMain(_ block: @escaping ()->()) {
         if Thread.isMainThread {
             block()
-        } else if base == DispatchQueue.main {
-            base.async { block() }
         } else {
             DispatchQueue.main.async {
                 block()

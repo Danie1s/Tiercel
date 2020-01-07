@@ -29,7 +29,7 @@ import Foundation
 
 extension Array {
     public func safeObject(at index: Int) -> Element? {
-        if index < count {
+        if (0..<count).contains(index) {
             return self[index]
         } else {
             return nil
