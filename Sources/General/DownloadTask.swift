@@ -32,29 +32,29 @@ public class DownloadTask: Task<DownloadTask> {
         case resumeData
     }
     
-    internal var task: URLSessionDownloadTask? {
+    internal var sessionTask: URLSessionDownloadTask? {
         willSet {
-            task?.removeObserver(self, forKeyPath: "currentRequest")
+            sessionTask?.removeObserver(self, forKeyPath: "currentRequest")
         }
         didSet {
-            task?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
+            sessionTask?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
         }
     }
     
     public var originalRequest: URLRequest? {
-        task?.originalRequest
+        sessionTask?.originalRequest
     }
 
     public var currentRequest: URLRequest? {
-        task?.currentRequest
+        sessionTask?.currentRequest
     }
 
     public var response: URLResponse? {
-        task?.response
+        sessionTask?.response
     }
     
     public var statusCode: Int? {
-        (task?.response as? HTTPURLResponse)?.statusCode
+        (sessionTask?.response as? HTTPURLResponse)?.statusCode
     }
 
     public var filePath: String {
@@ -130,7 +130,7 @@ public class DownloadTask: Task<DownloadTask> {
         try container.encodeIfPresent(resumeData, forKey: .resumeData)
     }
     
-    public required init(from decoder: Decoder) throws {
+    internal required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let superDecoder = try container.superDecoder()
         try super.init(from: superDecoder)
@@ -154,14 +154,14 @@ public class DownloadTask: Task<DownloadTask> {
     }
     
     deinit {
-        task?.removeObserver(self, forKeyPath: "currentRequest")
+        sessionTask?.removeObserver(self, forKeyPath: "currentRequest")
         NotificationCenter.default.removeObserver(self)
     }
     
     @objc private func fixDelegateMethodError() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.task?.suspend()
-            self.task?.resume()
+            self.sessionTask?.suspend()
+            self.sessionTask?.resume()
         }
     }
 
@@ -186,7 +186,7 @@ extension DownloadTask {
                 progress.totalUnitCount = length
             }
             succeeded()
-            manager?.process()
+            manager?.determineStatus()
             return
         }
         download()
@@ -204,7 +204,7 @@ extension DownloadTask {
             }
         case .succeeded:
             succeeded()
-            manager.process()
+            manager.determineStatus()
         case .running:
             TiercelLog("[downloadTask] running", identifier: manager.identifier, url: url)
         default: break
@@ -216,11 +216,11 @@ extension DownloadTask {
         if let resumeData = resumeData {
             cache.retrieveTmpFile(self)
             if #available(iOS 10.2, *) {
-                task = session?.downloadTask(withResumeData: resumeData)
+                sessionTask = session?.downloadTask(withResumeData: resumeData)
             } else if #available(iOS 10.0, *) {
-                task = session?.correctedDownloadTask(withResumeData: resumeData)
+                sessionTask = session?.correctedDownloadTask(withResumeData: resumeData)
             } else {
-                task = session?.downloadTask(withResumeData: resumeData)
+                sessionTask = session?.downloadTask(withResumeData: resumeData)
             }
         } else {
             var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
@@ -229,12 +229,12 @@ extension DownloadTask {
                     request.setValue(value, forHTTPHeaderField: key)
                 }
             }
-            task = session?.downloadTask(with: request)
+            sessionTask = session?.downloadTask(with: request)
         }
         speed = 0
         progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
 
-        task?.resume()
+        sessionTask?.resume()
 
         if startDate == 0 {
             startDate = Date().timeIntervalSince1970
@@ -252,7 +252,7 @@ extension DownloadTask {
 
         if status == .running {
             status = .willSuspend
-            task?.cancel(byProducingResumeData: { _ in })
+            sessionTask?.cancel(byProducingResumeData: { _ in })
         }
 
         if status == .waiting {
@@ -262,7 +262,7 @@ extension DownloadTask {
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
 
-            manager?.process()
+            manager?.determineStatus()
         }
     }
 
@@ -271,14 +271,14 @@ extension DownloadTask {
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
             status = .willCancel
-            task?.cancel()
+            sessionTask?.cancel()
         } else {
             status = .willCancel
             didCancelOrRemove()
             TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
-            manager?.process()
+            manager?.determineStatus()
         }
     }
 
@@ -288,14 +288,14 @@ extension DownloadTask {
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
             status = .willRemove
-            task?.cancel()
+            sessionTask?.cancel()
         } else {
             status = .willRemove
             didCancelOrRemove()
             TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
-            manager?.process()
+            manager?.determineStatus()
         }
     }
 
@@ -362,7 +362,7 @@ extension DownloadTask {
         validateFile()
     }
 
-    private func detectStatus(error: Error?, statusCode: Int) {
+    private func determineStatus(error: Error?, statusCode: Int) {
         if statusCode != 200 {
             status = .failed
         }
@@ -523,10 +523,10 @@ extension DownloadTask {
         if error == nil && statusCode == 200 {
             succeeded()
         } else {
-            detectStatus(error: error, statusCode: statusCode)
+            determineStatus(error: error, statusCode: statusCode)
         }
 
-        manager?.process()
+        manager?.determineStatus()
     }
 
 }

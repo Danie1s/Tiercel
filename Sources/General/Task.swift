@@ -34,7 +34,7 @@ extension Task {
     }
 }
 
-public class Task<T>: NSObject, NSCoding, Codable {
+public class Task<TaskType>: NSObject, NSCoding, Codable {
     
     private enum CodingKeys: CodingKey {
         case url
@@ -65,15 +65,15 @@ public class Task<T>: NSObject, NSCoding, Codable {
     
     internal var verificationType: FileVerificationType = .md5
     
-    internal var progressExecuter: Executer<T>?
+    internal var progressExecuter: Executer<TaskType>?
     
-    internal var successExecuter: Executer<T>?
+    internal var successExecuter: Executer<TaskType>?
     
-    internal var failureExecuter: Executer<T>?
+    internal var failureExecuter: Executer<TaskType>?
     
-    internal var controlExecuter: Executer<T>?
+    internal var controlExecuter: Executer<TaskType>?
 
-    internal var validateExecuter: Executer<T>?
+    internal var validateExecuter: Executer<TaskType>?
 
     internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
     
@@ -314,7 +314,7 @@ public class Task<T>: NSObject, NSCoding, Codable {
 
 
     
-    internal func execute(_ Executer: Executer<T>?) {
+    internal func execute(_ Executer: Executer<TaskType>?) {
         
     }
     
@@ -323,7 +323,7 @@ public class Task<T>: NSObject, NSCoding, Codable {
 
 extension Task {
     @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<TaskType>) -> Self {
         return operationQueue.sync {
             progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
             return self
@@ -332,7 +332,7 @@ extension Task {
     }
 
     @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<TaskType>) -> Self {
         operationQueue.sync {
             successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         }
@@ -346,7 +346,7 @@ extension Task {
     }
 
     @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<T>) -> Self {
+    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<TaskType>) -> Self {
         operationQueue.sync {
             failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         }

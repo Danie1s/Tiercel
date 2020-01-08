@@ -88,7 +88,7 @@
 		E1C1DD47206C9241003665A9 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		E1C1DD48206C9241003665A9 /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		E1C1DD49206C9241003665A9 /* SessionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionDelegate.swift; sourceTree = "<group>"; };
-		E1C1DD54206C92FE003665A9 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1C1DD54206C92FE003665A9 /* Tiercel-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiercel-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C1DD56206C92FE003665A9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E1C1DD5B206C92FE003665A9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		E1C1DD5D206C92FE003665A9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -139,7 +139,7 @@
 		E1C1DD2F206C91EF003665A9 = {
 			isa = PBXGroup;
 			children = (
-				E1C1DD3B206C91EF003665A9 /* Tiercel */,
+				E1C1DD3B206C91EF003665A9 /* Sources */,
 				E1C1DD55206C92FE003665A9 /* Demo */,
 				E1C1DD3A206C91EF003665A9 /* Products */,
 			);
@@ -149,12 +149,12 @@
 			isa = PBXGroup;
 			children = (
 				E1C1DD39206C91EF003665A9 /* Tiercel.framework */,
-				E1C1DD54206C92FE003665A9 /* Demo.app */,
+				E1C1DD54206C92FE003665A9 /* Tiercel-Demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		E1C1DD3B206C91EF003665A9 /* Tiercel */ = {
+		E1C1DD3B206C91EF003665A9 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				E1C1DD3C206C91EF003665A9 /* Tiercel.h */,
@@ -163,7 +163,7 @@
 				E1D8EFA821F6D548004B70C5 /* Utility */,
 				E1D8EF9621F6CE33004B70C5 /* Extensions */,
 			);
-			path = Tiercel;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		E1C1DD55206C92FE003665A9 /* Demo */ = {
@@ -279,7 +279,7 @@
 			);
 			name = Demo;
 			productName = Demo;
-			productReference = E1C1DD54206C92FE003665A9 /* Demo.app */;
+			productReference = E1C1DD54206C92FE003665A9 /* Tiercel-Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -546,10 +546,11 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Tiercel/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -570,10 +571,11 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Tiercel/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -594,7 +596,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Tiercel-Demo";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -613,7 +615,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-Demo";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Tiercel-Demo";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

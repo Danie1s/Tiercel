@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E1C1DD53206C92FE003665A9"
-               BuildableName = "Demo.app"
+               BuildableName = "Tiercel-Demo.app"
                BlueprintName = "Demo"
                ReferencedContainer = "container:Tiercel.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E1C1DD53206C92FE003665A9"
-            BuildableName = "Demo.app"
+            BuildableName = "Tiercel-Demo.app"
             BlueprintName = "Demo"
             ReferencedContainer = "container:Tiercel.xcodeproj">
          </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E1C1DD53206C92FE003665A9"
-            BuildableName = "Demo.app"
+            BuildableName = "Tiercel-Demo.app"
             BlueprintName = "Demo"
             ReferencedContainer = "container:Tiercel.xcodeproj">
          </BuildableReference>
@@ -71,7 +71,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E1C1DD53206C92FE003665A9"
-            BuildableName = "Demo.app"
+            BuildableName = "Tiercel-Demo.app"
             BlueprintName = "Demo"
             ReferencedContainer = "container:Tiercel.xcodeproj">
          </BuildableReference>

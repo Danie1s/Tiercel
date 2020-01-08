@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Tiercel'
-  s.version          = '2.3.0'
+  s.version          = '2.4.0'
   s.swift_version   = '5.0'
   s.summary          = 'Tiercel is a lightweight, pure-Swift download framework.'
 
@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '8.0'
 
-  s.source_files = 'Tiercel/**/*.swift'
+  s.source_files = 'Sources/**/*.swift'
   s.requires_arc = true
   s.frameworks = 'CFNetwork'
 

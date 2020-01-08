@@ -236,7 +236,7 @@ public class SessionManager {
         shouldCreatSession = true
         operationQueue.sync {
             createSession()
-            updateStatus()
+            restoreStatus()
         }
     }
 
@@ -262,37 +262,7 @@ public class SessionManager {
         completion?()
     }
     
-    private func updateStatus() {
-        if self.tasks.isEmpty {
-            return
-        }
-        session?.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-            guard let self = self else { return }
-            downloadTasks.forEach { downloadTask in
-                if downloadTask.state == .running,
-                    let currentURL = downloadTask.currentRequest?.url,
-                    let task = self.fetchTask(currentURL: currentURL) {
-                    task.status = .running
-                    task.task = downloadTask
-                    TiercelLog("[downloadTask] runing", identifier: self.identifier, url: task.url)
-                }
-            }
 
-            //  处理mananger状态
-            let isRunning = self.tasks.filter { $0.status == .running }.count > 0
-            if isRunning {
-                self.didStart()
-                return
-            }
-
-            let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
-            let isCompleted = isSucceeded ? isSucceeded : self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
-            
-            if !self.shouldComplete(isCompleted, isSucceeded) {
-                self.shouldSuspend()
-            }
-        }
-    }
 
 
 }
@@ -518,6 +488,38 @@ extension SessionManager {
 // MARK: - status handle
 extension SessionManager {
     
+    private func restoreStatus() {
+        if self.tasks.isEmpty {
+            return
+        }
+        session?.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+            guard let self = self else { return }
+            var isRunning = false
+            downloadTasks.forEach { downloadTask in
+                if downloadTask.state == .running,
+                    let currentURL = downloadTask.currentRequest?.url,
+                    let task = self.fetchTask(currentURL: currentURL) {
+                    task.status = .running
+                    task.sessionTask = downloadTask
+                    TiercelLog("[downloadTask] runing", identifier: self.identifier, url: task.url)
+                    isRunning = true
+                }
+            }
+            //  处理mananger状态
+            if isRunning {
+                self.didStart()
+                return
+            }
+
+            let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
+            let isCompleted = isSucceeded ? isSucceeded : self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+            
+            if !self.shouldComplete(isCompleted, isSucceeded) {
+                self.shouldSuspend()
+            }
+        }
+    }
+    
     internal func didStart() {
         if status != .running {
             createTimer()
@@ -546,7 +548,7 @@ extension SessionManager {
         }
     }
     
-    internal func process() {
+    internal func determineStatus() {
         cache.storeTasks(tasks)
                 
         let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
