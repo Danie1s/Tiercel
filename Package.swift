@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "Tiercel",
-    platforms: [.iOS(.v8)],
+    platforms: [.iOS(.v10)],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
@@ -18,5 +18,6 @@ let package = Package(
         .target(
             name: "Tiercel",
             path: "Sources")
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )

@@ -163,28 +163,26 @@ extension Cache {
 extension Cache {
     internal func retrieveAllTasks() -> [DownloadTask] {
         return ioQueue.sync {
-            var path = (downloadPath as NSString).appendingPathComponent("\(identifier)_Tasks.plist")
-            var tasks: [DownloadTask]
+            let path = (downloadPath as NSString).appendingPathComponent("\(identifier)_Tasks.plist")
             if fileManager.fileExists(atPath: path) {
                 do {
                     let url = URL(fileURLWithPath: path)
                     let data = try Data(contentsOf: url)
-                    tasks = try decoder.decode([DownloadTask].self, from: data)
+                    let tasks = try decoder.decode([DownloadTask].self, from: data)
+                    tasks.forEach { (task) in
+                        task.cache = self
+                        if task.status == .waiting  {
+                            task.protectedMutableState.write { $0.status = .suspended }
+                        }
+                    }
+                    return tasks
                 } catch  {
                     TiercelLog("retrieveAllTasks error: \(error)", identifier: identifier)
                     return [DownloadTask]()
                 }
             } else {
-                path = (downloadPath as NSString).appendingPathComponent("\(identifier)Tasks.plist")
-                tasks = NSKeyedUnarchiver.unarchiveObject(withFile: path) as? [DownloadTask] ?? [DownloadTask]()
+               return  [DownloadTask]()
             }
-            tasks.forEach { (task) in
-                task.cache = self
-                if task.status == .waiting  {
-                    task.status = .suspended
-                }
-            }
-            return tasks
         }
     }
 

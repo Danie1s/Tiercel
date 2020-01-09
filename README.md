@@ -5,7 +5,8 @@
 [![Version](https://img.shields.io/cocoapods/v/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Platform](https://img.shields.io/cocoapods/p/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 [![Language](https://img.shields.io/badge/language-swift-red.svg?style=flat)]()
-[![Support](https://img.shields.io/badge/support-iOS%208%2B%20-brightgreen.svg?style=flat)](https://www.apple.com/nl/ios/)
+[![SPM](https://img.shields.io/badge/SPM-supported-DE5C43.svg?style=flat)](https://swift.org/package-manager/)
+[![Support](https://img.shields.io/badge/support-iOS%2010%2B%20-brightgreen.svg?style=flat)](https://www.apple.com/nl/ios/)
 [![License](https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 
 Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持原生级别后台下载，拥有强大的任务管理功能，可以满足下载类 APP 的大部分需求
@@ -62,9 +63,9 @@ end
 
 ## 环境要求
 
-- iOS 8.0+
-- Xcode 10.2+
-- Swift 5.0+
+- iOS 10.0+
+- Xcode 11.0+
+- Swift 5.1+
 
 
 
@@ -82,7 +83,7 @@ $ gem install cocoapods
 
 ```ruby
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
+platform :ios, '10.0'
 use_frameworks!
 
 target '<Your Target Name>' do
