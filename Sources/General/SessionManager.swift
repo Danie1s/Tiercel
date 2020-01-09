@@ -369,7 +369,7 @@ extension SessionManager {
     internal func fetchTask(currentURL: URLConvertible) -> DownloadTask? {
         do {
             let validURL = try currentURL.asURL()
-            return tasks.first { $0.protectedMutableState.read { $0.currentURL == validURL } }
+            return tasks.first { $0.protectedState.read { $0.currentURL == validURL } }
         } catch {
             return nil
         }
@@ -386,7 +386,7 @@ extension SessionManager {
             if !self.shouldCreatSession {
                 task.prepare()
             } else {
-                task.protectedMutableState.write { $0.status = .suspended }
+                task.protectedState.write { $0.status = .suspended }
                 if !self.waitingTasks.contains(task) {
                     self.waitingTasks.append(task)
                 }
@@ -399,7 +399,7 @@ extension SessionManager {
             if !self.shouldCreatSession {
                 task.prepare()
             } else {
-                task.protectedMutableState.write { $0.status = .suspended }
+                task.protectedState.write { $0.status = .suspended }
                 if !self.waitingTasks.contains(task) {
                     self.waitingTasks.append(task)
                 }
@@ -500,7 +500,7 @@ extension SessionManager {
                 if downloadTask.state == .running,
                     let currentURL = downloadTask.currentRequest?.url,
                     let task = self.fetchTask(currentURL: currentURL) {
-                    task.protectedMutableState.write { $0.status = .running }
+                    task.protectedState.write { $0.status = .running }
                     task.sessionTask = downloadTask
                     TiercelLog("[downloadTask] runing", identifier: self.identifier, url: task.url)
                     isRunning = true

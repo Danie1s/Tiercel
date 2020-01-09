@@ -172,7 +172,7 @@ extension Cache {
                     tasks.forEach { (task) in
                         task.cache = self
                         if task.status == .waiting  {
-                            task.protectedMutableState.write { $0.status = .suspended }
+                            task.protectedState.write { $0.status = .suspended }
                         }
                     }
                     return tasks

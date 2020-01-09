@@ -77,27 +77,27 @@ public class Task<TaskType>: NSObject, Codable {
 
     internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
     
-    struct MutableState {
-        var isRemoveCompletely = false
-        var status: Status = .waiting
-        var validation: Validation = .unkown
-        var currentURL: URL
-        var startDate: Double = 0
-        var endDate: Double = 0
-        var speed: Int64 = 0
-        var fileName: String
-        var timeRemaining: Int64 = 0
+    internal struct State {
+        internal var isRemoveCompletely = false
+        internal var status: Status = .waiting
+        internal var validation: Validation = .unkown
+        internal var currentURL: URL
+        internal var startDate: Double = 0
+        internal var endDate: Double = 0
+        internal var speed: Int64 = 0
+        internal var fileName: String
+        internal var timeRemaining: Int64 = 0
     }
     
     
-    internal let protectedMutableState: Protector<MutableState>
+    internal let protectedState: Protector<State>
 
     public var status: Status {
-        protectedMutableState.directValue.status
+        protectedState.directValue.status
     }
     
     public var validation: Validation {
-        protectedMutableState.directValue.validation
+        protectedState.directValue.validation
     }
 
     public let url: URL
@@ -106,21 +106,21 @@ public class Task<TaskType>: NSObject, Codable {
     public let progress: Progress = Progress()
 
     public var startDate: Double {
-        protectedMutableState.directValue.startDate
+        protectedState.directValue.startDate
     }
 
     public var endDate: Double {
-       protectedMutableState.directValue.endDate
+       protectedState.directValue.endDate
     }
 
 
     public var speed: Int64 {
-        protectedMutableState.directValue.speed
+        protectedState.directValue.speed
     }
 
     /// 默认为url的md5加上文件扩展名
     public var fileName: String {
-        protectedMutableState.directValue.fileName
+        protectedState.directValue.fileName
     }
 
     private var _timeRemaining: Int64 = 0
@@ -147,7 +147,7 @@ public class Task<TaskType>: NSObject, Codable {
         self.cache = cache
         self.url = url
         self.operationQueue = operationQueue
-        protectedMutableState = Protector(MutableState(currentURL: url, fileName: url.tr.fileName))
+        protectedState = Protector(State(currentURL: url, fileName: url.tr.fileName))
         super.init()
         self.headers = headers
     }
@@ -155,7 +155,7 @@ public class Task<TaskType>: NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(url, forKey: .url)
-        try container.encode(protectedMutableState.directValue.currentURL, forKey: .currentURL)
+        try container.encode(protectedState.directValue.currentURL, forKey: .currentURL)
         try container.encode(fileName, forKey: .fileName)
         try container.encodeIfPresent(headers, forKey: .headers)
         try container.encode(startDate, forKey: .startDate)
@@ -174,26 +174,26 @@ public class Task<TaskType>: NSObject, Codable {
         url = try container.decode(URL.self, forKey: .url)
         let currentURL = try container.decode(URL.self, forKey: .currentURL)
         let fileName = try container.decode(String.self, forKey: .fileName)
-        protectedMutableState = Protector(MutableState(currentURL: currentURL, fileName: fileName))
+        protectedState = Protector(State(currentURL: currentURL, fileName: fileName))
         cache = decoder.userInfo[.cache] as? Cache ?? Cache("default")
         operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
 
         headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
-        try protectedMutableState.write { $0.startDate = try container.decode(Double.self, forKey: .startDate) }
-        try protectedMutableState.write { $0.endDate = try container.decode(Double.self, forKey: .endDate) }
+        try protectedState.write { $0.startDate = try container.decode(Double.self, forKey: .startDate) }
+        try protectedState.write { $0.endDate = try container.decode(Double.self, forKey: .endDate) }
         progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)
         progress.completedUnitCount = try container.decode(Int64.self, forKey: .completedBytes)
         verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
         
         let statusString = try container.decode(String.self, forKey: .status)
-        protectedMutableState.write { $0.status = Status(rawValue: statusString)! }
+        protectedState.write { $0.status = Status(rawValue: statusString)! }
 
         let verificationTypeInt = try container.decode(Int.self, forKey: .verificationType)
         verificationType = FileVerificationType(rawValue: verificationTypeInt)!
         
         let validationType = try container.decode(Int.self, forKey: .validation)
-        protectedMutableState.write { $0.validation = Validation(rawValue: validationType)! }
+        protectedState.write { $0.validation = Validation(rawValue: validationType)! }
 
     }
     

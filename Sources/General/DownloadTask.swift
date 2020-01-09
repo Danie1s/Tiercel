@@ -31,6 +31,8 @@ public class DownloadTask: Task<DownloadTask> {
     private enum CodingKeys: CodingKey {
         case resumeData
     }
+
+    fileprivate var acceptableStatusCodes: Range<Int> { return 200..<300 }
     
     internal var sessionTask: URLSessionDownloadTask? {
         willSet {
@@ -67,42 +69,29 @@ public class DownloadTask: Task<DownloadTask> {
     }
 
     internal var tmpFileURL: URL?
-    
-    internal var tmpFileName: String?
 
-    private var _resumeData: Data? {
-        didSet {
-            guard let resumeData = _resumeData else { return  }
-            tmpFileName = ResumeDataHelper.getTmpFileName(resumeData)
-        }
-    }
-    private var resumeData: Data? {
-        get {
-            return dataQueue.sync {
-                _resumeData
-            }
-        }
-        set {
-            dataQueue.sync {
-                _resumeData = newValue
-            }
-        }
+
+    private let protectedDownloadState: Protector<DownloadState> = Protector(DownloadState())
+    
+    internal var tmpFileName: String? {
+        protectedDownloadState.directValue.tmpFileName
     }
 
-    private var _shouldValidateFile: Bool = false
-    fileprivate var shouldValidateFile: Bool {
-        get {
-            return dataQueue.sync {
-                _shouldValidateFile
+    private struct DownloadState {
+
+        internal var resumeData: Data? {
+            didSet {
+                guard let resumeData = resumeData else { return  }
+                tmpFileName = ResumeDataHelper.getTmpFileName(resumeData)
             }
         }
-        set {
-            dataQueue.sync {
-                _shouldValidateFile = newValue
-            }
-        }
+
+        internal var tmpFileName: String?
+
+        internal var shouldValidateFile: Bool = false
     }
-    
+
+
 
     internal init(_ url: URL,
                   headers: [String: String]? = nil,
@@ -115,7 +104,7 @@ public class DownloadTask: Task<DownloadTask> {
                    operationQueue: operationQueue)
         if let fileName = fileName,
             !fileName.isEmpty {
-            protectedMutableState.write { $0.fileName = fileName }
+            protectedState.write { $0.fileName = fileName }
         }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
@@ -127,16 +116,17 @@ public class DownloadTask: Task<DownloadTask> {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let superEncoder = container.superEncoder()
         try super.encode(to: superEncoder)
-        try container.encodeIfPresent(resumeData, forKey: .resumeData)
+        try container.encodeIfPresent(protectedDownloadState.directValue.resumeData, forKey: .resumeData)
     }
     
     internal required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let superDecoder = try container.superDecoder()
         try super.init(from: superDecoder)
-        resumeData = try container.decodeIfPresent(Data.self, forKey: .resumeData)
-        guard let resumeData = resumeData else { return }
-        tmpFileName = ResumeDataHelper.getTmpFileName(resumeData)
+        guard let resumeData = try container.decodeIfPresent(Data.self, forKey: .resumeData) else { return }
+        protectedDownloadState.write {
+            $0.resumeData = resumeData
+        }
     }
     
     
@@ -186,7 +176,7 @@ extension DownloadTask {
             if manager.shouldRun {
                 start()
             } else {
-                protectedMutableState.write { $0.status = .waiting }
+                protectedState.write { $0.status = .waiting }
                 TiercelLog("[downloadTask] waiting", identifier: manager.identifier, url: url)
             }
         case .succeeded:
@@ -200,7 +190,7 @@ extension DownloadTask {
 
 
     private func start() {
-        if let resumeData = resumeData {
+        if let resumeData = protectedDownloadState.directValue.resumeData {
             cache.retrieveTmpFile(self)
             if #available(iOS 10.2, *) {
                 sessionTask = session?.downloadTask(withResumeData: resumeData)
@@ -218,15 +208,15 @@ extension DownloadTask {
             }
             sessionTask = session?.downloadTask(with: request)
         }
-        protectedMutableState.write { $0.speed = 0 }
+        protectedState.write { $0.speed = 0 }
         progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
 
         sessionTask?.resume()
 
         if startDate == 0 {
-            protectedMutableState.write { $0.startDate = Date().timeIntervalSince1970 }
+            protectedState.write { $0.startDate = Date().timeIntervalSince1970 }
         }
-        protectedMutableState.write { $0.status = .running }
+        protectedState.write { $0.status = .running }
         TiercelLog("[downloadTask] running", identifier: manager?.identifier ?? "", url: url)
         progressExecuter?.execute(self)
         manager?.didStart()
@@ -238,12 +228,12 @@ extension DownloadTask {
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
 
         if status == .running {
-            protectedMutableState.write { $0.status = .willSuspend }
+            protectedState.write { $0.status = .willSuspend }
             sessionTask?.cancel(byProducingResumeData: { _ in })
         }
 
         if status == .waiting {
-            protectedMutableState.write { $0.status = .suspended }
+            protectedState.write { $0.status = .suspended }
             TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
             progressExecuter?.execute(self)
             controlExecuter?.execute(self)
@@ -257,10 +247,10 @@ extension DownloadTask {
         guard status != .succeeded else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
-            protectedMutableState.write { $0.status = .willCancel }
+            protectedState.write { $0.status = .willCancel }
             sessionTask?.cancel()
         } else {
-            protectedMutableState.write { $0.status = .willCancel }
+            protectedState.write { $0.status = .willCancel }
             didCancelOrRemove()
             TiercelLog("[downloadTask] did cancel", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
@@ -271,13 +261,13 @@ extension DownloadTask {
 
 
     internal func remove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
-        protectedMutableState.write { $0.isRemoveCompletely = completely }
+        protectedState.write { $0.isRemoveCompletely = completely }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         if status == .running {
-            protectedMutableState.write { $0.status = .willRemove }
+            protectedState.write { $0.status = .willRemove }
             sessionTask?.cancel()
         } else {
-            protectedMutableState.write { $0.status = .willRemove }
+            protectedState.write { $0.status = .willRemove }
             didCancelOrRemove()
             TiercelLog("[downloadTask] did remove", identifier: manager?.identifier ?? "", url: url)
             controlExecuter?.execute(self)
@@ -290,13 +280,13 @@ extension DownloadTask {
     internal func updateFileName(_ newFileName: String) {
         guard !fileName.isEmpty else { return }
         cache.updateFileName(self, newFileName)
-        protectedMutableState.write { $0.fileName = newFileName }
+        protectedState.write { $0.fileName = newFileName }
     }
 
     fileprivate func validateFile() {
         guard let validateHandler = self.validateExecuter else { return }
 
-        if !shouldValidateFile {
+        if !protectedDownloadState.directValue.shouldValidateFile {
             validateHandler.execute(self)
             return
         }
@@ -304,8 +294,8 @@ extension DownloadTask {
         guard let verificationCode = verificationCode else { return }
         FileChecksumHelper.validateFile(filePath, code: verificationCode, type: verificationType) { [weak self] (isCorrect) in
             guard let self = self else { return }
-            self.shouldValidateFile = false
-            self.protectedMutableState.write { $0.validation = isCorrect ? .correct : .incorrect }
+            self.protectedDownloadState.write { $0.shouldValidateFile = false }
+            self.protectedState.write { $0.validation = isCorrect ? .correct : .incorrect }
             if let manager = self.manager {
                 manager.cache.storeTasks(manager.tasks)
             }
@@ -325,13 +315,13 @@ extension DownloadTask {
         
         // 把预操作的状态改成完成操作的状态
         if status == .willCancel {
-            protectedMutableState.write { $0.status = .canceled }
+            protectedState.write { $0.status = .canceled }
         }
         
         if status == .willRemove {
-            protectedMutableState.write { $0.status = .removed }
+            protectedState.write { $0.status = .removed }
         }
-        cache.remove(self, completely: protectedMutableState.directValue.isRemoveCompletely)
+        cache.remove(self, completely: protectedState.directValue.isRemoveCompletely)
         
         manager?.didCancelOrRemove(url.absoluteString)
     }
@@ -339,8 +329,8 @@ extension DownloadTask {
 
     internal func succeeded() {
         guard status != .succeeded else { return }
-        protectedMutableState.write { $0.status = .succeeded }
-        protectedMutableState.write { $0.endDate = Date().timeIntervalSince1970 }
+        protectedState.write { $0.status = .succeeded }
+        protectedState.write { $0.endDate = Date().timeIntervalSince1970 }
 
         progress.completedUnitCount = progress.totalUnitCount
         timeRemaining = 0
@@ -350,33 +340,33 @@ extension DownloadTask {
         validateFile()
     }
 
-    private func determineStatus(error: Error?, statusCode: Int) {
-        if statusCode != 200 {
-            protectedMutableState.write { $0.status = .failed }
+    private func determineStatus(error: Error?, isAcceptable: Bool) {
+        if !isAcceptable {
+            protectedState.write { $0.status = .failed }
         }
 
         if let error = error {
             self.error = error
 
             if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
-                self.resumeData = ResumeDataHelper.handleResumeData(resumeData)
+                protectedDownloadState.write { $0.resumeData = ResumeDataHelper.handleResumeData(resumeData)}
                 cache.storeTmpFile(self)
             }
             if let _ = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
-                protectedMutableState.write { $0.status = .suspended }
+                protectedState.write { $0.status = .suspended }
             }
             if let urlError = error as? URLError, urlError.code != URLError.cancelled {
-                protectedMutableState.write { $0.status = .failed }
+                protectedState.write { $0.status = .failed }
             }
         }
 
         switch status {
         case .suspended:
-            protectedMutableState.write { $0.status = .suspended }
+            protectedState.write { $0.status = .suspended }
             TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
 
         case .willSuspend:
-            protectedMutableState.write { $0.status = .suspended }
+            protectedState.write { $0.status = .suspended }
             TiercelLog("[downloadTask] did suspend", identifier: manager?.identifier ?? "", url: url)
             progressExecuter?.execute(self)
             controlExecuter?.execute(self)
@@ -392,7 +382,7 @@ extension DownloadTask {
             controlExecuter?.execute(self)
             failureExecuter?.execute(self)
         default:
-            protectedMutableState.write { $0.status = .failed }
+            protectedState.write { $0.status = .failed }
             TiercelLog("[downloadTask] failed", identifier: manager?.identifier ?? "", url: url)
             progressExecuter?.execute(self)
             failureExecuter?.execute(self)
@@ -411,9 +401,9 @@ extension DownloadTask {
             if verificationCode == code &&
                 verificationType == type &&
                 validation != .unkown {
-                shouldValidateFile = false
+                protectedDownloadState.write { $0.shouldValidateFile = false}
             } else {
-                shouldValidateFile = true
+                protectedDownloadState.write { $0.shouldValidateFile = true }
                 verificationCode = code
                 verificationType = type
             }
@@ -436,7 +426,7 @@ extension DownloadTask {
 extension DownloadTask {
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let change = change, let newRequest = change[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
-            protectedMutableState.write { $0.currentURL = url }
+            protectedState.write { $0.currentURL = url }
         }
     }
 }
@@ -450,7 +440,7 @@ extension DownloadTask {
         let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
 
         if dataCount > lastData {
-            protectedMutableState.write { $0.speed = Int64(Double(dataCount - lastData) / interval) }
+            protectedState.write { $0.speed = Int64(Double(dataCount - lastData) / interval) }
             updateTimeRemaining()
         }
         progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
@@ -487,7 +477,7 @@ extension DownloadTask {
     
     internal func didFinishDownloading(task: URLSessionDownloadTask, to location: URL) {
         guard let statusCode = (task.response as? HTTPURLResponse)?.statusCode,
-            statusCode == 200
+            acceptableStatusCodes.contains(statusCode)
             else { return }
         self.tmpFileURL = location
         cache.storeFile(self)
@@ -507,11 +497,12 @@ extension DownloadTask {
 
 
         let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -1
+        let isAcceptable = acceptableStatusCodes.contains(statusCode)
 
-        if error == nil && statusCode == 200 {
+        if error == nil && acceptableStatusCodes.contains(statusCode) {
             succeeded()
         } else {
-            determineStatus(error: error, statusCode: statusCode)
+            determineStatus(error: error, isAcceptable: isAcceptable)
         }
 
         manager?.determineStatus()
