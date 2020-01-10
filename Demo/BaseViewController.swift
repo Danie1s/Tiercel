@@ -51,7 +51,7 @@ class BaseViewController: UIViewController {
 
     func updateUI() {
         guard let downloadManager = sessionManager else { return  }
-        totalTasksLabel.text = "总任务：\(downloadManager.completedTasks.count)/\(downloadManager.tasks.count)"
+        totalTasksLabel.text = "总任务：\(downloadManager.succeededTasks.count)/\(downloadManager.tasks.count)"
         totalSpeedLabel.text = "总速度：\(downloadManager.speed.tr.convertSpeedToString())"
         timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemaining.tr.convertTimeToString())"
         let per = String(format: "%.2f", downloadManager.progress.fractionCompleted)

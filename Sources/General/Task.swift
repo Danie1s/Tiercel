@@ -57,13 +57,9 @@ public class Task<TaskType>: NSObject, Codable {
 
     internal var operationQueue: DispatchQueue
 
-    internal var session: URLSession?
+    public let url: URL
     
-    internal var headers: [String: String]?
-
-    internal var verificationCode: String?
-    
-    internal var verificationType: FileVerificationType = .md5
+    public let progress: Progress = Progress()
     
     internal var progressExecuter: Executer<TaskType>?
     
@@ -72,69 +68,94 @@ public class Task<TaskType>: NSObject, Codable {
     internal var failureExecuter: Executer<TaskType>?
     
     internal var controlExecuter: Executer<TaskType>?
-
+    
     internal var validateExecuter: Executer<TaskType>?
-
-    internal let dataQueue = DispatchQueue(label: "com.Tiercel.Task.dataQueue")
     
     internal struct State {
-        internal var isRemoveCompletely = false
-        internal var status: Status = .waiting
-        internal var validation: Validation = .unkown
-        internal var currentURL: URL
-        internal var startDate: Double = 0
-        internal var endDate: Double = 0
-        internal var speed: Int64 = 0
-        internal var fileName: String
-        internal var timeRemaining: Int64 = 0
+        var session: URLSession?
+        var headers: [String: String]?
+        var verificationCode: String?
+        var verificationType: FileVerificationType = .md5
+        var isRemoveCompletely = false
+        var status: Status = .waiting
+        var validation: Validation = .unkown
+        var currentURL: URL
+        var startDate: Double = 0
+        var endDate: Double = 0
+        var speed: Int64 = 0
+        var fileName: String
+        var timeRemaining: Int64 = 0
     }
     
     
     internal let protectedState: Protector<State>
-
-    public var status: Status {
-        protectedState.directValue.status
+    
+    internal var session: URLSession? {
+        get { protectedState.directValue.session }
+        set { protectedState.write { $0.session = newValue } }
     }
     
-    public var validation: Validation {
-        protectedState.directValue.validation
+    internal var headers: [String: String]? {
+        get { protectedState.directValue.headers }
+        set { protectedState.write { $0.headers = newValue } }
     }
-
-    public let url: URL
     
-
-    public let progress: Progress = Progress()
-
-    public var startDate: Double {
-        protectedState.directValue.startDate
+    internal var verificationCode: String? {
+        get { protectedState.directValue.verificationCode }
+        set { protectedState.write { $0.verificationCode = newValue } }
+    }
+    
+    internal var verificationType: FileVerificationType {
+        get { protectedState.directValue.verificationType }
+        set { protectedState.write { $0.verificationType = newValue } }
+    }
+    
+    internal var isRemoveCompletely: Bool {
+        get { protectedState.directValue.isRemoveCompletely }
+        set { protectedState.write { $0.isRemoveCompletely = newValue } }
     }
 
-    public var endDate: Double {
-       protectedState.directValue.endDate
+    public internal(set) var status: Status {
+        get { protectedState.directValue.status }
+        set { protectedState.write { $0.status = newValue } }
+    }
+    
+    public internal(set) var validation: Validation {
+        get { protectedState.directValue.validation }
+        set { protectedState.write { $0.validation = newValue } }
+    }
+    
+    internal var currentURL: URL {
+        get { protectedState.directValue.currentURL }
+        set { protectedState.write { $0.currentURL = newValue } }
     }
 
 
-    public var speed: Int64 {
-        protectedState.directValue.speed
+    public internal(set) var startDate: Double {
+        get { protectedState.directValue.startDate }
+        set { protectedState.write { $0.startDate = newValue } }
+    }
+
+    public internal(set) var endDate: Double {
+       get { protectedState.directValue.endDate }
+       set { protectedState.write { $0.endDate = newValue } }
+    }
+
+
+    public internal(set) var speed: Int64 {
+        get { protectedState.directValue.speed }
+        set { protectedState.write { $0.speed = newValue } }
     }
 
     /// 默认为url的md5加上文件扩展名
-    public var fileName: String {
-        protectedState.directValue.fileName
+    public internal(set) var fileName: String {
+        get { protectedState.directValue.fileName }
+        set { protectedState.write { $0.fileName = newValue } }
     }
 
-    private var _timeRemaining: Int64 = 0
     public internal(set) var timeRemaining: Int64 {
-        get {
-            return dataQueue.sync {
-                _timeRemaining
-            }
-        }
-        set {
-            dataQueue.sync {
-                _timeRemaining = newValue
-            }
-        }
+        get { protectedState.directValue.timeRemaining }
+        set { protectedState.write { $0.timeRemaining = newValue } }
     }
 
     public internal(set) var error: Error?
@@ -155,7 +176,7 @@ public class Task<TaskType>: NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(url, forKey: .url)
-        try container.encode(protectedState.directValue.currentURL, forKey: .currentURL)
+        try container.encode(currentURL, forKey: .currentURL)
         try container.encode(fileName, forKey: .fileName)
         try container.encodeIfPresent(headers, forKey: .headers)
         try container.encode(startDate, forKey: .startDate)
@@ -179,21 +200,22 @@ public class Task<TaskType>: NSObject, Codable {
         operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
 
-        headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
-        try protectedState.write { $0.startDate = try container.decode(Double.self, forKey: .startDate) }
-        try protectedState.write { $0.endDate = try container.decode(Double.self, forKey: .endDate) }
         progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)
         progress.completedUnitCount = try container.decode(Int64.self, forKey: .completedBytes)
-        verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
         
         let statusString = try container.decode(String.self, forKey: .status)
-        protectedState.write { $0.status = Status(rawValue: statusString)! }
-
         let verificationTypeInt = try container.decode(Int.self, forKey: .verificationType)
-        verificationType = FileVerificationType(rawValue: verificationTypeInt)!
-        
         let validationType = try container.decode(Int.self, forKey: .validation)
-        protectedState.write { $0.validation = Validation(rawValue: validationType)! }
+        
+        try protectedState.write {
+            $0.headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
+            $0.startDate = try container.decode(Double.self, forKey: .startDate)
+            $0.endDate = try container.decode(Double.self, forKey: .endDate)
+            $0.verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
+            $0.status = Status(rawValue: statusString)!
+            $0.verificationType = FileVerificationType(rawValue: verificationTypeInt)!
+            $0.validation = Validation(rawValue: validationType)!
+        }
 
     }
     

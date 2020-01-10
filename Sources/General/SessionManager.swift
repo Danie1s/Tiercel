@@ -34,25 +34,10 @@ public class SessionManager {
 
     public let operationQueue: DispatchQueue
 
-    private let dataQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.dataQueue")
-
     private let configurationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.configurationQueue")
 
     private let multiDownloadQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.multiDownloadQueue")
-
-    private var _session: URLSession?
-    private var session: URLSession? {
-        get {
-            return dataQueue.sync {
-                _session
-            }
-        }
-        set {
-            dataQueue.sync {
-                _session = newValue
-            }
-        }
-    }
+    
 
     private var timer: DispatchSourceTimer?
     
@@ -62,20 +47,7 @@ public class SessionManager {
     
     public var completionHandler: (() -> Void)?
 
-    private var _shouldCreatSession: Bool = false
-    private var shouldCreatSession: Bool {
-        get {
-            return dataQueue.sync {
-                _shouldCreatSession
-            }
-        }
-        set {
-            dataQueue.sync {
-                _shouldCreatSession = newValue
-            }
-        }
-    }
-    
+
     private var _configuration: SessionConfiguration {
         didSet {
             guard !shouldCreatSession else { return }
@@ -106,69 +78,62 @@ public class SessionManager {
         }
     }
     
+    private struct State {
+        var session: URLSession?
+        var shouldCreatSession: Bool = false
+        var status: Status = .waiting
+        var tasks: [DownloadTask] = []
+        var runningTasks: [DownloadTask] = []
+        var waitingTasks: [DownloadTask] = []
+        var speed: Int64 = 0
+        var timeRemaining: Int64 = 0
+        
+        var progressExecuter: Executer<SessionManager>?
+        var successExecuter: Executer<SessionManager>?
+        var failureExecuter: Executer<SessionManager>?
+        var controlExecuter: Executer<SessionManager>?
+    }
+    
+    
+    private let protectedState = Protector(State())
+    
     internal var shouldRun: Bool {
         return tasks.filter { $0.status == .running }.count < configuration.maxConcurrentTasksLimit
     }
     
+    private var session: URLSession? {
+        get { protectedState.directValue.session }
+        set { protectedState.write { $0.session = newValue } }
+    }
     
-    private var _status: Status = .waiting
+    private var shouldCreatSession: Bool {
+        get { protectedState.directValue.shouldCreatSession }
+        set { protectedState.write { $0.shouldCreatSession = newValue } }
+    }
+    
+    
     public private(set) var status: Status {
-        get {
-            return dataQueue.sync {
-                _status
-            }
-        }
-        set {
-            dataQueue.sync {
-                _status = newValue
-            }
-        }
+        get { protectedState.directValue.status }
+        set { protectedState.write { $0.status = newValue } }
     }
     
     
-    private var _tasks: [DownloadTask] = []
     public private(set) var tasks: [DownloadTask] {
-        get {
-            return dataQueue.sync {
-                _tasks
-            }
-        }
-        set {
-            dataQueue.sync {
-                _tasks = newValue
-            }
-        }
+        get { protectedState.directValue.tasks }
+        set { protectedState.write { $0.tasks = newValue } }
     }
     
-    private var _runningTasks = [DownloadTask]()
     private var runningTasks: [DownloadTask] {
-        get {
-            return dataQueue.sync {
-                _runningTasks
-            }
-        }
-        set {
-            dataQueue.sync {
-                _runningTasks = newValue
-            }
-        }
+        get { protectedState.directValue.runningTasks }
+        set { protectedState.write { $0.runningTasks = newValue } }
     }
     
-    private var _waitingTasks = [DownloadTask]()
     private var waitingTasks: [DownloadTask] {
-        get {
-            return dataQueue.sync {
-                _waitingTasks
-            }
-        }
-        set {
-            dataQueue.sync {
-                _waitingTasks = newValue
-            }
-        }
+        get { protectedState.directValue.waitingTasks }
+        set { protectedState.write { $0.waitingTasks = newValue } }
     }
-    
-    public var completedTasks: [DownloadTask] {
+
+    public var succeededTasks: [DownloadTask] {
         return tasks.filter { $0.status == .succeeded }
     }
 
@@ -179,42 +144,36 @@ public class SessionManager {
         return _progress
     }
 
-    private var _speed: Int64 = 0
     public private(set) var speed: Int64 {
-        get {
-            return dataQueue.sync {
-                _speed
-            }
-        }
-        set {
-            dataQueue.sync {
-                _speed = newValue
-            }
-        }
+        get { protectedState.directValue.speed }
+        set { protectedState.write { $0.speed = newValue } }
     }
 
 
-    private var _timeRemaining: Int64 = 0
     public private(set) var timeRemaining: Int64 {
-        get {
-            return dataQueue.sync {
-                _timeRemaining
-            }
-        }
-        set {
-            dataQueue.sync {
-                _timeRemaining = newValue
-            }
-        }
+        get { protectedState.directValue.timeRemaining }
+        set { protectedState.write { $0.timeRemaining = newValue } }
     }
 
-    private var progressExecuter: Executer<SessionManager>?
+    private var progressExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.progressExecuter }
+        set { protectedState.write { $0.progressExecuter = newValue } }
+    }
     
-    private var successExecuter: Executer<SessionManager>?
+    private var successExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.successExecuter }
+        set { protectedState.write { $0.successExecuter = newValue } }
+    }
     
-    private var failureExecuter: Executer<SessionManager>?
+    private var failureExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.failureExecuter }
+        set { protectedState.write { $0.failureExecuter = newValue } }
+    }
     
-    private var controlExecuter: Executer<SessionManager>?
+    private var controlExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.controlExecuter }
+        set { protectedState.write { $0.controlExecuter = newValue } }
+    }
 
     
     
@@ -227,13 +186,15 @@ public class SessionManager {
         self.operationQueue = operationQueue
         cache = Cache(identifier)
         cache.decoder.userInfo[.operationQueue] = operationQueue
-        tasks = cache.retrieveAllTasks()
-        tasks.forEach {
-            $0.manager = self
-            $0.operationQueue = operationQueue
+        protectedState.write {
+            $0.tasks = cache.retrieveAllTasks()
+            $0.tasks.forEach {
+                $0.manager = self
+                $0.operationQueue = operationQueue
+            }
+            TiercelLog("[manager] retrieveTasks, tasks.count: \($0.tasks.count)", identifier: self.identifier)
+            $0.shouldCreatSession = true
         }
-        TiercelLog("[manager] retrieveTasks, tasks.count: \(tasks.count)", identifier: self.identifier)
-        shouldCreatSession = true
         operationQueue.sync {
             createSession()
             restoreStatus()
@@ -256,9 +217,12 @@ public class SessionManager {
         let sessionDelegate = SessionDelegate()
         sessionDelegate.manager = self
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1, underlyingQueue: operationQueue, name: "com.Tiercel.SessionManager.delegateQueue")
-        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
-        tasks.forEach { $0.session = session }
-        shouldCreatSession = false
+        protectedState.write {
+            let session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
+            $0.session = session
+            $0.tasks.forEach {  $0.protectedState.directValue.session = session }
+            $0.shouldCreatSession = false
+        }
         completion?()
     }
     
@@ -289,7 +253,7 @@ extension SessionManager {
             operationQueue.sync {
                 task = fetchTask(validURL)
                 if let task = task {
-                    task.headers = headers
+                    task.protectedState.write { $0.headers = headers }
                     if let fileName = fileName {
                         task.updateFileName(fileName)
                     }
@@ -300,8 +264,8 @@ extension SessionManager {
                                         cache: cache,
                                         operationQueue: operationQueue)
                     task?.manager = self
-                    task?.session = session
-                    tasks.append(task!)
+                    task?.protectedState.directValue.session = protectedState.directValue.session
+                    protectedState.directValue.tasks.append(task!)
                 }
                 cache.storeTasks(tasks)
             }
@@ -668,31 +632,25 @@ extension SessionManager {
     }
 
     internal func updateSpeedAndTimeRemaining() {
-
-        var result: Int64 = 0
-        let interval = refreshInterval
-        tasks.forEach({ (task) in
-            if task.status == .running {
-                task.updateSpeedAndTimeRemaining(interval)
-                result += task.speed
-            }
+        speed = tasks.reduce(0, {
+            $1.updateSpeedAndTimeRemaining(refreshInterval)
+            return $0 + $1.speed
+            
         })
-        
-        speed = result
         updateTimeRemaining()
-        
     }
     
     private func updateTimeRemaining() {
+        var timeRemaining: Double
         if speed == 0 {
-            self.timeRemaining = 0
+            timeRemaining = 0
         } else {
-            let timeRemaining = (Double(progress.totalUnitCount) - Double(progress.completedUnitCount)) / Double(speed)
-            self.timeRemaining = Int64(timeRemaining)
-            if timeRemaining < 1 && timeRemaining > 0.8 {
-                self.timeRemaining += 1
+            timeRemaining = (Double(progress.totalUnitCount) - Double(progress.completedUnitCount)) / Double(speed)
+            if (0.8..<1).contains(timeRemaining) {
+                timeRemaining += 1
             }
         }
+        self.timeRemaining = Int64(timeRemaining)
     }
 }
 
@@ -700,19 +658,15 @@ extension SessionManager {
 extension SessionManager {
     @discardableResult
     public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        return operationQueue.sync {
-            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-            return self
-        }
+        progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        return self
     }
     
     @discardableResult
     public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        operationQueue.sync {
-            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .succeeded {
+        successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if self.status == .succeeded {
+            operationQueue.async {
                 self.successExecuter?.execute(self)
             }
         }
@@ -721,14 +675,12 @@ extension SessionManager {
     
     @discardableResult
     public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        operationQueue.sync {
-            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .suspended ||
-                self.status == .canceled ||
-                self.status == .removed ||
-                self.status == .failed  {
+        failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if self.status == .suspended ||
+            self.status == .canceled ||
+            self.status == .removed ||
+            self.status == .failed  {
+            operationQueue.async {
                 self.failureExecuter?.execute(self)
             }
         }
