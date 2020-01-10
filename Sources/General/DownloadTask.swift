@@ -31,6 +31,8 @@ public class DownloadTask: Task<DownloadTask> {
     private enum CodingKeys: CodingKey {
         case resumeData
     }
+
+    fileprivate var acceptableStatusCodes: Range<Int> { return 200..<300 }
     
     internal var sessionTask: URLSessionDownloadTask? {
         willSet {
@@ -362,10 +364,8 @@ extension DownloadTask {
         validateFile()
     }
 
-    private func determineStatus(error: Error?, statusCode: Int) {
-        if statusCode != 200 {
-            status = .failed
-        }
+    private func determineStatus(with error: Error?) {
+        var tempStatus = status
 
         if let error = error {
             self.error = error
@@ -375,12 +375,15 @@ extension DownloadTask {
                 cache.storeTmpFile(self)
             }
             if let _ = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
-                status = .suspended
+                tempStatus = .suspended
             }
             if let urlError = error as? URLError, urlError.code != URLError.cancelled {
-                status = .failed
+                tempStatus = .failed
             }
+        } else {
+            tempStatus = .failed
         }
+        status = tempStatus
 
         switch status {
         case .suspended:
@@ -499,7 +502,7 @@ extension DownloadTask {
     
     internal func didFinishDownloading(task: URLSessionDownloadTask, to location: URL) {
         guard let statusCode = (task.response as? HTTPURLResponse)?.statusCode,
-            statusCode == 200
+            acceptableStatusCodes.contains(statusCode)
             else { return }
         self.tmpFileURL = location
         cache.storeFile(self)
@@ -519,11 +522,12 @@ extension DownloadTask {
 
 
         let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -1
+        let isAcceptable = acceptableStatusCodes.contains(statusCode)
 
-        if error == nil && statusCode == 200 {
+        if error == nil && isAcceptable {
             succeeded()
         } else {
-            determineStatus(error: error, statusCode: statusCode)
+            determineStatus(with: error)
         }
 
         manager?.determineStatus()
