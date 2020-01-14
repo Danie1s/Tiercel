@@ -20,33 +20,47 @@ class BaseViewController: UIViewController {
     
     @IBOutlet weak var taskLimitSwitch: UISwitch!
     @IBOutlet weak var cellularAccessSwitch: UISwitch!
-    
-    // 由于执行删除running的task，结果是异步回调的，所以最好是用downloadURLStrings作为数据源
-    lazy var downloadURLStrings = [String]()
 
-    var sessionManager: SessionManager?
+
+    var sessionManager: SessionManager!
 
     var URLStrings: [String] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // tableView的设置
-        automaticallyAdjustsScrollViewInsets = false
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.tableFooterView = UIView()
-        tableView.register(UINib(nibName: "DownloadTaskCell", bundle: nil), forCellReuseIdentifier: "cell")
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 164
-
+        setupUI()
+        
         // 检查磁盘空间
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
 
-        SessionManager.logLevel = .detailed
+        sessionManager.logger.option = .default
         
         updateSwicth()
+    }
+    
+    func setupUI() {
+        // tableView的设置
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.tableFooterView = UIView()
+        tableView.register(UINib(nibName: "\(DownloadTaskCell.self)", bundle: nil), forCellReuseIdentifier: DownloadTaskCell.reuseIdentifier)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 164
+        
+        configureNavigationItem()
+    }
+    
+    func configureNavigationItem() {
+        let editingItem = UIBarButtonItem(title: tableView.isEditing ? "完成" : "编辑", style: .plain, target: self, action: #selector(toggleEditing))
+        navigationItem.rightBarButtonItems = [editingItem]
+    }
+    
+    
+    @objc func toggleEditing() {
+        tableView.setEditing(!tableView.isEditing, animated: true)
+        configureNavigationItem()
     }
 
     func updateUI() {
@@ -68,52 +82,37 @@ class BaseViewController: UIViewController {
     func setupManager() {
 
         // 设置manager的回调
-        sessionManager?.progress { [weak self] (manager) in
-                self?.updateUI()
-
-            }.success{ [weak self] (manager) in
-                self?.updateUI()
-                // 下载任务成功了
-            }.failure { [weak self] (manager) in
-                guard let self = self,
-                    let downloadManager = self.sessionManager
-                    else { return }
-                self.downloadURLStrings = downloadManager.tasks.map({ $0.url.absoluteString })
-                self.tableView.reloadData()
-                self.updateUI()
-                
-                if manager.status == .suspended {
-                    // manager 暂停了
-                }
-                if manager.status == .failed {
-                    // manager 失败了
-                }
-                if manager.status == .canceled {
-                    // manager 取消了
-                }
-                if manager.status == .removed {
-                    // manager 移除了
-                }
+        sessionManager.progress { [weak self] (manager) in
+            self?.updateUI()
+            
+        }.completion { [weak self] (task) in
+            self?.tableView.reloadData()
+            self?.updateUI()
+            if task.status == .succeeded {
+                // 下载成功
+            } else {
+                // 其他状态
+            }
         }
     }
 }
 
 extension BaseViewController {
     @IBAction func totalStart(_ sender: Any) {
-        sessionManager?.totalStart()
+        sessionManager.totalStart()
         tableView.reloadData()
     }
 
     @IBAction func totalSuspend(_ sender: Any) {
-        sessionManager?.totalSuspend()
+        sessionManager.totalSuspend()
     }
 
     @IBAction func totalCancel(_ sender: Any) {
-        sessionManager?.totalCancel()
+        sessionManager.totalCancel()
     }
 
     @IBAction func totalDelete(_ sender: Any) {
-        sessionManager?.totalRemove(completely: false)
+        sessionManager.totalRemove(completely: false)
     }
 
     @IBAction func clearDisk(_ sender: Any) {
@@ -126,16 +125,16 @@ extension BaseViewController {
     @IBAction func taskLimit(_ sender: UISwitch) {
         let isTaskLimit = sender.isOn
         if isTaskLimit {
-            sessionManager?.configuration.maxConcurrentTasksLimit = 2
+            sessionManager.configuration.maxConcurrentTasksLimit = 2
         } else {
-            sessionManager?.configuration.maxConcurrentTasksLimit = Int.max
+            sessionManager.configuration.maxConcurrentTasksLimit = Int.max
         }
         updateSwicth()
         
     }
     
     @IBAction func cellularAccess(_ sender: UISwitch) {
-        sessionManager?.configuration.allowsCellularAccess = sender.isOn
+        sessionManager.configuration.allowsCellularAccess = sender.isOn
         updateSwicth()
     }
 }
@@ -143,38 +142,21 @@ extension BaseViewController {
 // MARK: - UITableViewDataSource & UITableViewDelegate
 extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return downloadURLStrings.count
+        return sessionManager.tasks.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as! DownloadTaskCell
-
-        // task的闭包引用了cell，所以这里的task要用weak
-        cell.tapClosure = { [weak self] cell in
-            guard let indexPath = self?.tableView.indexPath(for: cell),
-                let URLString = self?.downloadURLStrings.safeObject(at: indexPath.row),
-                let task = self?.sessionManager?.fetchTask(URLString)
-                else { return }
-            
-            switch task.status {
-            case .running:
-                self?.sessionManager?.suspend(URLString)
-            case .waiting, .suspended, .failed:
-                self?.sessionManager?.start(URLString)
-            default: break
-            }
-        }
-
+        let cell = tableView.dequeueReusableCell(withIdentifier: DownloadTaskCell.reuseIdentifier, for: indexPath) as! DownloadTaskCell
         return cell
     }
 
     // 每个cell中的状态更新，应该在willDisplay中执行
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let URLString = downloadURLStrings.safeObject(at: indexPath.row),
-            let task = sessionManager?.fetchTask(URLString)
-            else { return }
+
+        guard let task = sessionManager.tasks.safeObject(at: indexPath.row),
+            let cell = cell as? DownloadTaskCell else { return }
         
-        var image: UIImage = #imageLiteral(resourceName: "suspend")
+        let image: UIImage
         switch task.status {
         case .running:
             image = #imageLiteral(resourceName: "resume")
@@ -182,13 +164,26 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             image = #imageLiteral(resourceName: "suspend")
         }
         
-        let cell = cell as! DownloadTaskCell
 
         cell.controlButton.setImage(image, for: .normal)
         
         cell.titleLabel.text = task.fileName
         
         cell.updateProgress(task)
+        
+        // task的闭包引用了cell，所以这里的task要用weak
+        cell.tapClosure = { [weak self] cell in
+            guard let indexPath = self?.tableView.indexPath(for: cell),
+                let task = self?.sessionManager.tasks.safeObject(at: indexPath.row)
+                else { return }
+            switch task.status {
+            case .running:
+                self?.sessionManager?.suspend(task)
+            case .waiting, .suspended, .failed:
+                self?.sessionManager?.start(task)
+            default: break
+            }
+        }
 
         task.progress { [weak cell] (task) in
                 cell?.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
@@ -221,11 +216,28 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
 
     // 由于cell是循环利用的，不在可视范围内的cell，不应该去更新cell的状态
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let URLString = downloadURLStrings.safeObject(at: indexPath.row),
-            let task = sessionManager?.fetchTask(URLString)
-            else { return }
+        guard let task = sessionManager.tasks.safeObject(at: indexPath.row) else { return }
 
-        task.progress { _ in }.success({ _ in }).failure({ _ in})
+        task.progress { _ in }.success { _ in } .failure { _ in }
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            guard let task = sessionManager.tasks.safeObject(at: indexPath.row) else { return }
+            sessionManager.remove(task, completely: false) { [weak self] _ in
+                self?.tableView.deleteRows(at: [indexPath], with: .automatic)
+                self?.updateUI()
+            }
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        sessionManager.moveTask(at: sourceIndexPath.row, to: destinationIndexPath.row)
+        tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

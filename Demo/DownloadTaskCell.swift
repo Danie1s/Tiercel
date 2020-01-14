@@ -10,6 +10,8 @@ import UIKit
 import Tiercel
 
 class DownloadTaskCell: UITableViewCell {
+    
+    static let reuseIdentifier = "reuseIdentifier"
 
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var speedLabel: UILabel!

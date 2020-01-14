@@ -51,7 +51,7 @@ public class Task<TaskType>: NSObject, Codable {
         case validation
     }
 
-    internal weak var manager: SessionManager?
+    public internal(set) weak var manager: SessionManager?
 
     internal var cache: Cache
 
@@ -60,23 +60,13 @@ public class Task<TaskType>: NSObject, Codable {
     public let url: URL
     
     public let progress: Progress = Progress()
-    
-    internal var progressExecuter: Executer<TaskType>?
-    
-    internal var successExecuter: Executer<TaskType>?
-    
-    internal var failureExecuter: Executer<TaskType>?
-    
-    internal var controlExecuter: Executer<TaskType>?
-    
-    internal var validateExecuter: Executer<TaskType>?
-    
+
     internal struct State {
         var session: URLSession?
         var headers: [String: String]?
         var verificationCode: String?
         var verificationType: FileVerificationType = .md5
-        var isRemoveCompletely = false
+        var isRemoveCompletely: Bool = false
         var status: Status = .waiting
         var validation: Validation = .unkown
         var currentURL: URL
@@ -85,6 +75,14 @@ public class Task<TaskType>: NSObject, Codable {
         var speed: Int64 = 0
         var fileName: String
         var timeRemaining: Int64 = 0
+        var error: Error?
+
+        var progressExecuter: Executer<TaskType>?
+        var successExecuter: Executer<TaskType>?
+        var failureExecuter: Executer<TaskType>?
+        var controlExecuter: Executer<TaskType>?
+        var completionExecuter: Executer<TaskType>?
+        var validateExecuter: Executer<TaskType>?
     }
     
     
@@ -117,7 +115,15 @@ public class Task<TaskType>: NSObject, Codable {
 
     public internal(set) var status: Status {
         get { protectedState.directValue.status }
-        set { protectedState.write { $0.status = newValue } }
+        set {
+            protectedState.write { $0.status = newValue }
+            if newValue == .willSuspend || newValue == .willCancel || newValue == .willRemove {
+                return
+            }
+            if self is DownloadTask {
+                manager?.log(.downloadTask(newValue.rawValue, task: self as! DownloadTask))
+            }
+        }
     }
     
     public internal(set) var validation: Validation {
@@ -158,7 +164,42 @@ public class Task<TaskType>: NSObject, Codable {
         set { protectedState.write { $0.timeRemaining = newValue } }
     }
 
-    public internal(set) var error: Error?
+    public internal(set) var error: Error? {
+        get { protectedState.directValue.error }
+        set { protectedState.write { $0.error = newValue } }
+    }
+
+
+    internal var progressExecuter: Executer<TaskType>? {
+        get { protectedState.directValue.progressExecuter }
+        set { protectedState.write { $0.progressExecuter = newValue } }
+    }
+
+    internal var successExecuter: Executer<TaskType>? {
+        get { protectedState.directValue.successExecuter }
+        set { protectedState.write { $0.successExecuter = newValue } }
+    }
+
+    internal var failureExecuter: Executer<TaskType>? {
+        get { protectedState.directValue.failureExecuter }
+        set { protectedState.write { $0.failureExecuter = newValue } }
+    }
+
+    internal var completionExecuter: Executer<TaskType>? {
+        get { protectedState.directValue.completionExecuter }
+        set { protectedState.write { $0.completionExecuter = newValue } }
+    }
+    
+    internal var controlExecuter: Executer<TaskType>? {
+        get { protectedState.directValue.controlExecuter }
+        set { protectedState.write { $0.controlExecuter = newValue } }
+    }
+
+    internal var validateExecuter: Executer<TaskType>? {
+        get { protectedState.directValue.controlExecuter }
+        set { protectedState.write { $0.controlExecuter = newValue } }
+    }
+
 
 
     internal init(_ url: URL,
@@ -216,9 +257,7 @@ public class Task<TaskType>: NSObject, Codable {
             $0.verificationType = FileVerificationType(rawValue: verificationTypeInt)!
             $0.validation = Validation(rawValue: validationType)!
         }
-
     }
-    
 
     internal func execute(_ Executer: Executer<TaskType>?) {
         
@@ -229,21 +268,16 @@ public class Task<TaskType>: NSObject, Codable {
 
 extension Task {
     @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<TaskType>) -> Self {
-        return operationQueue.sync {
-            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-            return self
-        }
-
+    public func progress(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
+        progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        return self
     }
 
     @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<TaskType>) -> Self {
-        operationQueue.sync {
-            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .succeeded {
+    public func success(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
+        successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if status == .succeeded  && completionExecuter == nil{
+            operationQueue.async {
                 self.execute(self.successExecuter)
             }
         }
@@ -252,20 +286,35 @@ extension Task {
     }
 
     @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<TaskType>) -> Self {
-        operationQueue.sync {
-            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .suspended ||
-                self.status == .canceled ||
-                self.status == .removed ||
-                self.status == .failed  {
+    public func failure(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
+        failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if completionExecuter == nil &&
+            (status == .suspended ||
+            status == .canceled ||
+            status == .removed ||
+            status == .failed) {
+            operationQueue.async {
                 self.execute(self.failureExecuter)
             }
         }
         return self
     }
+    
+    @discardableResult
+    public func completion(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
+        completionExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if status == .suspended ||
+            status == .canceled ||
+            status == .removed ||
+            status == .succeeded ||
+            status == .failed  {
+            operationQueue.async {
+                self.execute(self.completionExecuter)
+            }
+        }
+        return self
+    }
+    
 }
 
 

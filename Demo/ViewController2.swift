@@ -12,9 +12,10 @@ import Tiercel
 class ViewController2: BaseViewController {
 
     override func viewDidLoad() {
-        super.viewDidLoad()
-
+        
         sessionManager = appDelegate.sessionManager2
+
+        super.viewDidLoad()
 
 
         URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Microsoft_Office_16.24.19041401_Installer.pkg",
@@ -43,11 +44,8 @@ class ViewController2: BaseViewController {
                       "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
                       "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
         
-        guard let downloadManager = sessionManager else { return  }
 
         setupManager()
-
-        downloadURLStrings = downloadManager.tasks.map({ $0.url.absoluteString })
 
         updateUI()
         tableView.reloadData()
@@ -60,27 +58,24 @@ class ViewController2: BaseViewController {
 extension ViewController2 {
 
     @IBAction func addDownloadTask(_ sender: Any) {
+        let downloadURLStrings = sessionManager.tasks.map { $0.url.absoluteString }
         guard let URLString = URLStrings.first(where: { !downloadURLStrings.contains($0) }) else { return }
-        downloadURLStrings.append(URLString)
-        sessionManager?.download(URLString)
-        let index = downloadURLStrings.count - 1
-        tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        updateUI()
+        if let _ = sessionManager.download(URLString) {
+            let index = sessionManager.tasks.count - 1
+            tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            updateUI()
+        }
     }
 
     @IBAction func deleteDownloadTask(_ sender: Any) {
-        let count = downloadURLStrings.count
+        let count = sessionManager.tasks.count
         guard count > 0 else { return }
-        
         let index = count - 1
-        let URLString = downloadURLStrings[index]
-        downloadURLStrings.remove(at: index)
-        tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        sessionManager?.remove(URLString, completely: false,  { [weak self] _ in
+        guard let task = sessionManager.tasks.safeObject(at: index) else { return }
+        sessionManager.remove(task, completely: false) { [weak self] _ in
+            self?.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
             self?.updateUI()
-        })
-
-        
+        }
     }
 }
 

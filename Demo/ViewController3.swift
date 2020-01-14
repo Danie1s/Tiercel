@@ -13,9 +13,11 @@ class ViewController3: BaseViewController {
 
 
     override func viewDidLoad() {
+        
+        sessionManager = appDelegate.sessionManager3
+
         super.viewDidLoad()
 
-        sessionManager = appDelegate.sessionManager3
 
         URLStrings = ["https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Microsoft_Office_16.24.19041401_Installer.pkg",
                       "http://issuecdn.baidupcs.com/issue/netdisk/MACguanjia/BaiduNetdisk_mac_2.2.3.dmg",
@@ -42,14 +44,11 @@ class ViewController3: BaseViewController {
                       "http://api.gfs100.cn/upload/20180131/201801311435101664.mp4",
                       "http://api.gfs100.cn/upload/20180131/201801311059389211.mp4",
                       "http://api.gfs100.cn/upload/20171219/201712190944143459.mp4"]
-
-        guard let downloadManager = sessionManager else { return  }
         
-//        URLStrings.append(contentsOf: NSArray(contentsOfFile: Bundle.main.path(forResource: "VideoURLStrings.plist", ofType: nil)!) as! [String])
+        URLStrings.append(contentsOf: NSArray(contentsOfFile: Bundle.main.path(forResource: "VideoURLStrings.plist", ofType: nil)!) as! [String])
 
         setupManager()
 
-        downloadURLStrings = downloadManager.tasks.map({ $0.url.absoluteString })
 
         updateUI()
         tableView.reloadData()
@@ -62,12 +61,11 @@ extension ViewController3 {
 
 
     @IBAction func multiDownload(_ sender: Any) {
-        if downloadURLStrings.isEmpty {
-            downloadURLStrings.append(contentsOf: URLStrings)
+        if sessionManager.tasks.isEmpty {
             
             // 如果同时开启的下载任务过多，会阻塞主线程，所以可以在子线程中开启
             DispatchQueue.global().async {
-                self.sessionManager?.multiDownload(self.downloadURLStrings)
+                self.sessionManager?.multiDownload(self.URLStrings)
                 
                 DispatchQueue.main.async {
                     self.updateUI()

@@ -37,12 +37,6 @@ class ListViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if #available(iOS 11, *) {
-        } else {
-            let topSafeArea = (navigationController?.navigationBar.frame.height ?? 0) + UIApplication.shared.statusBarFrame.size.height
-            tableView.contentInset.top = topSafeArea
-            tableView.scrollIndicatorInsets.top = topSafeArea
-        }
 
     }
 
@@ -53,7 +47,7 @@ class ListViewController: UITableViewController {
 
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "listCell", for: indexPath) as! ListViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: ListViewCell.reuseIdentifier, for: indexPath) as! ListViewCell
         cell.URLStringLabel.text = "视频\(indexPath.row + 1).mp4"
         let URLStirng = URLStrings[indexPath.row]
         cell.downloadClosure = { cell in

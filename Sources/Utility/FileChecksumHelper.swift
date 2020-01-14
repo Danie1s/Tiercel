@@ -35,21 +35,28 @@ public enum FileVerificationType : Int {
 
 public enum FileChecksumHelper {
     
-    private static let ioQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.FileChecksumHelper.ioQueue", attributes: .concurrent)
+    public enum FileVerificationError: Error {
+        case codeEmpty
+        case codeMismatch(code: String)
+        case fileDoesnotExist(path: String)
+        case readDataFailed(path: String)
+    }
+    
+    private static let ioQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.FileChecksumHelper.ioQueue",
+                                                              attributes: .concurrent)
+    
     
     public static func validateFile(_ filePath: String,
                                    code: String,
                                    type: FileVerificationType,
-                                   _ completion: @escaping (Bool) -> ()) {
+                                   completion: @escaping (Result<Bool, FileVerificationError>) -> ()) {
         if code.isEmpty {
-            TiercelLog("verification code is empty")
-            completion(false)
+            completion(.failure(FileVerificationError.codeEmpty))
             return
         }
         ioQueue.async {
             guard FileManager.default.fileExists(atPath: filePath) else {
-                TiercelLog("file does not exist, filePath: \(filePath)")
-                completion(false)
+                completion(.failure(FileVerificationError.fileDoesnotExist(path: filePath)))
                 return
             }
             let url = URL(fileURLWithPath: filePath)
@@ -68,10 +75,13 @@ public enum FileChecksumHelper {
                     string = data.tr.sha512
                 }
                 let isCorrect = string.lowercased() == code.lowercased()
-                completion(isCorrect)
+                if isCorrect {
+                    completion(.success(true))
+                } else {
+                    completion(.failure(FileVerificationError.codeMismatch(code: code)))
+                }
             } catch {
-                TiercelLog("can't read data, error: \(error)")
-                completion(false)
+                completion(.failure(FileVerificationError.readDataFailed(path: filePath)))
             }
         }
     }
@@ -79,6 +89,20 @@ public enum FileChecksumHelper {
 
 
 
+extension FileChecksumHelper.FileVerificationError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .codeEmpty:
+            return "verification code is empty"
+        case let .codeMismatch(code):
+            return "verification code mismatch, code: \(code)"
+        case let .fileDoesnotExist(path):
+            return "file does not exist, path: \(path)"
+        case let .readDataFailed(path):
+            return "read data failed, path: \(path)"
+        }
+    }
 
+}
 
 
