@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Tiercel'
-  s.version          = '2.4.1'
+  s.version          = '3.0.0'
   s.swift_version   = '5.0'
   s.summary          = 'Tiercel is a lightweight, pure-Swift download framework.'
 
@@ -11,10 +11,9 @@ Pod::Spec.new do |s|
   s.author           = { 'Daniels' => '176516837@qq.com' }
   s.source           = { :git => 'https://github.com/Danie1s/Tiercel.git', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.0'
 
   s.source_files = 'Sources/**/*.swift'
   s.requires_arc = true
-  s.frameworks = 'CFNetwork'
 
 end

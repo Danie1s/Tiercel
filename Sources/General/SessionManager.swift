@@ -27,34 +27,8 @@
 import UIKit
 
 public class SessionManager {
-    
-    public static var logLevel: LogLevel = .detailed
-
-    public static var isControlNetworkActivityIndicator = true
 
     public let operationQueue: DispatchQueue
-
-    private let dataQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.dataQueue")
-
-    private let configurationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.configurationQueue")
-
-    private let multiDownloadQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.multiDownloadQueue")
-
-    private var _session: URLSession?
-    private var session: URLSession? {
-        get {
-            return dataQueue.sync {
-                _session
-            }
-        }
-        set {
-            dataQueue.sync {
-                _session = newValue
-            }
-        }
-    }
-
-    private var timer: DispatchSourceTimer?
     
     public let cache: Cache
     
@@ -62,113 +36,117 @@ public class SessionManager {
     
     public var completionHandler: (() -> Void)?
 
-    private var _shouldCreatSession: Bool = false
-    private var shouldCreatSession: Bool {
-        get {
-            return dataQueue.sync {
-                _shouldCreatSession
-            }
-        }
-        set {
-            dataQueue.sync {
-                _shouldCreatSession = newValue
-            }
-        }
-    }
-    
-    private var _configuration: SessionConfiguration {
-        didSet {
-            guard !shouldCreatSession else { return }
-            shouldCreatSession = true
-            if status == .running {
-                runningTasks = tasks.filter { $0.status == .running }
-                waitingTasks = tasks.filter { $0.status == .waiting }
-                totalSuspend()
-            } else {
-                session?.invalidateAndCancel()
-                session = nil
-            }
-        }
-    }
-    
     public var configuration: SessionConfiguration {
-        get {
-            return configurationQueue.sync {
-                _configuration
-            }
-        }
+        get { protectedState.directValue.configuration }
         set {
             operationQueue.sync {
-                configurationQueue.sync {
-                    _configuration = newValue
+                protectedState.write {
+                    $0.configuration = newValue
+                    if $0.status == .running {
+                        totalSuspend()
+                    }
                 }
             }
         }
+    }
+    
+    private struct State {
+        var logger: Logable
+        var isControlNetworkActivityIndicator: Bool = true
+        var configuration: SessionConfiguration {
+            didSet {
+                guard !shouldCreatSession else { return }
+                shouldCreatSession = true
+                if status == .running {
+                    runningTasks = tasks.filter { $0.status == .running }
+                    waitingTasks = tasks.filter { $0.status == .waiting }
+                } else {
+                    session?.invalidateAndCancel()
+                    session = nil
+                }
+            }
+        }
+        var session: URLSession?
+        var shouldCreatSession: Bool = false
+        var timer: DispatchSourceTimer?
+        var status: Status = .waiting
+        var tasks: [DownloadTask] = []
+        var taskMapper: [String: DownloadTask] = [String: DownloadTask]()
+        var urlMapper: [URL: URL] = [URL: URL]()
+        var runningTasks: [DownloadTask] = []
+        var waitingTasks: [DownloadTask] = []
+        var speed: Int64 = 0
+        var timeRemaining: Int64 = 0
+        
+        var progressExecuter: Executer<SessionManager>?
+        var successExecuter: Executer<SessionManager>?
+        var failureExecuter: Executer<SessionManager>?
+        var completionExecuter: Executer<SessionManager>?
+        var controlExecuter: Executer<SessionManager>?
+    }
+    
+    
+    private let protectedState: Protector<State>
+
+    public var logger: Logable {
+        get { protectedState.directValue.logger }
+        set { protectedState.write { $0.logger = newValue } }
+    }
+    
+    public var isControlNetworkActivityIndicator: Bool {
+        get { protectedState.directValue.isControlNetworkActivityIndicator }
+        set { protectedState.write { $0.isControlNetworkActivityIndicator = newValue } }
     }
     
     internal var shouldRun: Bool {
         return tasks.filter { $0.status == .running }.count < configuration.maxConcurrentTasksLimit
     }
     
+    private var session: URLSession? {
+        get { protectedState.directValue.session }
+        set { protectedState.write { $0.session = newValue } }
+    }
     
-    private var _status: Status = .waiting
+    private var shouldCreatSession: Bool {
+        get { protectedState.directValue.shouldCreatSession }
+        set { protectedState.write { $0.shouldCreatSession = newValue } }
+    }
+
+    
+    private var timer: DispatchSourceTimer? {
+        get { protectedState.directValue.timer }
+        set { protectedState.write { $0.timer = newValue } }
+    }
+
+    
     public private(set) var status: Status {
-        get {
-            return dataQueue.sync {
-                _status
-            }
-        }
+        get { protectedState.directValue.status }
         set {
-            dataQueue.sync {
-                _status = newValue
+            protectedState.write { $0.status = newValue }
+            if newValue == .willSuspend || newValue == .willCancel || newValue == .willRemove {
+                return
             }
+            log(.sessionManager(newValue.rawValue, manager: self))
         }
     }
     
     
-    private var _tasks: [DownloadTask] = []
     public private(set) var tasks: [DownloadTask] {
-        get {
-            return dataQueue.sync {
-                _tasks
-            }
-        }
-        set {
-            dataQueue.sync {
-                _tasks = newValue
-            }
-        }
+        get { protectedState.directValue.tasks }
+        set { protectedState.write { $0.tasks = newValue } }
     }
     
-    private var _runningTasks = [DownloadTask]()
     private var runningTasks: [DownloadTask] {
-        get {
-            return dataQueue.sync {
-                _runningTasks
-            }
-        }
-        set {
-            dataQueue.sync {
-                _runningTasks = newValue
-            }
-        }
+        get { protectedState.directValue.runningTasks }
+        set { protectedState.write { $0.runningTasks = newValue } }
     }
     
-    private var _waitingTasks = [DownloadTask]()
     private var waitingTasks: [DownloadTask] {
-        get {
-            return dataQueue.sync {
-                _waitingTasks
-            }
-        }
-        set {
-            dataQueue.sync {
-                _waitingTasks = newValue
-            }
-        }
+        get { protectedState.directValue.waitingTasks }
+        set { protectedState.write { $0.waitingTasks = newValue } }
     }
-    
-    public var completedTasks: [DownloadTask] {
+
+    public var succeededTasks: [DownloadTask] {
         return tasks.filter { $0.status == .succeeded }
     }
 
@@ -179,70 +157,90 @@ public class SessionManager {
         return _progress
     }
 
-    private var _speed: Int64 = 0
     public private(set) var speed: Int64 {
-        get {
-            return dataQueue.sync {
-                _speed
-            }
-        }
-        set {
-            dataQueue.sync {
-                _speed = newValue
-            }
-        }
+        get { protectedState.directValue.speed }
+        set { protectedState.write { $0.speed = newValue } }
     }
 
-
-    private var _timeRemaining: Int64 = 0
+    public var speedString: String {
+        speed.tr.convertSpeedToString()
+    }
+    
+    
     public private(set) var timeRemaining: Int64 {
-        get {
-            return dataQueue.sync {
-                _timeRemaining
-            }
-        }
-        set {
-            dataQueue.sync {
-                _timeRemaining = newValue
-            }
-        }
+        get { protectedState.directValue.timeRemaining }
+        set { protectedState.write { $0.timeRemaining = newValue } }
     }
 
-    private var progressExecuter: Executer<SessionManager>?
+    public var timeRemainingString: String {
+        timeRemaining.tr.convertTimeToString()
+    }
     
-    private var successExecuter: Executer<SessionManager>?
+    private var progressExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.progressExecuter }
+        set { protectedState.write { $0.progressExecuter = newValue } }
+    }
     
-    private var failureExecuter: Executer<SessionManager>?
+    private var successExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.successExecuter }
+        set { protectedState.write { $0.successExecuter = newValue } }
+    }
     
-    private var controlExecuter: Executer<SessionManager>?
+    private var failureExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.failureExecuter }
+        set { protectedState.write { $0.failureExecuter = newValue } }
+    }
+    
+    private var completionExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.completionExecuter }
+        set { protectedState.write { $0.completionExecuter = newValue } }
+    }
+    
+    private var controlExecuter: Executer<SessionManager>? {
+        get { protectedState.directValue.controlExecuter }
+        set { protectedState.write { $0.controlExecuter = newValue } }
+    }
 
     
     
     public init(_ identifier: String,
                 configuration: SessionConfiguration,
+                logger: Logable? = nil,
+                cache: Cache? = nil,
                 operationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
-        self._configuration = configuration
+        protectedState = Protector(
+            State(logger: logger ?? Logger(identifier: "\(bundleIdentifier).\(identifier)", option: .default),
+                  configuration: configuration)
+        )
         self.operationQueue = operationQueue
-        cache = Cache(identifier)
-        cache.decoder.userInfo[.operationQueue] = operationQueue
-        tasks = cache.retrieveAllTasks()
-        tasks.forEach {
-            $0.manager = self
-            $0.operationQueue = operationQueue
+        self.cache = cache ?? Cache(identifier)
+        self.cache.manager = self
+        self.cache.retrieveAllTasks().forEach { updateTasks(with: .append($0)) }
+        log(.sessionManager("retrieveTasks", manager: self))
+        protectedState.write { state in
+            state.tasks.forEach {
+                $0.manager = self
+                $0.operationQueue = operationQueue
+                state.urlMapper[$0.currentURL] = $0.url
+            }
+            state.shouldCreatSession = true
         }
-        TiercelLog("[manager] retrieveTasks, tasks.count: \(tasks.count)", identifier: self.identifier)
-        shouldCreatSession = true
         operationQueue.sync {
             createSession()
             restoreStatus()
         }
     }
+    
+    deinit {
+        invalidate()
+    }
 
     public func invalidate() {
         session?.invalidateAndCancel()
         session = nil
+        cache.invalidate()
         invalidateTimer()
     }
 
@@ -253,18 +251,25 @@ public class SessionManager {
         sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
         sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
+        if #available(iOS 13, *) {
+            sessionConfiguration.allowsConstrainedNetworkAccess = configuration.allowsConstrainedNetworkAccess
+            sessionConfiguration.allowsExpensiveNetworkAccess = configuration.allowsExpensiveNetworkAccess
+        }
         let sessionDelegate = SessionDelegate()
         sessionDelegate.manager = self
-        let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1, underlyingQueue: operationQueue, name: "com.Tiercel.SessionManager.delegateQueue")
-        session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: delegateQueue)
-        tasks.forEach { $0.session = session }
-        shouldCreatSession = false
+        let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1,
+                                           underlyingQueue: operationQueue,
+                                           name: "com.Tiercel.SessionManager.delegateQueue")
+        protectedState.write {
+            let session = URLSession(configuration: sessionConfiguration,
+                                     delegate: sessionDelegate,
+                                     delegateQueue: delegateQueue)
+            $0.session = session
+            $0.tasks.forEach { $0.session = session }
+            $0.shouldCreatSession = false
+        }
         completion?()
     }
-    
-
-
-
 }
 
 
@@ -289,10 +294,7 @@ extension SessionManager {
             operationQueue.sync {
                 task = fetchTask(validURL)
                 if let task = task {
-                    task.headers = headers
-                    if let fileName = fileName {
-                        task.updateFileName(fileName)
-                    }
+                    task.update(headers, newFileName: fileName)
                 } else {
                     task = DownloadTask(validURL,
                                         headers: headers,
@@ -301,14 +303,14 @@ extension SessionManager {
                                         operationQueue: operationQueue)
                     task?.manager = self
                     task?.session = session
-                    tasks.append(task!)
+                    updateTasks(with: .append(task!))
                 }
                 cache.storeTasks(tasks)
             }
             start(task!)
             return task
         } catch {
-            TiercelLog("[manager] url error：\(url)", identifier: identifier)
+            log(.error("create dowloadTask failed", error: error))
             return nil
         }
 
@@ -324,32 +326,56 @@ extension SessionManager {
     /// - Returns: 返回url数组中有效url对应的task数组
     @discardableResult
     public func multiDownload(_ urls: [URLConvertible],
-                              headers: [[String: String]]? = nil,
+                              headersArray: [[String: String]]? = nil,
                               fileNames: [String]? = nil) -> [DownloadTask] {
-        if let headers = headers,
-            headers.count != 0 && headers.count != urls.count {
-            TiercelLog("[manager] multiDownload error：headers.count != urls.count", identifier: identifier)
+        if let headersArray = headersArray,
+            headersArray.count != 0 && headersArray.count != urls.count {
+            log(.error("create multiple dowloadTasks failed", error: TiercelError.headersMatchFailed))
             return [DownloadTask]()
         }
         
         if let fileNames = fileNames,
             fileNames.count != 0 && fileNames.count != urls.count {
-            TiercelLog("[manager] multiDownload error：fileNames.count != urls.count", identifier: identifier)
+            log(.error("create multiple dowloadTasks failed", error: TiercelError.fileNamesMatchFailed))
             return [DownloadTask]()
         }
 
+        var urlSet = Set<URL>()
         var uniqueTasks = [DownloadTask]()
 
-        multiDownloadQueue.sync {
+        operationQueue.sync {
             for (index, url) in urls.enumerated() {
                 let fileName = fileNames?.safeObject(at: index)
-                let header = headers?.safeObject(at: index)
-                if let task = download(url, headers: header, fileName: fileName),
-                    !uniqueTasks.contains { $0.url == task.url } {
-                    uniqueTasks.append(task)
+                let headers = headersArray?.safeObject(at: index)
+
+                guard let validURL = try? url.asURL() else {
+                    log(.error("create dowloadTask failed", error: TiercelError.invalidURL(url: url)))
+                    continue
+                }
+                guard urlSet.insert(validURL).inserted else {
+                    log(.error("create dowloadTask failed", error: TiercelError.duplicateURL(url: url)))
+                    continue
+                }
+
+                var task: DownloadTask?
+                task = fetchTask(validURL)
+                if let task = task {
+                    task.update(headers, newFileName: fileName)
+                } else {
+                    task = DownloadTask(validURL,
+                                        headers: headers,
+                                        fileName: fileName,
+                                        cache: cache,
+                                        operationQueue: operationQueue)
+                    task?.manager = self
+                    task?.session = session
+                    updateTasks(with: .append(task!))
+                    uniqueTasks.append(task!)
                 }
             }
+            cache.storeTasks(tasks)
         }
+        uniqueTasks.forEach { start($0) }
         return uniqueTasks
     }
 }
@@ -360,32 +386,35 @@ extension SessionManager {
     public func fetchTask(_ url: URLConvertible) -> DownloadTask? {
         do {
             let validURL = try url.asURL()
-            return tasks.first { $0.url == validURL }
+            return protectedState.read { $0.taskMapper[validURL.absoluteString] }
         } catch {
+            log(.error("fetch task failed", error: TiercelError.invalidURL(url: url)))
             return nil
         }
     }
     
-    internal func fetchTask(currentURL: URLConvertible) -> DownloadTask? {
-        do {
-            let validURL = try currentURL.asURL()
-            return tasks.first { $0.currentURL == validURL }
-        } catch {
-            return nil
+    internal func mapTask(_ currentURL: URL) -> DownloadTask? {
+        protectedState.read {
+            let url = $0.urlMapper[currentURL] ?? currentURL
+            return $0.taskMapper[url.absoluteString]
         }
     }
+
     
     
     /// 开启任务
     /// 会检查存放下载完成的文件中是否存在跟fileName一样的文件
     /// 如果存在则不会开启下载，直接调用task的successHandler
     public func start(_ url: URLConvertible) {
-        operationQueue.async {
-            guard let task = self.fetchTask(url) else { return }
+        operationQueue.sync {
+            guard let task = self.fetchTask(url) else {
+                self.log(.error("can't start downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                return
+            }
             if !self.shouldCreatSession {
-                task.prepare()
+                task.prepareForDownload()
             } else {
-                task.status = .suspended
+                task.update(newStatus: .suspended)
                 if !self.waitingTasks.contains(task) {
                     self.waitingTasks.append(task)
                 }
@@ -394,11 +423,11 @@ extension SessionManager {
     }
     
     public func start(_ task: DownloadTask) {
-        operationQueue.async {
+        operationQueue.sync {
             if !self.shouldCreatSession {
-                task.prepare()
+                task.prepareForDownload()
             } else {
-                task.status = .suspended
+                task.update(newStatus: .suspended)
                 if !self.waitingTasks.contains(task) {
                     self.waitingTasks.append(task)
                 }
@@ -408,10 +437,19 @@ extension SessionManager {
 
     
     /// 暂停任务，会触发sessionDelegate的完成回调
-    public func suspend(_ url: URLConvertible, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
+    public func suspend(_ url: URLConvertible, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
-            guard let task = self.fetchTask(url) else { return }
-            task.suspend(onMainQueue: onMainQueue, handler)
+            guard let task = self.fetchTask(url) else {
+                self.log(.error("can't suspend downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                return
+            }
+            task.suspend(onMainQueue: onMainQueue, handler: handler)
+        }
+    }
+    
+    public func suspend(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
+        operationQueue.async {
+            task.suspend(onMainQueue: onMainQueue, handler: handler)
         }
     }
     
@@ -420,10 +458,19 @@ extension SessionManager {
     /// 其他状态的任务都可以被取消，被取消的任务会被移除
     /// 会删除还没有下载完成的缓存文件
     /// 会触发sessionDelegate的完成回调
-    public func cancel(_ url: URLConvertible, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
+    public func cancel(_ url: URLConvertible, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
-            guard let task = self.fetchTask(url) else { return }
-            task.cancel(onMainQueue: onMainQueue, handler)
+            guard let task = self.fetchTask(url) else {
+                self.log(.error("can't cancel downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                return
+            }
+            task.cancel(onMainQueue: onMainQueue, handler: handler)
+        }
+    }
+    
+    public func cancel(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
+        operationQueue.async {
+            task.cancel(onMainQueue: onMainQueue, handler: handler)
         }
     }
     
@@ -437,10 +484,35 @@ extension SessionManager {
     /// - Parameters:
     ///   - url: URLConvertible
     ///   - completely: 是否删除下载完成的文件
-    public func remove(_ url: URLConvertible, completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<DownloadTask>? = nil) {
+    public func remove(_ url: URLConvertible, completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
-            guard let task = self.fetchTask(url) else { return }
-            task.remove(completely: completely, onMainQueue: onMainQueue, handler)
+            guard let task = self.fetchTask(url) else {
+                self.log(.error("can't remove downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                return
+            }
+            task.remove(completely: completely, onMainQueue: onMainQueue, handler: handler)
+        }
+    }
+    
+    public func remove(_ task: DownloadTask, completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
+        operationQueue.async {
+            task.remove(completely: completely, onMainQueue: onMainQueue, handler: handler)
+        }
+    }
+    
+    public func moveTask(at sourceIndex: Int, to destinationIndex: Int) {
+        operationQueue.sync {
+            let range = (0..<tasks.count)
+            guard range.contains(sourceIndex) && range.contains(destinationIndex) else {
+                log(.error("move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)",
+                                error: TiercelError.indexOutOfRange))
+                return
+            }
+            protectedState.write {
+                let task = $0.tasks[sourceIndex]
+                $0.tasks.remove(at: sourceIndex)
+                $0.tasks.insert(task, at: destinationIndex)
+            }
         }
     }
     
@@ -455,7 +527,7 @@ extension SessionManager {
         }
     }
     
-    public func totalSuspend(onMainQueue: Bool = true, _ handler: Handler<SessionManager>? = nil) {
+    public func totalSuspend(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status == .running || self.status == .waiting else { return }
             self.status = .willSuspend
@@ -465,7 +537,7 @@ extension SessionManager {
 
     }
     
-    public func totalCancel(onMainQueue: Bool = true, _ handler: Handler<SessionManager>? = nil) {
+    public func totalCancel(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status != .succeeded && self.status != .canceled else { return }
             self.status = .willCancel
@@ -474,7 +546,7 @@ extension SessionManager {
         }
     }
     
-    public func totalRemove(completely: Bool = false, onMainQueue: Bool = true, _ handler: Handler<SessionManager>? = nil) {
+    public func totalRemove(completely: Bool = false, onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status != .removed else { return }
             self.status = .willRemove
@@ -482,11 +554,47 @@ extension SessionManager {
             self.tasks.forEach { $0.remove(completely: completely) }
         }
     }
+    
+    public func tasksSort(by areInIncreasingOrder: (DownloadTask, DownloadTask) throws -> Bool) rethrows {
+        try operationQueue.sync {
+            try protectedState.write {
+                try $0.tasks.sort(by: areInIncreasingOrder)
+            }
+        }
+    }
 }
 
 
 // MARK: - status handle
 extension SessionManager {
+
+    private enum TasksUpdateAction {
+        case append(DownloadTask)
+        case remove(DownloadTask)
+    }
+
+    private func updateTasks(with action: TasksUpdateAction) {
+        switch action {
+        case let .append(task):
+            protectedState.write { state in
+                state.tasks.append(task)
+                state.taskMapper[task.url.absoluteString] = task
+                state.urlMapper[task.currentURL] = task.url
+            }
+        case let .remove(task):
+            protectedState.write { state in
+                state.tasks.removeAll {
+                    $0.url.absoluteString == task.url.absoluteString
+                }
+                state.taskMapper.removeValue(forKey: task.url.absoluteString)
+                state.urlMapper.removeValue(forKey: task.currentURL)
+            }
+        }
+    }
+
+    internal func updateUrlMapper(with task: DownloadTask) {
+        protectedState.write { $0.urlMapper[task.currentURL] = task.url }
+    }
     
     private func restoreStatus() {
         if self.tasks.isEmpty {
@@ -498,10 +606,9 @@ extension SessionManager {
             downloadTasks.forEach { downloadTask in
                 if downloadTask.state == .running,
                     let currentURL = downloadTask.currentRequest?.url,
-                    let task = self.fetchTask(currentURL: currentURL) {
-                    task.status = .running
+                    let task = self.mapTask(currentURL) {
+                    task.update(newStatus: .running)
                     task.sessionTask = downloadTask
-                    TiercelLog("[downloadTask] runing", identifier: self.identifier, url: task.url)
                     isRunning = true
                 }
             }
@@ -510,12 +617,46 @@ extension SessionManager {
                 self.didStart()
                 return
             }
-
-            let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
-            let isCompleted = isSucceeded ? isSucceeded : self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
             
-            if !self.shouldComplete(isCompleted, isSucceeded) {
+            if !self.shouldComplete() {
                 self.shouldSuspend()
+            }
+        }
+    }
+    
+    
+    private func shouldComplete() -> Bool {
+        
+        let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
+        let isCompleted = isSucceeded ? isSucceeded :
+                                        self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+        guard isCompleted else { return false }
+
+        if status == .succeeded || status == .failed {
+            return true
+        }
+        timeRemaining = 0
+        progressExecuter?.execute(self)
+        status = isSucceeded ? .succeeded : .failed
+        executeCompletion(isSucceeded)
+        return true
+    }
+    
+
+
+    private func shouldSuspend() {
+        let isSuspended = tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
+
+        if isSuspended {
+            if status == .suspended {
+                return
+            }
+            status = .suspended
+            executeControl()
+            executeCompletion(false)
+            if shouldCreatSession {
+                session?.invalidateAndCancel()
+                session = nil
             }
         }
     }
@@ -524,18 +665,21 @@ extension SessionManager {
         if status != .running {
             createTimer()
             status = .running
-            TiercelLog("[manager] running", identifier: identifier)
             progressExecuter?.execute(self)
         }
     }
     
     internal func updateProgress() {
+        if isControlNetworkActivityIndicator {
+            DispatchQueue.tr.executeOnMain {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            }
+        }
         progressExecuter?.execute(self)
     }
     
-    internal func didCancelOrRemove(_ url: URLConvertible) {
-        guard let task = fetchTask(url) else { return }
-        tasks.removeAll { $0.url == task.url}
+    internal func didCancelOrRemove(_ task: DownloadTask) {
+        updateTasks(with: .remove(task))
         
         // 处理使用单个任务操作移除最后一个task时，manager状态
         if tasks.isEmpty {
@@ -547,112 +691,111 @@ extension SessionManager {
             }
         }
     }
+
+    internal func storeTasks() {
+        cache.storeTasks(tasks)
+    }
     
     internal func determineStatus() {
-        cache.storeTasks(tasks)
-                
-        let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
-        let isCompleted = isSucceeded ? isSucceeded : tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+        if isControlNetworkActivityIndicator {
+            DispatchQueue.tr.executeOnMain {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            }
+        }
 
-        if shouldRemove() ||
-            shouldCancel(isSucceeded) ||
-            shouldComplete(isCompleted, isSucceeded) ||
-            shouldSuspend() {
 
-            invalidateTimer()
+        // removed
+        if status == .willRemove {
+            if tasks.isEmpty {
+                status = .removed
+                executeControl()
+                executeCompletion(false)
+                final()
+            }
             return
         }
-
-        // 运行下一个等待中的任务
-        startNextTask()
-    }
-    
-    
-    private func shouldRemove() -> Bool {
-        guard status == .willRemove else { return false }
-        guard tasks.isEmpty else { return true }
         
-        status = .removed
-        TiercelLog("[manager] removed", identifier: identifier)
-        controlExecuter?.execute(self)
-        failureExecuter?.execute(self)
-        return true
-    }
-    
-    private func shouldCancel(_ isSucceeded: Bool) -> Bool {
-        guard status == .willCancel else { return false }
+        // canceled
+        let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
         
-        guard isSucceeded else { return true }
-        status = .canceled
-        TiercelLog("[manager] canceled", identifier: identifier)
-        controlExecuter?.execute(self)
-        failureExecuter?.execute(self)
-        return true
-    }
-    
-    private func shouldComplete(_ isCompleted: Bool, _ isSucceeded: Bool) -> Bool {
-        guard isCompleted else { return false }
-
-        if status == .succeeded || status == .failed {
-            return true
+        if status == .willCancel {
+            if isSucceeded {
+                status = .canceled
+                executeControl()
+                executeCompletion(false)
+                final()
+                return
+            }
+            return
         }
-        timeRemaining = 0
-
-        progressExecuter?.execute(self)
         
-        // 成功或者失败
-        if isSucceeded {
-            status = .succeeded
-            TiercelLog("[manager] succeeded", identifier: identifier)
-            successExecuter?.execute(self)
-        } else {
-            status = .failed
-            TiercelLog("[manager] failed", identifier: identifier)
-            failureExecuter?.execute(self)
+        // completed
+        let isCompleted = isSucceeded ? isSucceeded :
+                            tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+        
+        if isCompleted {
+            if status == .succeeded || status == .failed {
+                return
+            }
+            timeRemaining = 0
+            progressExecuter?.execute(self)
+            status = isSucceeded ? .succeeded : .failed
+            executeCompletion(isSucceeded)
+            final()
+            return
         }
-        return true
-    }
-
-    @discardableResult
-    private func shouldSuspend() -> Bool {
-        let isSuspended = tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
+        
+        // suspended
+        let isSuspended = tasks.allSatisfy { $0.status == .suspended ||
+                                             $0.status == .succeeded ||
+                                             $0.status == .failed }
 
         if isSuspended {
             if status == .suspended {
-                return true
+                return
             }
             status = .suspended
-            TiercelLog("[manager] did suspend", identifier: identifier)
-            controlExecuter?.execute(self)
-            failureExecuter?.execute(self)
+            executeControl()
+            executeCompletion(false)
             if shouldCreatSession {
                 session?.invalidateAndCancel()
                 session = nil
             }
-            return true
+            final()
+            return
         }
         
         if status == .willSuspend {
-            return true
+            return
         }
         
-        return false
+        cache.storeTasks(tasks)
+        
+        // next task
+        startNextTask()
     }
+    
+    private func final() {
+        cache.storeTasks(tasks)
+        invalidateTimer()
+    }
+    
     
     private func startNextTask() {
         guard let waitingTask = tasks.first (where: { $0.status == .waiting }) else { return }
-        TiercelLog("[manager] start to download the next task", identifier: identifier)
-        waitingTask.prepare()
+        waitingTask.prepareForDownload()
     }
 }
 
-let refreshInterval: Double = 0.8
 // MARK: - info
 extension SessionManager {
+
+    static let refreshInterval: Double = 0.8
+
     private func createTimer() {
         if timer == nil {
             timer = DispatchSource.makeTimerSource(flags: .strict, queue: operationQueue)
-            timer?.schedule(deadline: .now(), repeating: refreshInterval)
+            timer?.schedule(deadline: .now(), repeating: Self.refreshInterval)
             timer?.setEventHandler(handler: { [weak self] in
                 guard let self = self else { return }
                 self.updateSpeedAndTimeRemaining()
@@ -667,51 +810,51 @@ extension SessionManager {
     }
 
     internal func updateSpeedAndTimeRemaining() {
-
-        var result: Int64 = 0
-        let interval = refreshInterval
-        tasks.forEach({ (task) in
-            if task.status == .running {
-                task.updateSpeedAndTimeRemaining(interval)
-                result += task.speed
+        let speed = tasks.reduce(Int64(0), {
+            if $1.status == .running {
+                $1.updateSpeedAndTimeRemaining(Self.refreshInterval)
+                return $0 + $1.speed
+            } else {
+                return $0
             }
         })
-        
-        speed = result
-        updateTimeRemaining()
-        
+        updateTimeRemaining(speed)
     }
     
-    private func updateTimeRemaining() {
+    private func updateTimeRemaining(_ speed: Int64) {
+        var timeRemaining: Double
         if speed == 0 {
-            self.timeRemaining = 0
+            timeRemaining = 0
         } else {
-            let timeRemaining = (Double(progress.totalUnitCount) - Double(progress.completedUnitCount)) / Double(speed)
-            self.timeRemaining = Int64(timeRemaining)
-            if timeRemaining < 1 && timeRemaining > 0.8 {
-                self.timeRemaining += 1
+            timeRemaining = (Double(progress.totalUnitCount) - Double(progress.completedUnitCount)) / Double(speed)
+            if (0.8..<1).contains(timeRemaining) {
+                timeRemaining += 1
             }
         }
+        self.speed = speed
+        self.timeRemaining = Int64(timeRemaining)
+    }
+
+
+
+    internal func log(_ type: LogType) {
+        logger.log(type)
     }
 }
 
 // MARK: - closure
 extension SessionManager {
     @discardableResult
-    public func progress(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        return operationQueue.sync {
-            progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-            return self
-        }
+    public func progress(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
+        progressExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        return self
     }
     
     @discardableResult
-    public func success(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        operationQueue.sync {
-            successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .succeeded {
+    public func success(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
+        successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if status == .succeeded  && completionExecuter == nil{
+            operationQueue.async {
                 self.successExecuter?.execute(self)
             }
         }
@@ -719,19 +862,48 @@ extension SessionManager {
     }
     
     @discardableResult
-    public func failure(onMainQueue: Bool = true, _ handler: @escaping Handler<SessionManager>) -> Self {
-        operationQueue.sync {
-            failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        }
-        operationQueue.async {
-            if self.status == .suspended ||
-                self.status == .canceled ||
-                self.status == .removed ||
-                self.status == .failed  {
+    public func failure(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
+        failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if completionExecuter == nil &&
+            (status == .suspended ||
+            status == .canceled ||
+            status == .removed ||
+            status == .failed) {
+            operationQueue.async {
                 self.failureExecuter?.execute(self)
             }
         }
         return self
+    }
+    
+    @discardableResult
+    public func completion(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
+        completionExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        if status == .suspended ||
+            status == .canceled ||
+            status == .removed ||
+            status == .succeeded ||
+            status == .failed  {
+            operationQueue.async {
+                self.completionExecuter?.execute(self)
+            }
+        }
+        return self
+    }
+    
+    private func executeCompletion(_ isSucceeded: Bool) {
+        if let completionExecuter = completionExecuter {
+            completionExecuter.execute(self)
+        } else if isSucceeded {
+            successExecuter?.execute(self)
+        } else {
+            failureExecuter?.execute(self)
+        }
+    }
+    
+    private func executeControl() {
+        controlExecuter?.execute(self)
+//        controlExecuter = nil
     }
 }
 
@@ -741,9 +913,9 @@ extension SessionManager {
     internal func didBecomeInvalidation(withError error: Error?) {
         createSession { [weak self] in
             guard let self = self else { return }
-            self.runningTasks.forEach { $0.prepare() }
+            self.runningTasks.forEach { $0.prepareForDownload() }
             self.runningTasks.removeAll()
-            self.waitingTasks.forEach { $0.prepare() }
+            self.waitingTasks.forEach { $0.prepareForDownload() }
             self.waitingTasks.removeAll()
         }
     }

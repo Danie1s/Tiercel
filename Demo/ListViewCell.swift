@@ -9,6 +9,8 @@
 import UIKit
 
 class ListViewCell: UITableViewCell {
+    
+    static let reuseIdentifier = "reuseIdentifier"
 
     @IBOutlet weak var URLStringLabel: UILabel!
     
