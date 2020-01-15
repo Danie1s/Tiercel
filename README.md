@@ -13,7 +13,7 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 
 如果你使用的开发语言是 Objective-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
 
-- [Tiercel 3](tiercel-3)
+- [Tiercel 3.0](tiercel 3.0)
 - [特性](#特性)
 - [环境要求](#环境要求)
 - [安装](#安装)
@@ -27,9 +27,9 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 
 
 
-## Tiercel 3
+## Tiercel 3.0
 
-Tiercel 3 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2 升级到 Tiercel 3 并不会很困难，强烈推荐所有开发者都进行升级，具体请查看 [迁移指南](https://github.com/Danie1s/Tiercel/wiki/%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
+Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2.0 升级到 Tiercel 3.0 并不会很困难，强烈推荐所有开发者都进行升级，具体请查看 [迁移指南](https://github.com/Danie1s/Tiercel/wiki/%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
 
 ## 特性
 
@@ -168,7 +168,7 @@ sessionManager.totalRemove(completely: false)
 
 ### 后台下载
 
-从 Tiercel 2 开始支持原生的后台下载，只要使用 Tiercel 开启了下载任务：
+从 Tiercel 2.0 开始支持原生的后台下载，只要使用 Tiercel 开启了下载任务：
 
 - 手动 Kill App，任务会暂停，重启 App 后可以恢复进度，继续下载
 - 只要不是手动 Kill App，任务都会一直在下载，例如：
@@ -220,7 +220,7 @@ public class func validateFile(_ filePath: String,
 
 ### 更多
 
-有关 Tiercel 3 的详细使用方法和升级迁移，请查看 [WiKI](https://github.com/Danie1s/Tiercel/wiki)
+有关 Tiercel 3.0 的详细使用方法和升级迁移，请查看 [WiKI](https://github.com/Danie1s/Tiercel/wiki)
 
 
 
