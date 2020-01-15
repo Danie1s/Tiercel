@@ -903,7 +903,7 @@ extension SessionManager {
     
     private func executeControl() {
         controlExecuter?.execute(self)
-//        controlExecuter = nil
+        controlExecuter = nil
     }
 }
 

@@ -32,7 +32,7 @@ public class DownloadTask: Task<DownloadTask> {
         case resumeData
     }
 
-    fileprivate var acceptableStatusCodes: Range<Int> { return 200..<300 }
+    private var acceptableStatusCodes: Range<Int> { return 200..<300 }
     
     private var _sessionTask: URLSessionDownloadTask? {
         willSet {
@@ -99,7 +99,7 @@ public class DownloadTask: Task<DownloadTask> {
         protectedDownloadState.directValue.tmpFileName
     }
 
-    fileprivate var shouldValidateFile: Bool {
+    private var shouldValidateFile: Bool {
         get { protectedDownloadState.directValue.shouldValidateFile }
         set { protectedDownloadState.write { $0.shouldValidateFile = newValue } }
     }
@@ -292,7 +292,7 @@ extension DownloadTask {
         }
     }
 
-    fileprivate func validateFile() {
+    private func validateFile() {
         guard let validateHandler = self.validateExecuter else { return }
 
         if !shouldValidateFile {

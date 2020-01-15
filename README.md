@@ -9,12 +9,15 @@
 [![Support](https://img.shields.io/badge/support-iOS%2010%2B%20-brightgreen.svg?style=flat)](https://www.apple.com/nl/ios/)
 [![License](https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat)](http://cocoapods.org/pods/Tiercel)
 
-Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持原生级别后台下载，拥有强大的任务管理功能，可以满足下载类 APP 的大部分需求。如果你的开发语言是 Objective-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
+Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持原生级别后台下载，拥有强大的任务管理功能，可以满足下载类 APP 的大部分需求。
 
+如果你使用的开发语言是 Objective-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
+
+- [Tiercel 3](tiercel-3)
 - [特性](#特性)
 - [环境要求](#环境要求)
 - [安装](#安装)
-- [Demo](#Demo)
+- [Demo](#demo)
 - [用法](#用法)
   - [基本用法](#基本用法)
   - [后台下载](#后台下载)
@@ -26,7 +29,7 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 
 ## Tiercel 3
 
-Tiercel 3 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2 升级到 Tiercel 3 并不会很困难，强烈推荐所有开发者都进行升级，请看 [迁移指南](https://github.com/Danie1s/Tiercel/wiki/%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
+Tiercel 3 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2 升级到 Tiercel 3 并不会很困难，强烈推荐所有开发者都进行升级，具体请查看 [迁移指南](https://github.com/Danie1s/Tiercel/wiki/%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
 
 ## 特性
 
@@ -98,10 +101,8 @@ Tiercel 也支持手动集成，只需把本项目文件夹中的`Tiercel`文件
 
 打开本项目文件夹中 `Tiercel.xcodeproj` ，可以直接运行 Demo
 
-<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/1.gif" width="50%" height="50%">
-
-<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/2.gif" width="50%" height="50%">
-
+<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/1.gif">
+<img src="https://raw.githubusercontent.com/Danie1s/Tiercel/master/Images/2.gif">
 
 
 ## 用法
