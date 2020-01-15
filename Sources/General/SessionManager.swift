@@ -162,12 +162,20 @@ public class SessionManager {
         set { protectedState.write { $0.speed = newValue } }
     }
 
-
+    public var speedString: String {
+        speed.tr.convertSpeedToString()
+    }
+    
+    
     public private(set) var timeRemaining: Int64 {
         get { protectedState.directValue.timeRemaining }
         set { protectedState.write { $0.timeRemaining = newValue } }
     }
 
+    public var timeRemainingString: String {
+        timeRemaining.tr.convertTimeToString()
+    }
+    
     private var progressExecuter: Executer<SessionManager>? {
         get { protectedState.directValue.progressExecuter }
         set { protectedState.write { $0.progressExecuter = newValue } }
@@ -398,7 +406,7 @@ extension SessionManager {
     /// 会检查存放下载完成的文件中是否存在跟fileName一样的文件
     /// 如果存在则不会开启下载，直接调用task的successHandler
     public func start(_ url: URLConvertible) {
-        operationQueue.async {
+        operationQueue.sync {
             guard let task = self.fetchTask(url) else {
                 self.log(.error("can't start downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
                 return
@@ -415,7 +423,7 @@ extension SessionManager {
     }
     
     public func start(_ task: DownloadTask) {
-        operationQueue.async {
+        operationQueue.sync {
             if !self.shouldCreatSession {
                 task.prepareForDownload()
             } else {
@@ -493,14 +501,14 @@ extension SessionManager {
     }
     
     public func moveTask(at sourceIndex: Int, to destinationIndex: Int) {
-        operationQueue.async {
-            let range = (0..<self.tasks.count)
+        operationQueue.sync {
+            let range = (0..<tasks.count)
             guard range.contains(sourceIndex) && range.contains(destinationIndex) else {
-                self.log(.error("move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)",
+                log(.error("move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)",
                                 error: TiercelError.indexOutOfRange))
                 return
             }
-            self.protectedState.write {
+            protectedState.write {
                 let task = $0.tasks[sourceIndex]
                 $0.tasks.remove(at: sourceIndex)
                 $0.tasks.insert(task, at: destinationIndex)
@@ -544,6 +552,14 @@ extension SessionManager {
             self.status = .willRemove
             self.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
             self.tasks.forEach { $0.remove(completely: completely) }
+        }
+    }
+    
+    public func tasksSort(by areInIncreasingOrder: (DownloadTask, DownloadTask) throws -> Bool) rethrows {
+        try operationQueue.sync {
+            try protectedState.write {
+                try $0.tasks.sort(by: areInIncreasingOrder)
+            }
         }
     }
 }
@@ -636,7 +652,7 @@ extension SessionManager {
                 return
             }
             status = .suspended
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
             if shouldCreatSession {
                 session?.invalidateAndCancel()
@@ -692,7 +708,7 @@ extension SessionManager {
         if status == .willRemove {
             if tasks.isEmpty {
                 status = .removed
-                controlExecuter?.execute(self)
+                executeControl()
                 executeCompletion(false)
                 final()
             }
@@ -705,7 +721,7 @@ extension SessionManager {
         if status == .willCancel {
             if isSucceeded {
                 status = .canceled
-                controlExecuter?.execute(self)
+                executeControl()
                 executeCompletion(false)
                 final()
                 return
@@ -739,7 +755,7 @@ extension SessionManager {
                 return
             }
             status = .suspended
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
             if shouldCreatSession {
                 session?.invalidateAndCancel()
@@ -794,15 +810,18 @@ extension SessionManager {
     }
 
     internal func updateSpeedAndTimeRemaining() {
-        speed = tasks.reduce(0, {
-            $1.updateSpeedAndTimeRemaining(Self.refreshInterval)
-            return $0 + $1.speed
-            
+        let speed = tasks.reduce(Int64(0), {
+            if $1.status == .running {
+                $1.updateSpeedAndTimeRemaining(Self.refreshInterval)
+                return $0 + $1.speed
+            } else {
+                return $0
+            }
         })
-        updateTimeRemaining()
+        updateTimeRemaining(speed)
     }
     
-    private func updateTimeRemaining() {
+    private func updateTimeRemaining(_ speed: Int64) {
         var timeRemaining: Double
         if speed == 0 {
             timeRemaining = 0
@@ -812,6 +831,7 @@ extension SessionManager {
                 timeRemaining += 1
             }
         }
+        self.speed = speed
         self.timeRemaining = Int64(timeRemaining)
     }
 
@@ -871,7 +891,7 @@ extension SessionManager {
         return self
     }
     
-    internal func executeCompletion(_ isSucceeded: Bool) {
+    private func executeCompletion(_ isSucceeded: Bool) {
         if let completionExecuter = completionExecuter {
             completionExecuter.execute(self)
         } else if isSucceeded {
@@ -879,6 +899,11 @@ extension SessionManager {
         } else {
             failureExecuter?.execute(self)
         }
+    }
+    
+    private func executeControl() {
+        controlExecuter?.execute(self)
+//        controlExecuter = nil
     }
 }
 

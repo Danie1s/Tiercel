@@ -141,16 +141,28 @@ public class Task<TaskType>: NSObject, Codable {
         get { protectedState.directValue.startDate }
         set { protectedState.write { $0.startDate = newValue } }
     }
+    
+    public var startDateString: String {
+        startDate.tr.convertTimeToDateString()
+    }
 
     public internal(set) var endDate: Double {
        get { protectedState.directValue.endDate }
        set { protectedState.write { $0.endDate = newValue } }
+    }
+    
+    public var endDateString: String {
+        endDate.tr.convertTimeToDateString()
     }
 
 
     public internal(set) var speed: Int64 {
         get { protectedState.directValue.speed }
         set { protectedState.write { $0.speed = newValue } }
+    }
+    
+    public var speedString: String {
+        speed.tr.convertSpeedToString()
     }
 
     /// 默认为url的md5加上文件扩展名
@@ -162,6 +174,10 @@ public class Task<TaskType>: NSObject, Codable {
     public internal(set) var timeRemaining: Int64 {
         get { protectedState.directValue.timeRemaining }
         set { protectedState.write { $0.timeRemaining = newValue } }
+    }
+    
+    public var timeRemainingString: String {
+        timeRemaining.tr.convertTimeToString()
     }
 
     public internal(set) var error: Error? {
@@ -196,8 +212,8 @@ public class Task<TaskType>: NSObject, Codable {
     }
 
     internal var validateExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.controlExecuter }
-        set { protectedState.write { $0.controlExecuter = newValue } }
+        get { protectedState.directValue.validateExecuter }
+        set { protectedState.write { $0.validateExecuter = newValue } }
     }
 
 

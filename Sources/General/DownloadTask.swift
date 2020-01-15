@@ -242,7 +242,7 @@ extension DownloadTask {
         if status == .waiting {
             status = .suspended
             progressExecuter?.execute(self)
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
 
             manager?.determineStatus()
@@ -258,7 +258,7 @@ extension DownloadTask {
         } else {
             status = .willCancel
             didCancelOrRemove()
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
             manager?.determineStatus()
         }
@@ -274,7 +274,7 @@ extension DownloadTask {
         } else {
             status = .willRemove
             didCancelOrRemove()
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
             manager?.determineStatus()
         }
@@ -383,11 +383,11 @@ extension DownloadTask {
         case .willSuspend:
             status = .suspended
             progressExecuter?.execute(self)
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
         case .willCancel, .willRemove:
             didCancelOrRemove()
-            controlExecuter?.execute(self)
+            executeControl()
             executeCompletion(false)
         case .failed:
             progressExecuter?.execute(self)
@@ -431,7 +431,7 @@ extension DownloadTask {
         return self
     }
     
-    internal func executeCompletion(_ isSucceeded: Bool) {
+    private func executeCompletion(_ isSucceeded: Bool) {
         if let completionExecuter = completionExecuter {
             completionExecuter.execute(self)
         } else if isSucceeded {
@@ -439,6 +439,11 @@ extension DownloadTask {
         } else {
             failureExecuter?.execute(self)
         }
+    }
+    
+    private func executeControl() {
+        controlExecuter?.execute(self)
+        controlExecuter = nil
     }
 }
 
@@ -463,14 +468,14 @@ extension DownloadTask {
         let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
 
         if dataCount > lastData {
-            speed = Int64(Double(dataCount - lastData) / interval)
-            updateTimeRemaining()
+            let speed = Int64(Double(dataCount - lastData) / interval)
+            updateTimeRemaining(speed)
         }
         progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
 
     }
 
-    private func updateTimeRemaining() {
+    private func updateTimeRemaining(_ speed: Int64) {
         var timeRemaining: Double
         if speed == 0 {
             timeRemaining = 0
@@ -480,6 +485,7 @@ extension DownloadTask {
                 timeRemaining += 1
             }
         }
+        self.speed = speed
         self.timeRemaining = Int64(timeRemaining)
     }
 }

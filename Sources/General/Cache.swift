@@ -46,7 +46,7 @@ public class Cache {
     
     private let decoder = PropertyListDecoder()
     
-    private static func defaultDiskCachePathClosure(_ cacheName: String) -> String {
+    public static func defaultDiskCachePathClosure(_ cacheName: String) -> String {
         let dstPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
         return (dstPath as NSString).appendingPathComponent(cacheName)
     }
@@ -97,11 +97,11 @@ extension Cache {
                 try fileManager.createDirectory(atPath: downloadPath, withIntermediateDirectories: true, attributes: nil)
             } catch  {
                 manager?.log(.error("create directory failed",
-                error: TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadPath,
-                                                                              error: error))))
+                                    error: TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadPath,
+                                                                                                  error: error))))
             }
         }
-
+        
         if !fileManager.fileExists(atPath: downloadTmpPath) {
             do {
                 try fileManager.createDirectory(atPath: downloadTmpPath, withIntermediateDirectories: true, attributes: nil)
@@ -164,7 +164,7 @@ extension Cache {
     
     
     
-    public func clearDiskCache(onMainQueue: Bool = true, _ handler: Handler<Cache>? = nil) {
+    public func clearDiskCache(onMainQueue: Bool = true, handler: Handler<Cache>? = nil) {
         ioQueue.async {
             guard self.fileManager.fileExists(atPath: self.downloadPath) else { return }
             do {

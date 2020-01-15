@@ -32,10 +32,10 @@ class DownloadTaskCell: UITableViewCell {
     func updateProgress(_ task: DownloadTask) {
         progressView.progress = Float(task.progress.fractionCompleted)
         bytesLabel.text = "\(task.progress.completedUnitCount.tr.convertBytesToString())/\(task.progress.totalUnitCount.tr.convertBytesToString())"
-        speedLabel.text = task.speed.tr.convertSpeedToString()
-        timeRemainingLabel.text = "剩余时间：\(task.timeRemaining.tr.convertTimeToString())"
-        startDateLabel.text = "开始时间：\(task.startDate.tr.convertTimeToDateString())"
-        endDateLabel.text = "结束时间：\(task.endDate.tr.convertTimeToDateString())"
+        speedLabel.text = task.speedString
+        timeRemainingLabel.text = "剩余时间：\(task.timeRemainingString)"
+        startDateLabel.text = "开始时间：\(task.startDateString)"
+        endDateLabel.text = "结束时间：\(task.endDateString)"
     }
 
 }

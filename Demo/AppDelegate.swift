@@ -21,7 +21,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var sessionManager2: SessionManager = {
         var configuration = SessionConfiguration()
         configuration.allowsCellularAccess = true
-        let manager = SessionManager("ViewController2", configuration: configuration, operationQueue: DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue"))
+        let path = Cache.defaultDiskCachePathClosure("Test")
+        let cacahe = Cache("ViewController2", downloadPath: path)
+        let manager = SessionManager("ViewController2", configuration: configuration, cache: cacahe, operationQueue: DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue"))
         return manager
     }()
     

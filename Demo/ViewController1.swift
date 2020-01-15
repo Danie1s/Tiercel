@@ -27,8 +27,22 @@ class ViewController1: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let task = sessionManager.tasks.safeObject(at: 0) {
-            updateUI(task)
+        sessionManager.tasks.safeObject(at: 0)?.progress { [weak self] (task) in
+            self?.updateUI(task)
+        }.completion { [weak self] (task) in
+            self?.updateUI(task)
+            if task.status == .succeeded {
+                // 下载成功
+            } else {
+                // 其他状态
+            }
+        }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5) { [weak self] (task) in
+            self?.updateUI(task)
+            if task.validation == .correct {
+                // 文件正确
+            } else {
+                // 文件错误
+            }
         }
     }
 
@@ -36,10 +50,10 @@ class ViewController1: UIViewController {
         let per = task.progress.fractionCompleted
         progressLabel.text = "progress： \(String(format: "%.2f", per * 100))%"
         progressView.progress = Float(per)
-        speedLabel.text = "speed： \(task.speed.tr.convertSpeedToString())"
-        timeRemainingLabel.text = "剩余时间： \(task.timeRemaining.tr.convertTimeToString())"
-        startDateLabel.text = "开始时间： \(task.startDate.tr.convertTimeToDateString())"
-        endDateLabel.text = "结束时间： \(task.endDate.tr.convertTimeToDateString())"
+        speedLabel.text = "speed： \(task.speedString)"
+        timeRemainingLabel.text = "剩余时间： \(task.timeRemainingString)"
+        startDateLabel.text = "开始时间： \(task.startDateString)"
+        endDateLabel.text = "结束时间： \(task.endDateString)"
         var validation: String
         switch task.validation {
         case .unkown:

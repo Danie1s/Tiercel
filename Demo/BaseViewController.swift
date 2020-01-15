@@ -66,8 +66,8 @@ class BaseViewController: UIViewController {
     func updateUI() {
         guard let downloadManager = sessionManager else { return  }
         totalTasksLabel.text = "总任务：\(downloadManager.succeededTasks.count)/\(downloadManager.tasks.count)"
-        totalSpeedLabel.text = "总速度：\(downloadManager.speed.tr.convertSpeedToString())"
-        timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemaining.tr.convertTimeToString())"
+        totalSpeedLabel.text = "总速度：\(downloadManager.speedString)"
+        timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemainingString)"
         let per = String(format: "%.2f", downloadManager.progress.fractionCompleted)
         totalProgressLabel.text = "总进度： \(per)"
 
@@ -86,7 +86,6 @@ class BaseViewController: UIViewController {
             self?.updateUI()
             
         }.completion { [weak self] (task) in
-            self?.tableView.reloadData()
             self?.updateUI()
             if task.status == .succeeded {
                 // 下载成功
@@ -104,15 +103,21 @@ extension BaseViewController {
     }
 
     @IBAction func totalSuspend(_ sender: Any) {
-        sessionManager.totalSuspend()
+        sessionManager.totalSuspend() { [weak self] _ in
+            self?.tableView.reloadData()
+        }
     }
 
     @IBAction func totalCancel(_ sender: Any) {
-        sessionManager.totalCancel()
+        sessionManager.totalCancel() { [weak self] _ in
+            self?.tableView.reloadData()
+        }
     }
 
     @IBAction func totalDelete(_ sender: Any) {
-        sessionManager.totalRemove(completely: false)
+        sessionManager.totalRemove(completely: false) { [weak self] _ in
+            self?.tableView.reloadData()
+        }
     }
 
     @IBAction func clearDisk(_ sender: Any) {
@@ -237,7 +242,6 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         sessionManager.moveTask(at: sourceIndexPath.row, to: destinationIndexPath.row)
-        tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
