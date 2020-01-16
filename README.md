@@ -194,7 +194,7 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 
 ### 更多
 
-有关 Tiercel 3.0 的详细使用方法和升级迁移，请查看 [WiKI](https://github.com/Danie1s/Tiercel/wiki)
+有关 Tiercel 3.0 的详细使用方法和升级迁移，请查看 [Wiki](https://github.com/Danie1s/Tiercel/wiki)
 
 
 
