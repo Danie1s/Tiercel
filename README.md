@@ -16,7 +16,7 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 - [Tiercel 3.0](#tiercel-30)
 - [特性](#特性)
 - [环境要求](#环境要求)
-- [安装](#安装)
+- [集成](#集成)
 - [Demo](#demo)
 - [用法](#用法)
   - [基本用法](#基本用法)
@@ -29,7 +29,7 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 
 ## Tiercel 3.0
 
-Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2.0 升级到 Tiercel 3.0 并不会很困难，强烈推荐所有开发者都进行升级，具体请查看 [Tiercel 3.0 迁移指南](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
+Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2.0 升级到 Tiercel 3.0 是很简单的，强烈推荐所有开发者都进行升级，具体请查看 [Tiercel 3.0 迁移指南](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
 
 ## 特性
 
