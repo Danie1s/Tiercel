@@ -13,7 +13,7 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 
 如果你使用的开发语言是 Objective-C ，可以使用 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 进行桥接
 
-- [Tiercel 3.0](tiercel 3.0)
+- [Tiercel 3.0](#tiercel-30)
 - [特性](#特性)
 - [环境要求](#环境要求)
 - [安装](#安装)
@@ -29,7 +29,7 @@ Tiercel 是一个简单易用、功能丰富的纯 Swift 下载框架，支持�
 
 ## Tiercel 3.0
 
-Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2.0 升级到 Tiercel 3.0 并不会很困难，强烈推荐所有开发者都进行升级，具体请查看 [迁移指南](https://github.com/Danie1s/Tiercel/wiki/%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
+Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了更多方便的 API。从 Tiercel 2.0 升级到 Tiercel 3.0 并不会很困难，强烈推荐所有开发者都进行升级，具体请查看 [Tiercel 3.0 迁移指南](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
 
 ## 特性
 
@@ -40,6 +40,8 @@ Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了�
 - [x] 每个下载模块拥有单独的管理者，可以对总任务进行操作和管理
 - [x] 支持批量操作
 - [x] 内置了下载速度、剩余时间等常见的下载信息
+- [x] 支持自定义日志
+- [x] 支持下载任务排序
 - [x] 链式语法调用
 - [x] 支持控制下载任务的最大并发数
 - [x] 支持文件校验
@@ -115,11 +117,11 @@ Tiercel 也支持手动集成，只需把本项目文件夹中的`Tiercel`文件
 // 创建下载任务并且开启下载，同时返回可选类型的DownloadTask实例，如果url无效，则返回nil
 let task = sessionManager.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
 
-// 批量创建下载任务并且开启下载，返回有效url对应的任务数组，url需要跟fileNames一一对应
+// 批量创建下载任务并且开启下载，返回有效url对应的任务数组，urls需要跟fileNames一一对应
 let tasks = sessionManager.multiDownload(URLStrings)
 ```
 
-如果需要设置回调
+可以对任务设置状态回调
 
 ```swift
 let task = sessionManager.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
@@ -134,34 +136,22 @@ task?.progress(onMainQueue: true, { (task) in
 }
 ```
 
-下载任务的管理和操作。**在 Tiercel 中，URL 是下载任务的唯一标识，如果需要对下载任务进行操作，则使用SessionManager 实例对 URL 进行操作。** 暂停下载、取消下载、移除下载的操作可以添加回调，并且可以选择是否在主线程上执行该回调。
+可以通过 URL 对下载任务进行操作，也可以直接操作下载任务
 
 ```swift
-let URLString = "http://api.gfs100.cn/upload/20171219/201712191530562229.mp4"
+let URLString = "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg"
 
-// 创建下载任务并且开启下载，同时返回可选类型的DownloadTask实例，如果url无效，则返回nil
-let task = sessionManager.download(URLString)
-// 根据URLString查找下载任务，返回可选类型的DownloadTask实例，如果不存在，则返回nil
-let task = sessionManager.fetchTask(URLString)
-
-// 开始下载
-// 如果调用suspend暂停了下载，可以调用这个方法继续下载
+// 通过 URL 对下载任务进行操作
 sessionManager.start(URLString)
-
-// 暂停下载
 sessionManager.suspend(URLString)
-
-// 取消下载，没有下载完成的任务会被移除，不保留缓存，已经下载完成的不受影响
 sessionManager.cancel(URLString)
-
-// 移除下载，任何状态的任务都会被移除，没有下载完成的缓存文件会被删除，可以选择是否保留已经下载完成的文件
 sessionManager.remove(URLString, completely: false)
 
-// 除了可以对单个任务进行操作，TRManager也提供了对所有任务同时操作的API
-sessionManager.totalStart()
-sessionManager.totalSuspend()
-sessionManager.totalCancel()
-sessionManager.totalRemove(completely: false)
+// 直接对下载任务进行操作
+sessionManager.start(task)
+sessionManager.suspend(task)
+sessionManager.cancel(task)
+sessionManager.remove(task, completely: false)
 ```
 
 
@@ -176,7 +166,7 @@ sessionManager.totalRemove(completely: false)
   - App 崩溃或者被系统关闭
   - 重启手机
 
-如果想了解后台下载的细节和注意事项，可以看这篇文章：[iOS原生级别后台下载详解](https://juejin.im/post/5c4ed0b0e51d4511dc730799)
+如果想了解后台下载的细节和注意事项，可以查看：[iOS 原生级别后台下载详解](https://github.com/Danie1s/Tiercel/wiki/iOS-%E5%8E%9F%E7%94%9F%E7%BA%A7%E5%88%AB%E5%90%8E%E5%8F%B0%E4%B8%8B%E8%BD%BD%E8%AF%A6%E8%A7%A3)
 
 
 
@@ -200,23 +190,7 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 }
 ```
 
-FileChecksumHelper 是文件校验的工具类，可以直接使用它对已经存在的文件进行校验
 
-```swift
-/// 对文件进行校验，是在子线程进行的
-///
-/// - Parameters:
-///   - filePath: 文件路径
-///   - verificationCode: 文件的Hash值
-///   - verificationType: Hash类型
-///   - completion: 完成回调, 在子线程运行
-public class func validateFile(_ filePath: String, 
-                               code: String, 
-                               type: FileVerificationType, 
-                               _ completion: @escaping (Bool) -> ()) {
-    
-}
-```
 
 ### 更多
 
