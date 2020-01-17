@@ -462,13 +462,13 @@ extension DownloadTask {
 // MARK: - info
 extension DownloadTask {
 
-    internal func updateSpeedAndTimeRemaining(_ interval: TimeInterval) {
+    internal func updateSpeedAndTimeRemaining() {
 
         let dataCount = progress.completedUnitCount
         let lastData: Int64 = progress.userInfo[.fileCompletedCountKey] as? Int64 ?? 0
 
         if dataCount > lastData {
-            let speed = Int64(Double(dataCount - lastData) / interval)
+            let speed = dataCount - lastData
             updateTimeRemaining(speed)
         }
         progress.setUserInfoObject(dataCount, forKey: .fileCompletedCountKey)
@@ -485,8 +485,10 @@ extension DownloadTask {
                 timeRemaining += 1
             }
         }
-        self.speed = speed
-        self.timeRemaining = Int64(timeRemaining)
+        protectedState.write {
+            $0.speed = speed
+            $0.timeRemaining = Int64(timeRemaining)
+        }
     }
 }
 

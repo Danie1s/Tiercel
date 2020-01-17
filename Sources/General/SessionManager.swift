@@ -508,6 +508,9 @@ extension SessionManager {
                                 error: TiercelError.indexOutOfRange))
                 return
             }
+            if sourceIndex == destinationIndex {
+                return
+            }
             protectedState.write {
                 let task = $0.tasks[sourceIndex]
                 $0.tasks.remove(at: sourceIndex)
@@ -790,7 +793,7 @@ extension SessionManager {
 // MARK: - info
 extension SessionManager {
 
-    static let refreshInterval: Double = 0.8
+    static let refreshInterval: Double = 1
 
     private func createTimer() {
         if timer == nil {
@@ -812,7 +815,7 @@ extension SessionManager {
     internal func updateSpeedAndTimeRemaining() {
         let speed = tasks.reduce(Int64(0), {
             if $1.status == .running {
-                $1.updateSpeedAndTimeRemaining(Self.refreshInterval)
+                $1.updateSpeedAndTimeRemaining()
                 return $0 + $1.speed
             } else {
                 return $0
@@ -831,8 +834,10 @@ extension SessionManager {
                 timeRemaining += 1
             }
         }
-        self.speed = speed
-        self.timeRemaining = Int64(timeRemaining)
+        protectedState.write {
+            $0.speed = speed
+            $0.timeRemaining = Int64(timeRemaining)
+        }
     }
 
 
