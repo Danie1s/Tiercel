@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Tiercel'
-  s.version          = '3.0.0'
+  s.version          = '3.1.0'
   s.swift_version   = '5.0'
   s.summary          = 'Tiercel is a lightweight, pure-Swift download framework.'
 

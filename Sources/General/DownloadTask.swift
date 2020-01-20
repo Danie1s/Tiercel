@@ -439,6 +439,7 @@ extension DownloadTask {
         } else {
             failureExecuter?.execute(self)
         }
+        NotificationCenter.default.postNotification(name: DownloadTask.didCompleteNotification, downloadTask: self)
     }
     
     private func executeControl() {
@@ -499,6 +500,7 @@ extension DownloadTask {
         progress.totalUnitCount = totalBytesExpectedToWrite
         progressExecuter?.execute(self)
         manager?.updateProgress()
+        NotificationCenter.default.postNotification(name: DownloadTask.runningNotification, downloadTask: self)
     }
     
     

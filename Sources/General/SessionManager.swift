@@ -370,8 +370,8 @@ extension SessionManager {
                     task?.manager = self
                     task?.session = session
                     updateTasks(with: .append(task!))
-                    uniqueTasks.append(task!)
                 }
+                uniqueTasks.append(task!)
             }
             cache.storeTasks(tasks)
         }
@@ -679,6 +679,7 @@ extension SessionManager {
             }
         }
         progressExecuter?.execute(self)
+        NotificationCenter.default.postNotification(name: SessionManager.runningNotification, sessionManager: self)
     }
     
     internal func didCancelOrRemove(_ task: DownloadTask) {
@@ -758,11 +759,12 @@ extension SessionManager {
                 return
             }
             status = .suspended
-            executeControl()
-            executeCompletion(false)
             if shouldCreatSession {
                 session?.invalidateAndCancel()
                 session = nil
+            } else {
+                executeControl()
+                executeCompletion(false)
             }
             final()
             return
@@ -904,6 +906,7 @@ extension SessionManager {
         } else {
             failureExecuter?.execute(self)
         }
+        NotificationCenter.default.postNotification(name: SessionManager.didCompleteNotification, sessionManager: self)
     }
     
     private func executeControl() {
