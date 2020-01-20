@@ -126,10 +126,10 @@ let tasks = sessionManager.multiDownload(URLStrings)
 ```swift
 let task = sessionManager.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
 
-task?.progress(onMainQueue: true, { (task) in
+task?.progress(onMainQueue: true) { (task) in
     let progress = task.progress.fractionCompleted
     print("下载中, 进度：\(progress)")
-}).success { (task) in
+}.success { (task) in
     print("下载完成")
 }.failure { (task) in
     print("下载失败")
