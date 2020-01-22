@@ -26,16 +26,17 @@
 
 import UIKit
 
-internal let NSURLSessionResumeInfoVersion = "NSURLSessionResumeInfoVersion"
-internal let NSURLSessionResumeCurrentRequest = "NSURLSessionResumeCurrentRequest"
-internal let NSURLSessionResumeOriginalRequest = "NSURLSessionResumeOriginalRequest"
-internal let NSURLSessionResumeByteRange = "NSURLSessionResumeByteRange"
-internal let NSURLSessionResumeInfoTempFileName = "NSURLSessionResumeInfoTempFileName"
-internal let NSURLSessionResumeInfoLocalPath = "NSURLSessionResumeInfoLocalPath"
-internal let NSURLSessionResumeBytesReceived = "NSURLSessionResumeBytesReceived"
-
 
 internal enum ResumeDataHelper {
+    
+    static let infoVersionKey = "NSURLSessionResumeInfoVersion"
+    static let currentRequestKey = "NSURLSessionResumeCurrentRequest"
+    static let originalRequestKey = "NSURLSessionResumeOriginalRequest"
+    static let resumeByteRangeKey = "NSURLSessionResumeByteRange"
+    static let infoTempFileNameKey = "NSURLSessionResumeInfoTempFileName"
+    static let infoLocalPathKey = "NSURLSessionResumeInfoLocalPath"
+    static let bytesReceivedKey = "NSURLSessionResumeBytesReceived"
+    static let archiveRootObjectKey = "NSKeyedArchiveRootObjectKey"
     
     internal static func handleResumeData(_ data: Data) -> Data? {
         if #available(iOS 11.3, *) {
@@ -60,9 +61,10 @@ internal enum ResumeDataHelper {
     /// - Returns:
     private static func deleteResumeByteRange(_ data: Data) -> Data? {
         guard let resumeDictionary = getResumeDictionary(data) else { return nil }
-        resumeDictionary.removeObject(forKey: NSURLSessionResumeByteRange)
-        let result = try? PropertyListSerialization.data(fromPropertyList: resumeDictionary, format: PropertyListSerialization.PropertyListFormat.xml, options: PropertyListSerialization.WriteOptions())
-        return result
+        resumeDictionary.removeObject(forKey: resumeByteRangeKey)
+        return try? PropertyListSerialization.data(fromPropertyList: resumeDictionary,
+                                                         format: PropertyListSerialization.PropertyListFormat.xml,
+                                                         options: PropertyListSerialization.WriteOptions())
     }
     
     
@@ -73,11 +75,16 @@ internal enum ResumeDataHelper {
     private static func correctResumeData(_ data: Data) -> Data? {
         guard let resumeDictionary = getResumeDictionary(data) else { return nil }
         
-        resumeDictionary[NSURLSessionResumeCurrentRequest] = correct(requestData: resumeDictionary[NSURLSessionResumeCurrentRequest] as? Data)
-        resumeDictionary[NSURLSessionResumeOriginalRequest] = correct(requestData: resumeDictionary[NSURLSessionResumeOriginalRequest] as? Data)
+        if let currentRequest = resumeDictionary[currentRequestKey] as? Data {
+            resumeDictionary[currentRequestKey] = correct(with: currentRequest)
+        }
+        if let originalRequest = resumeDictionary[originalRequestKey] as? Data {
+            resumeDictionary[originalRequestKey] = correct(with: originalRequest)
+        }
         
-        let result = try? PropertyListSerialization.data(fromPropertyList: resumeDictionary, format: PropertyListSerialization.PropertyListFormat.xml, options: PropertyListSerialization.WriteOptions())
-        return result
+        return try? PropertyListSerialization.data(fromPropertyList: resumeDictionary,
+                                                         format: PropertyListSerialization.PropertyListFormat.xml,
+                                                         options: PropertyListSerialization.WriteOptions())
     }
     
     
@@ -87,35 +94,44 @@ internal enum ResumeDataHelper {
     /// - Returns:
     internal static func getResumeDictionary(_ data: Data) -> NSMutableDictionary? {
         // In beta versions, resumeData is NSKeyedArchive encoded instead of plist
-        var resumeDictionary: NSMutableDictionary?
+        var object: NSDictionary?
         if #available(OSX 10.11, iOS 9.0, *) {
             let keyedUnarchiver = NSKeyedUnarchiver(forReadingWith: data)
             
             do {
-                resumeDictionary = try keyedUnarchiver.decodeTopLevelObject(of: NSMutableDictionary.self, forKey: "NSKeyedArchiveRootObjectKey") ?? nil
-                if resumeDictionary == nil {
-                    resumeDictionary = try keyedUnarchiver.decodeTopLevelObject(of: NSMutableDictionary.self, forKey: NSKeyedArchiveRootObjectKey)
+                object = try keyedUnarchiver.decodeTopLevelObject(of: NSDictionary.self, forKey: archiveRootObjectKey)
+                if object == nil {
+                    object = try keyedUnarchiver.decodeTopLevelObject(of: NSDictionary.self, forKey: NSKeyedArchiveRootObjectKey)
                 }
             } catch {}
             keyedUnarchiver.finishDecoding()
-            
         }
         
-        if resumeDictionary == nil {
+        if object == nil {
             do {
-                resumeDictionary = try PropertyListSerialization.propertyList(from: data, options: PropertyListSerialization.ReadOptions(), format: nil) as? NSMutableDictionary
+                object = try PropertyListSerialization.propertyList(from: data,
+                                                                    options: .mutableContainersAndLeaves,
+                                                                    format: nil) as? NSDictionary
             } catch {}
         }
         
-        return resumeDictionary
+        if let resumeDictionary = object as? NSMutableDictionary {
+            return resumeDictionary
+        }
+        
+        guard let resumeDictionary = object else { return nil }
+        return NSMutableDictionary(dictionary: resumeDictionary)
+
     }
     
     internal static func getTmpFileName(_ data: Data) -> String? {
-        guard let resumeDictionary = ResumeDataHelper.getResumeDictionary(data), let version = resumeDictionary[NSURLSessionResumeInfoVersion] as? Int else { return nil }
+        guard let resumeDictionary = ResumeDataHelper.getResumeDictionary(data),
+            let version = resumeDictionary[infoVersionKey] as? Int
+            else { return nil }
         if version > 1 {
-            return resumeDictionary[NSURLSessionResumeInfoTempFileName] as? String
+            return resumeDictionary[infoTempFileNameKey] as? String
         } else {
-            guard let path = resumeDictionary[NSURLSessionResumeInfoLocalPath] as? String else { return nil }
+            guard let path = resumeDictionary[infoLocalPathKey] as? String else { return nil }
             let url = URL(fileURLWithPath: path)
             return url.lastPathComponent
         }
@@ -127,49 +143,48 @@ internal enum ResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    private static func correct(requestData data: Data?) -> Data? {
-        guard let data = data else {
-            return nil
-        }
+    private static func correct(with data: Data) -> Data? {
         if NSKeyedUnarchiver.unarchiveObject(with: data) != nil {
             return data
         }
-        guard let archive = (try? PropertyListSerialization.propertyList(from: data, options: [.mutableContainersAndLeaves], format: nil)) as? NSMutableDictionary else {
-            return nil
-        }
+        guard let resumeDictionary = try? PropertyListSerialization.propertyList(from: data,
+                                                                                 options: .mutableContainersAndLeaves,
+                                                                                 format: nil) as? NSMutableDictionary
+            else { return nil }
         // Rectify weird __nsurlrequest_proto_props objects to $number pattern
         var k = 0
-        while ((archive["$objects"] as? NSArray)?[1] as? NSDictionary)?.object(forKey: "$\(k)") != nil {
+        while ((resumeDictionary["$objects"] as? NSArray)?[1] as? NSDictionary)?.object(forKey: "$\(k)") != nil {
             k += 1
         }
         var i = 0
-        while ((archive["$objects"] as? NSArray)?[1] as? NSDictionary)?.object(forKey: "__nsurlrequest_proto_prop_obj_\(i)") != nil {
-            let arr = archive["$objects"] as? NSMutableArray
+        while ((resumeDictionary["$objects"] as? NSArray)?[1] as? NSDictionary)?.object(forKey: "__nsurlrequest_proto_prop_obj_\(i)") != nil {
+            let arr = resumeDictionary["$objects"] as? NSMutableArray
             if let dic = arr?[1] as? NSMutableDictionary, let obj = dic["__nsurlrequest_proto_prop_obj_\(i)"] {
                 dic.setObject(obj, forKey: "$\(i + k)" as NSString)
                 dic.removeObject(forKey: "__nsurlrequest_proto_prop_obj_\(i)")
                 arr?[1] = dic
-                archive["$objects"] = arr
+                resumeDictionary["$objects"] = arr
             }
             i += 1
         }
-        if ((archive["$objects"] as? NSArray)?[1] as? NSDictionary)?.object(forKey: "__nsurlrequest_proto_props") != nil {
-            let arr = archive["$objects"] as? NSMutableArray
+        if ((resumeDictionary["$objects"] as? NSArray)?[1] as? NSDictionary)?.object(forKey: "__nsurlrequest_proto_props") != nil {
+            let arr = resumeDictionary["$objects"] as? NSMutableArray
             if let dic = arr?[1] as? NSMutableDictionary, let obj = dic["__nsurlrequest_proto_props"] {
                 dic.setObject(obj, forKey: "$\(i + k)" as NSString)
                 dic.removeObject(forKey: "__nsurlrequest_proto_props")
                 arr?[1] = dic
-                archive["$objects"] = arr
+                resumeDictionary["$objects"] = arr
             }
         }
 
-        if let obj = (archive["$top"] as? NSMutableDictionary)?.object(forKey: "NSKeyedArchiveRootObjectKey") as AnyObject? {
-            (archive["$top"] as? NSMutableDictionary)?.setObject(obj, forKey: NSKeyedArchiveRootObjectKey as NSString)
-            (archive["$top"] as? NSMutableDictionary)?.removeObject(forKey: "NSKeyedArchiveRootObjectKey")
+        if let obj = (resumeDictionary["$top"] as? NSMutableDictionary)?.object(forKey: archiveRootObjectKey) as AnyObject? {
+            (resumeDictionary["$top"] as? NSMutableDictionary)?.setObject(obj, forKey: NSKeyedArchiveRootObjectKey as NSString)
+            (resumeDictionary["$top"] as? NSMutableDictionary)?.removeObject(forKey: archiveRootObjectKey)
         }
         // Reencode archived object
-        let result = try? PropertyListSerialization.data(fromPropertyList: archive, format: PropertyListSerialization.PropertyListFormat.binary, options: PropertyListSerialization.WriteOptions())
-        return result
+        return try? PropertyListSerialization.data(fromPropertyList: resumeDictionary,
+                                                   format: PropertyListSerialization.PropertyListFormat.binary,
+                                                   options: PropertyListSerialization.WriteOptions())
     }
 
 }
