@@ -210,32 +210,36 @@ extension Cache {
         }
     }
 
-    internal func retrieveTmpFile(_ task: DownloadTask) {
-        ioQueue.sync {
-            guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return }
-            let path1 = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
-            let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
-            guard fileManager.fileExists(atPath: path1) else { return }
-
-            if fileManager.fileExists(atPath: path2) {
+    internal func retrieveTmpFile(_ task: DownloadTask) -> Bool {
+        return ioQueue.sync {
+            guard let tmpFileName = task.tmpFileName, !tmpFileName.isEmpty else { return false }
+            let backupFilePath = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
+            let originFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
+            let backupFileExists = fileManager.fileExists(atPath: backupFilePath)
+            let originFileExists = fileManager.fileExists(atPath: originFilePath)
+            guard backupFileExists || originFileExists else { return false }
+            
+            if originFileExists {
                 do {
-                    try fileManager.removeItem(atPath: path1)
+                    try fileManager.removeItem(atPath: backupFilePath)
                 } catch {
                     self.manager?.log(.error("retrieve tmpFile failed",
-                                             error: TiercelError.cacheError(reason: .cannotRemoveItem(path: path1,
+                                             error: TiercelError.cacheError(reason: .cannotRemoveItem(path: backupFilePath,
                                                                                                       error: error))))
                 }
             } else {
                 do {
-                    try fileManager.moveItem(atPath: path1, toPath: path2)
+                    try fileManager.moveItem(atPath: backupFilePath, toPath: originFilePath)
                 } catch {
                     self.manager?.log(.error("retrieve tmpFile failed",
-                                             error: TiercelError.cacheError(reason: .cannotMoveItem(atPath: path1,
-                                                                                                      toPath: path2,
-                                                                                                      error: error))))
+                                             error: TiercelError.cacheError(reason: .cannotMoveItem(atPath: backupFilePath,
+                                                                                                    toPath: originFilePath,
+                                                                                                    error: error))))
                 }
             }
+            return true
         }
+ 
     }
 
 

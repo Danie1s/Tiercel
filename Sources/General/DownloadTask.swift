@@ -198,8 +198,8 @@ extension DownloadTask {
 
 
     private func start() {
-        if let resumeData = resumeData {
-            cache.retrieveTmpFile(self)
+        if let resumeData = resumeData,
+            cache.retrieveTmpFile(self) {
             if #available(iOS 10.2, *) {
                 sessionTask = session?.downloadTask(withResumeData: resumeData)
             } else if #available(iOS 10.0, *) {
@@ -213,6 +213,8 @@ extension DownloadTask {
                 request.allHTTPHeaderFields = headers
             }
             sessionTask = session?.downloadTask(with: request)
+            progress.completedUnitCount = 0
+            progress.totalUnitCount = 0
         }
         let tempStartDate = startDate
         status = .running
