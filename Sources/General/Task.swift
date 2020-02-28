@@ -49,6 +49,18 @@ public class Task<TaskType>: NSObject, Codable {
         case status
         case verificationType
         case validation
+        case error
+    }
+    
+    enum CompletionType {
+        case local
+        case network(task: URLSessionTask, error: Error?)
+    }
+    
+    enum InterruptType {
+        case manual
+        case error(_ error: Error)
+        case statusCode(_ statusCode: Int)
     }
 
     public internal(set) weak var manager: SessionManager?
@@ -65,7 +77,7 @@ public class Task<TaskType>: NSObject, Codable {
         var session: URLSession?
         var headers: [String: String]?
         var verificationCode: String?
-        var verificationType: FileVerificationType = .md5
+        var verificationType: FileChecksumHelper.VerificationType = .md5
         var isRemoveCompletely: Bool = false
         var status: Status = .waiting
         var validation: Validation = .unkown
@@ -103,7 +115,7 @@ public class Task<TaskType>: NSObject, Codable {
         set { protectedState.write { $0.verificationCode = newValue } }
     }
     
-    internal var verificationType: FileVerificationType {
+    internal var verificationType: FileChecksumHelper.VerificationType {
         get { protectedState.directValue.verificationType }
         set { protectedState.write { $0.verificationType = newValue } }
     }
@@ -244,7 +256,15 @@ public class Task<TaskType>: NSObject, Codable {
         try container.encodeIfPresent(verificationCode, forKey: .verificationCode)
         try container.encode(verificationType.rawValue, forKey: .verificationType)
         try container.encode(validation.rawValue, forKey: .validation)
-        
+        if let error = error {
+            let errorData: Data
+            if #available(iOS 11.0, *) {
+                errorData = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
+            } else {
+                errorData = NSKeyedArchiver.archivedData(withRootObject: (error as NSError))
+            }
+            try container.encode(errorData, forKey: .error)
+        }
     }
     
     public required init(from decoder: Decoder) throws {
@@ -270,8 +290,15 @@ public class Task<TaskType>: NSObject, Codable {
             $0.endDate = try container.decode(Double.self, forKey: .endDate)
             $0.verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
             $0.status = Status(rawValue: statusString)!
-            $0.verificationType = FileVerificationType(rawValue: verificationTypeInt)!
+            $0.verificationType = FileChecksumHelper.VerificationType(rawValue: verificationTypeInt)!
             $0.validation = Validation(rawValue: validationType)!
+            if let errorData = try container.decodeIfPresent(Data.self, forKey: .error) {
+                if #available(iOS 11.0, *) {
+                    $0.error = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSError.self, from: errorData)
+                } else {
+                    $0.error = NSKeyedUnarchiver.unarchiveObject(with: errorData) as? NSError
+                }
+            }
         }
     }
 

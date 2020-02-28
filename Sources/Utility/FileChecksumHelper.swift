@@ -26,14 +26,15 @@
 
 import Foundation
 
-public enum FileVerificationType : Int {
-    case md5
-    case sha1
-    case sha256
-    case sha512
-}
 
 public enum FileChecksumHelper {
+    
+    public enum VerificationType : Int {
+        case md5
+        case sha1
+        case sha256
+        case sha512
+    }
     
     public enum FileVerificationError: Error {
         case codeEmpty
@@ -48,7 +49,7 @@ public enum FileChecksumHelper {
     
     public static func validateFile(_ filePath: String,
                                    code: String,
-                                   type: FileVerificationType,
+                                   type: VerificationType,
                                    completion: @escaping (Result<Bool, FileVerificationError>) -> ()) {
         if code.isEmpty {
             completion(.failure(FileVerificationError.codeEmpty))
@@ -89,8 +90,8 @@ public enum FileChecksumHelper {
 
 
 
-extension FileChecksumHelper.FileVerificationError: CustomStringConvertible {
-    public var description: String {
+extension FileChecksumHelper.FileVerificationError: LocalizedError {
+    public var errorDescription: String? {
         switch self {
         case .codeEmpty:
             return "verification code is empty"

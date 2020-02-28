@@ -15,6 +15,8 @@
 		E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14405228A95FC00B4CD6D /* URLConvertible.swift */; };
 		E1A14408228A9CA100B4CD6D /* TiercelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14407228A9CA100B4CD6D /* TiercelError.swift */; };
 		E1AC760123D5A789008ED7D0 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1AC760023D5A789008ED7D0 /* Notifications.swift */; };
+		E1BDF1FB24090B6D0059673E /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; };
+		E1BDF1FC24090B6D0059673E /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1C1DD3E206C91EF003665A9 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1C1DD3C206C91EF003665A9 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E1C1DD4A206C9241003665A9 /* DownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD44206C9241003665A9 /* DownloadTask.swift */; };
 		E1C1DD4B206C9241003665A9 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD45206C9241003665A9 /* Cache.swift */; };
@@ -35,8 +37,6 @@
 		E1C1DD75206C9385003665A9 /* DownloadTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD71206C9385003665A9 /* DownloadTaskCell.swift */; };
 		E1C1DD76206C9385003665A9 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C1DD72206C9385003665A9 /* BaseViewController.swift */; };
 		E1C1DD77206C9385003665A9 /* DownloadTaskCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E1C1DD73206C9385003665A9 /* DownloadTaskCell.xib */; };
-		E1C1DD78206C93A6003665A9 /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; };
-		E1C1DD79206C93A6003665A9 /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1C1DD39206C91EF003665A9 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1C6A3D522775C33009C0935 /* Executer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C6A3D422775C33009C0935 /* Executer.swift */; };
 		E1C6A3DA22775F23009C0935 /* OperationQueue+DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C6A3D922775F23009C0935 /* OperationQueue+DispatchQueue.swift */; };
 		E1D8EF9521F6B916004B70C5 /* FileChecksumHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EF9421F6B916004B70C5 /* FileChecksumHelper.swift */; };
@@ -48,7 +48,7 @@
 		E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */; };
 		E1D8EFA421F6D2B3004B70C5 /* Array+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */; };
 		E1D8EFA621F6D328004B70C5 /* UIDevice+Free.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */; };
-		E1F6024A226822D300B69998 /* VideoURLStrings.plist in Resources */ = {isa = PBXBuildFile; fileRef = E1F60249226822D300B69998 /* VideoURLStrings.plist */; };
+		E1DE88762400225300764C0A /* VideoURLStrings.plist in Resources */ = {isa = PBXBuildFile; fileRef = E1DE88752400225300764C0A /* VideoURLStrings.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,13 +62,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		E1C1DD7C206C93A7003665A9 /* Embed Frameworks */ = {
+		E1BDF1FD24090B6D0059673E /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E1C1DD79206C93A6003665A9 /* Tiercel.framework in Embed Frameworks */,
+				E1BDF1FC24090B6D0059673E /* Tiercel.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -118,7 +118,7 @@
 		E1D8EFA121F6CFE9004B70C5 /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
 		E1D8EFA321F6D2B3004B70C5 /* Array+Safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Safe.swift"; sourceTree = "<group>"; };
 		E1D8EFA521F6D328004B70C5 /* UIDevice+Free.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Free.swift"; sourceTree = "<group>"; };
-		E1F60249226822D300B69998 /* VideoURLStrings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = VideoURLStrings.plist; sourceTree = "<group>"; };
+		E1DE88752400225300764C0A /* VideoURLStrings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = VideoURLStrings.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,7 +133,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1C1DD78206C93A6003665A9 /* Tiercel.framework in Frameworks */,
+				E1BDF1FB24090B6D0059673E /* Tiercel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,7 +187,7 @@
 				E1C1DD5D206C92FE003665A9 /* Assets.xcassets */,
 				E1C1DD5F206C92FE003665A9 /* LaunchScreen.storyboard */,
 				E1C1DD62206C92FE003665A9 /* Info.plist */,
-				E1F60249226822D300B69998 /* VideoURLStrings.plist */,
+				E1DE88752400225300764C0A /* VideoURLStrings.plist */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -276,7 +276,7 @@
 				E1C1DD50206C92FE003665A9 /* Sources */,
 				E1C1DD51206C92FE003665A9 /* Frameworks */,
 				E1C1DD52206C92FE003665A9 /* Resources */,
-				E1C1DD7C206C93A7003665A9 /* Embed Frameworks */,
+				E1BDF1FD24090B6D0059673E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -341,7 +341,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1F6024A226822D300B69998 /* VideoURLStrings.plist in Resources */,
+				E1DE88762400225300764C0A /* VideoURLStrings.plist in Resources */,
 				E1C1DD77206C9385003665A9 /* DownloadTaskCell.xib in Resources */,
 				E1C1DD61206C92FE003665A9 /* LaunchScreen.storyboard in Resources */,
 				E1C1DD5E206C92FE003665A9 /* Assets.xcassets in Resources */,
@@ -548,6 +548,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = Y3437T5EGX;
@@ -558,10 +559,13 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 3.1.0;
+				MARKETING_VERSION = 3.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -572,7 +576,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = Y3437T5EGX;
@@ -583,10 +589,13 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 3.1.0;
+				MARKETING_VERSION = 3.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -595,11 +604,11 @@
 		E1C1DD64206C92FE003665A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Y3437T5EGX;
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -614,7 +623,6 @@
 		E1C1DD65206C92FE003665A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;

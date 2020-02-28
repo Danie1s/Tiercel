@@ -45,7 +45,8 @@ class BaseViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.tableFooterView = UIView()
-        tableView.register(UINib(nibName: "\(DownloadTaskCell.self)", bundle: nil), forCellReuseIdentifier: DownloadTaskCell.reuseIdentifier)
+        tableView.register(UINib(nibName: "\(DownloadTaskCell.self)", bundle: nil),
+                           forCellReuseIdentifier: DownloadTaskCell.reuseIdentifier)
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 164
         
@@ -53,7 +54,10 @@ class BaseViewController: UIViewController {
     }
     
     func configureNavigationItem() {
-        let editingItem = UIBarButtonItem(title: tableView.isEditing ? "完成" : "编辑", style: .plain, target: self, action: #selector(toggleEditing))
+        let editingItem = UIBarButtonItem(title: tableView.isEditing ? "完成" : "编辑",
+                                          style: .plain,
+                                          target: self,
+                                          action: #selector(toggleEditing))
         navigationItem.rightBarButtonItems = [editingItem]
     }
     
@@ -64,19 +68,16 @@ class BaseViewController: UIViewController {
     }
 
     func updateUI() {
-        guard let downloadManager = sessionManager else { return  }
-        totalTasksLabel.text = "总任务：\(downloadManager.succeededTasks.count)/\(downloadManager.tasks.count)"
-        totalSpeedLabel.text = "总速度：\(downloadManager.speedString)"
-        timeRemainingLabel.text = "剩余时间： \(downloadManager.timeRemainingString)"
-        let per = String(format: "%.2f", downloadManager.progress.fractionCompleted)
+        totalTasksLabel.text = "总任务：\(sessionManager.succeededTasks.count)/\(sessionManager.tasks.count)"
+        totalSpeedLabel.text = "总速度：\(sessionManager.speedString)"
+        timeRemainingLabel.text = "剩余时间： \(sessionManager.timeRemainingString)"
+        let per = String(format: "%.2f", sessionManager.progress.fractionCompleted)
         totalProgressLabel.text = "总进度： \(per)"
-
     }
     
     func updateSwicth() {
-        guard let downloadManager = sessionManager else { return  }
-        taskLimitSwitch.isOn = downloadManager.configuration.maxConcurrentTasksLimit < 3
-        cellularAccessSwitch.isOn = downloadManager.configuration.allowsCellularAccess
+        taskLimitSwitch.isOn = sessionManager.configuration.maxConcurrentTasksLimit < 3
+        cellularAccessSwitch.isOn = sessionManager.configuration.allowsCellularAccess
     }
 
     func setupManager() {
@@ -98,13 +99,15 @@ class BaseViewController: UIViewController {
 
 extension BaseViewController {
     @IBAction func totalStart(_ sender: Any) {
-        sessionManager.totalStart()
-        tableView.reloadData()
+        sessionManager.totalStart { [weak self] _ in
+            self?.tableView.reloadData()
+        }
     }
 
     @IBAction func totalSuspend(_ sender: Any) {
         sessionManager.totalSuspend() { [weak self] _ in
             self?.tableView.reloadData()
+
         }
     }
 
@@ -121,26 +124,21 @@ extension BaseViewController {
     }
 
     @IBAction func clearDisk(_ sender: Any) {
-        guard let downloadManager = sessionManager else { return  }
-        downloadManager.cache.clearDiskCache()
+        sessionManager.cache.clearDiskCache()
         updateUI()
     }
     
     
     @IBAction func taskLimit(_ sender: UISwitch) {
-        let isTaskLimit = sender.isOn
-        if isTaskLimit {
+        if sender.isOn {
             sessionManager.configuration.maxConcurrentTasksLimit = 2
         } else {
             sessionManager.configuration.maxConcurrentTasksLimit = Int.max
         }
-        updateSwicth()
-        
     }
     
     @IBAction func cellularAccess(_ sender: UISwitch) {
         sessionManager.configuration.allowsCellularAccess = sender.isOn
-        updateSwicth()
     }
 }
 
@@ -160,18 +158,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
 
         guard let task = sessionManager.tasks.safeObject(at: indexPath.row),
             let cell = cell as? DownloadTaskCell else { return }
-        
-        let image: UIImage
-        switch task.status {
-        case .running:
-            image = #imageLiteral(resourceName: "resume")
-        default:
-            image = #imageLiteral(resourceName: "suspend")
-        }
-        
-
-        cell.controlButton.setImage(image, for: .normal)
-        
+                
         cell.titleLabel.text = task.fileName
         
         cell.updateProgress(task)
@@ -182,26 +169,23 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
                 let task = self?.sessionManager.tasks.safeObject(at: indexPath.row)
                 else { return }
             switch task.status {
-            case .running:
-                self?.sessionManager?.suspend(task)
-            case .waiting, .suspended, .failed:
-                self?.sessionManager?.start(task)
+            case .waiting, .running:
+                self?.sessionManager.suspend(task)
+            case .suspended, .failed:
+                self?.sessionManager.start(task)
             default: break
             }
         }
 
         task.progress { [weak cell] (task) in
-                cell?.controlButton.setImage(#imageLiteral(resourceName: "resume"), for: .normal)
                 cell?.updateProgress(task)
             }
             .success { [weak cell] (task) in
-                cell?.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
                 cell?.updateProgress(task)
                 // 下载任务成功了
 
             }
             .failure { [weak cell] (task) in
-                cell?.controlButton.setImage(#imageLiteral(resourceName: "suspend"), for: .normal)
                 cell?.updateProgress(task)
                 if task.status == .suspended {
                     // 下载任务暂停了

@@ -49,7 +49,7 @@ class ViewController1: UIViewController {
     private func updateUI(_ task: DownloadTask) {
         let per = task.progress.fractionCompleted
         progressLabel.text = "progress： \(String(format: "%.2f", per * 100))%"
-        progressView.progress = Float(per)
+        progressView.observedProgress = task.progress
         speedLabel.text = "speed： \(task.speedString)"
         timeRemainingLabel.text = "剩余时间： \(task.timeRemainingString)"
         startDateLabel.text = "开始时间： \(task.startDateString)"
