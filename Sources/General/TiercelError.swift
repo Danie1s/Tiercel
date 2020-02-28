@@ -27,7 +27,7 @@
 import Foundation
 
 public enum TiercelError: Error {
-    
+        
     public enum CacheErrorReason {
         case cannotCreateDirectory(path: String, error: Error)
         case cannotRemoveItem(path: String, error: Error)
@@ -50,8 +50,8 @@ public enum TiercelError: Error {
     case cacheError(reason: CacheErrorReason)
 }
 
-extension TiercelError: CustomStringConvertible {
-    public var description: String {
+extension TiercelError: LocalizedError {
+    public var errorDescription: String? {
         switch self {
         case .unknown:
             return "unkown error"
@@ -70,15 +70,36 @@ extension TiercelError: CustomStringConvertible {
         case let .unacceptableStatusCode(code):
             return "Response status code was unacceptable: \(code)"
         case let .cacheError(reason):
-            return "\(reason)"
+            return reason.errorDescription
         }
     }
 }
 
-
-extension TiercelError.CacheErrorReason: CustomStringConvertible {
+extension TiercelError: CustomNSError {
     
-    public var description: String {
+    public static let errorDomain: String = "com.Daniels.Tiercel.Error"
+
+    public var errorCode: Int {
+        if case .unacceptableStatusCode = self {
+            return 1001
+        } else {
+            return -1
+        }
+    }
+
+    public var errorUserInfo: [String: Any] {
+        if let errorDescription = errorDescription {
+            return [NSLocalizedDescriptionKey: errorDescription]
+        } else {
+            return [String: Any]()
+        }
+        
+    }
+}
+
+extension TiercelError.CacheErrorReason {
+    
+    public var errorDescription: String? {
         switch self {
         case let .cannotCreateDirectory(path, error):
             return "can not create directory, path: \(path), underlying: \(error)"
@@ -99,6 +120,7 @@ extension TiercelError.CacheErrorReason: CustomStringConvertible {
         }
     }
 
+    
 }
 
 

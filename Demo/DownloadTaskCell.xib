@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -32,7 +32,7 @@
                         <rect key="frame" x="16" y="121" width="231" height="2"/>
                     </progressView>
                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="usv-X3-4y3">
-                        <rect key="frame" x="263" y="43" width="50" height="50"/>
+                        <rect key="frame" x="263" y="23" width="50" height="50"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="50" id="Fyj-ze-QKb"/>
                             <constraint firstAttribute="width" constant="50" id="u7N-L8-JOe"/>
@@ -66,6 +66,12 @@
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="等待中" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kwN-Ec-QjZ">
+                        <rect key="frame" x="265" y="95" width="46" height="18"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
                 <constraints>
                     <constraint firstItem="usv-X3-4y3" firstAttribute="leading" secondItem="VxF-sI-uou" secondAttribute="trailing" constant="10" id="22M-LD-TvR"/>
@@ -83,12 +89,14 @@
                     <constraint firstItem="pUI-TD-eZ0" firstAttribute="leading" secondItem="Pyb-wY-gDY" secondAttribute="trailing" constant="20" id="iVT-4t-mhx"/>
                     <constraint firstItem="pUI-TD-eZ0" firstAttribute="centerY" secondItem="Pyb-wY-gDY" secondAttribute="centerY" id="khJ-8A-xom"/>
                     <constraint firstItem="usv-X3-4y3" firstAttribute="leading" secondItem="OhP-Hb-V0O" secondAttribute="trailing" constant="10" id="lK9-FZ-51Q"/>
+                    <constraint firstItem="kwN-Ec-QjZ" firstAttribute="centerY" secondItem="pUI-TD-eZ0" secondAttribute="centerY" id="mmm-d2-gFf"/>
                     <constraint firstAttribute="trailing" secondItem="znY-KU-sa9" secondAttribute="trailing" constant="82" id="nPX-uo-1qF"/>
                     <constraint firstItem="usv-X3-4y3" firstAttribute="leading" secondItem="pUI-TD-eZ0" secondAttribute="trailing" constant="16" id="pd1-Z4-f6z"/>
-                    <constraint firstItem="usv-X3-4y3" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="qlX-UR-Lvi"/>
                     <constraint firstItem="znY-KU-sa9" firstAttribute="top" secondItem="Pyb-wY-gDY" secondAttribute="bottom" constant="8" id="qqA-8Q-Dgp"/>
                     <constraint firstItem="PIA-pT-9a5" firstAttribute="leading" secondItem="Obr-qh-YFK" secondAttribute="trailing" constant="10" id="skJ-jS-9cz"/>
+                    <constraint firstItem="kwN-Ec-QjZ" firstAttribute="centerX" secondItem="usv-X3-4y3" secondAttribute="centerX" id="uYp-IG-22X"/>
                     <constraint firstItem="PIA-pT-9a5" firstAttribute="trailing" secondItem="pUI-TD-eZ0" secondAttribute="trailing" id="va9-fh-oMg"/>
+                    <constraint firstItem="usv-X3-4y3" firstAttribute="centerY" secondItem="VxF-sI-uou" secondAttribute="centerY" id="wUj-cR-kll"/>
                     <constraint firstItem="OhP-Hb-V0O" firstAttribute="leading" secondItem="Obr-qh-YFK" secondAttribute="leading" id="zjf-gB-1F4"/>
                 </constraints>
             </tableViewCellContentView>
@@ -99,6 +107,7 @@
                 <outlet property="progressView" destination="znY-KU-sa9" id="MLX-NV-5cK"/>
                 <outlet property="speedLabel" destination="pUI-TD-eZ0" id="P7I-6L-O52"/>
                 <outlet property="startDateLabel" destination="VxF-sI-uou" id="pTT-Mr-1F3"/>
+                <outlet property="statusLabel" destination="kwN-Ec-QjZ" id="QLr-qx-dL4"/>
                 <outlet property="timeRemainingLabel" destination="PIA-pT-9a5" id="BoR-ox-aOO"/>
                 <outlet property="titleLabel" destination="Obr-qh-YFK" id="6cx-ab-1WY"/>
             </connections>

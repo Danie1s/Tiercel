@@ -73,7 +73,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
                 manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: TiercelError.fetchDownloadTaskFailed(url: currentURL)))
                 return
             }
-            downloadTask.didComplete(task: task, error: error)
+            downloadTask.didComplete(.network(task: task, error: error))
         } else {
             if let error = error {
                 if let urlError = error as? URLError,
@@ -83,7 +83,7 @@ extension SessionDelegate: URLSessionDownloadDelegate {
                         manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: error))
                         return
                     }
-                    downloadTask.didComplete(task: task, error: error)
+                    downloadTask.didComplete(.network(task: task, error: error))
                 } else {
                     manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: error))
                     return
