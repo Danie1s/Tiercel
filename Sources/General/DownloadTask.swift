@@ -46,7 +46,7 @@ public class DownloadTask: Task<DownloadTask> {
     
     internal var sessionTask: URLSessionDownloadTask? {
         get { protectedDownloadState.read { _ in _sessionTask }}
-        set { protectedDownloadState.read { _ in _sessionTask = newValue }}
+        set { protectedDownloadState.write { _ in _sessionTask = newValue }}
     }
     
 
@@ -207,6 +207,7 @@ extension DownloadTask {
             }
         }
         error = nil
+        response = nil
         start(fileExists: fileExists)
     }
 

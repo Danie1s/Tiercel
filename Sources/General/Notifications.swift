@@ -30,8 +30,7 @@ public extension DownloadTask {
 
     static let runningNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.running")
     static let didCompleteNotification = Notification.Name(rawValue: "com.Tiercel.notification.name.downloadTask.didComplete")
-    
-    
+ 
 }
 
 public extension SessionManager {
@@ -41,16 +40,18 @@ public extension SessionManager {
     
 }
 
-extension Notification {
+extension Notification: TiercelCompatible { }
+extension TiercelWrapper where Base == Notification {
     public var downloadTask: DownloadTask? {
-        return userInfo?[String.downloadTaskKey] as? DownloadTask
+        return base.userInfo?[String.downloadTaskKey] as? DownloadTask
     }
     
     public var sessionManager: SessionManager? {
-        return userInfo?[String.sessionManagerKey] as? SessionManager
+        return base.userInfo?[String.sessionManagerKey] as? SessionManager
     }
+}
 
-
+extension Notification {
     init(name: Notification.Name, downloadTask: DownloadTask) {
         self.init(name: name, object: nil, userInfo: [String.downloadTaskKey: downloadTask])
     }
