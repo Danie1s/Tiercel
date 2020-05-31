@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/Danie1s/Tiercel.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '10.0'
+  s.osx.deployment_target = '10.14'
 
   s.source_files = 'Sources/**/*.swift'
   s.requires_arc = true

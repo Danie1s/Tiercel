@@ -24,8 +24,10 @@
 //  THE SOFTWARE.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
-
 
 extension UIDevice: TiercelCompatible {}
 extension TiercelWrapper where Base: UIDevice {
@@ -46,3 +48,4 @@ extension TiercelWrapper where Base: UIDevice {
         }
     }
 }
+#endif
