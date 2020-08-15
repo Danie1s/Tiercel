@@ -24,7 +24,11 @@
 //  THE SOFTWARE.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 public class SessionManager {
     
@@ -267,7 +271,7 @@ public class SessionManager {
         sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
         sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
-        if #available(iOS 13, *) {
+        if #available(iOS 13, macOS 10.15, *) {
             sessionConfiguration.allowsConstrainedNetworkAccess = configuration.allowsConstrainedNetworkAccess
             sessionConfiguration.allowsExpensiveNetworkAccess = configuration.allowsExpensiveNetworkAccess
         }
@@ -732,7 +736,10 @@ extension SessionManager {
     internal func updateProgress() {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
+                #if os(macOS)
+                #else
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                #endif
             }
         }
         progressExecuter?.execute(self)
@@ -760,7 +767,10 @@ extension SessionManager {
     internal func determineStatus(fromRunningTask: Bool) {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
+                #if os(macOS)
+                #else
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                #endif
             }
         }
 

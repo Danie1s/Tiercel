@@ -24,7 +24,11 @@
 //  THE SOFTWARE.
 //
 
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 public class DownloadTask: Task<DownloadTask> {
     
@@ -111,10 +115,14 @@ public class DownloadTask: Task<DownloadTask> {
         if let fileName = fileName, !fileName.isEmpty {
             self.fileName = fileName
         }
+        #if os(macOS)
+        //        TODO: - didBecomeActiveNotification
+        #else
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(fixDelegateMethodError),
-                                               name: UIApplication.didBecomeActiveNotification,
-                                               object: nil)
+        selector: #selector(fixDelegateMethodError),
+        name: UIApplication.didBecomeActiveNotification,
+        object: nil)
+        #endif
     }
     
     public override func encode(to encoder: Encoder) throws {
