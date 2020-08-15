@@ -54,17 +54,17 @@ class BaseViewController: UIViewController {
     }
     
     func configureNavigationItem() {
-        let editingItem = UIBarButtonItem(title: tableView.isEditing ? "完成" : "编辑",
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "完成",
                                           style: .plain,
                                           target: self,
                                           action: #selector(toggleEditing))
-        navigationItem.rightBarButtonItems = [editingItem]
     }
     
     
     @objc func toggleEditing() {
         tableView.setEditing(!tableView.isEditing, animated: true)
-        configureNavigationItem()
+        let button = navigationItem.rightBarButtonItem!
+        button.title = tableView.isEditing ? "完成" : "编辑"
     }
 
     func updateUI() {
@@ -82,7 +82,7 @@ class BaseViewController: UIViewController {
 
     func setupManager() {
 
-        // 设置manager的回调
+        // 设置 manager 的回调
         sessionManager.progress { [weak self] (manager) in
             self?.updateUI()
             
@@ -153,7 +153,7 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 
-    // 每个cell中的状态更新，应该在willDisplay中执行
+    // 每个 cell 中的状态更新，应该在 willDisplay 中执行
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
 
         guard let task = sessionManager.tasks.safeObject(at: indexPath.row),
@@ -163,8 +163,8 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
         
         cell.updateProgress(task)
         
-        // task的闭包引用了cell，所以这里的task要用weak
         cell.tapClosure = { [weak self] cell in
+            // 由于 cell 是循环利用的，所以要在闭包里面获取正确的 indexPath，从而得到正确的 task
             guard let indexPath = self?.tableView.indexPath(for: cell),
                 let task = self?.sessionManager.tasks.safeObject(at: indexPath.row)
                 else { return }
@@ -203,10 +203,9 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
             }
     }
 
-    // 由于cell是循环利用的，不在可视范围内的cell，不应该去更新cell的状态
+    // 由于 cell 是循环利用的，不在可视范围内的 cell，不应该去更新 cell 的状态
     func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let task = sessionManager.tasks.safeObject(at: indexPath.row) else { return }
-
         task.progress { _ in }.success { _ in } .failure { _ in }
     }
     
