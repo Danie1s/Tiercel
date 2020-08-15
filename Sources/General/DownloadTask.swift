@@ -119,9 +119,9 @@ public class DownloadTask: Task<DownloadTask> {
         //        TODO: - didBecomeActiveNotification
         #else
         NotificationCenter.default.addObserver(self,
-        selector: #selector(fixDelegateMethodError),
-        name: UIApplication.didBecomeActiveNotification,
-        object: nil)
+                                               selector: #selector(fixDelegateMethodError),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
         #endif
     }
     
