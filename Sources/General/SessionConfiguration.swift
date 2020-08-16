@@ -24,11 +24,7 @@
 //  THE SOFTWARE.
 //
 
-#if os(macOS)
-import AppKit
-#else
-import UIKit
-#endif
+import Foundation
 
 public struct SessionConfiguration {
     // 请求超时时间

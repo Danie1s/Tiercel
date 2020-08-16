@@ -54,7 +54,7 @@ class BaseViewController: UIViewController {
     }
     
     func configureNavigationItem() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "完成",
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "编辑",
                                           style: .plain,
                                           target: self,
                                           action: #selector(toggleEditing))

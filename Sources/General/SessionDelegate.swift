@@ -24,11 +24,7 @@
 //  THE SOFTWARE.
 //
 
-#if os(macOS)
-import AppKit
-#else
-import UIKit
-#endif
+import Foundation
 
 internal class SessionDelegate: NSObject {
     internal weak var manager: SessionManager?
