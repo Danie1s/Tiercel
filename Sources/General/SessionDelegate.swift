@@ -24,7 +24,7 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
 internal class SessionDelegate: NSObject {
     internal weak var manager: SessionManager?
@@ -92,8 +92,5 @@ extension SessionDelegate: URLSessionDownloadDelegate {
                 manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: TiercelError.unknown))
             }
         }
-
     }
-    
-    
 }

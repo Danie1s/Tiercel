@@ -24,7 +24,7 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
 public struct SessionConfiguration {
     // 请求超时时间

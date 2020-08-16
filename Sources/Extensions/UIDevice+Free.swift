@@ -26,7 +26,6 @@
 
 import UIKit
 
-
 extension UIDevice: TiercelCompatible {}
 extension TiercelWrapper where Base: UIDevice {
     public var freeDiskSpaceInBytes: Int64 {
@@ -46,3 +45,4 @@ extension TiercelWrapper where Base: UIDevice {
         }
     }
 }
+
