@@ -1,0 +1,27 @@
+//
+//  ViewController.swift
+//  Tiercel-macOS-Demo
+//
+//  Created by Daniels on 2020/8/17.
+//  Copyright © 2020 Daniels. All rights reserved.
+//
+
+import Cocoa
+
+class ViewController: NSViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+    }
+
+    override var representedObject: Any? {
+        didSet {
+        // Update the view, if already loaded.
+        }
+    }
+
+
+}
+
