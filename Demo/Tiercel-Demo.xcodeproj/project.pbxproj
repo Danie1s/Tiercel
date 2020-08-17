@@ -11,6 +11,8 @@
 		E1BB022124EA2949007D5CDF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BB022024EA2949007D5CDF /* ViewController.swift */; };
 		E1BB022324EA294C007D5CDF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1BB022224EA294C007D5CDF /* Assets.xcassets */; };
 		E1BB022624EA294C007D5CDF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1BB022424EA294C007D5CDF /* Main.storyboard */; };
+		E1BB022C24EA9856007D5CDF /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1EBF51C24E99C9900697485 /* Tiercel.framework */; };
+		E1BB022D24EA9856007D5CDF /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1EBF51C24E99C9900697485 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1EBF4F324E9993300697485 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF4F224E9993300697485 /* AppDelegate.swift */; };
 		E1EBF4FA24E9993300697485 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4F824E9993300697485 /* Main.storyboard */; };
 		E1EBF4FC24E9993500697485 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4FB24E9993500697485 /* Assets.xcassets */; };
@@ -30,6 +32,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E1BB022E24EA9856007D5CDF /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E1BB022D24EA9856007D5CDF /* Tiercel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1EBF51F24E99C9900697485 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -75,6 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1BB022C24EA9856007D5CDF /* Tiercel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -169,6 +183,7 @@
 				E1BB021824EA2949007D5CDF /* Sources */,
 				E1BB021924EA2949007D5CDF /* Frameworks */,
 				E1BB021A24EA2949007D5CDF /* Resources */,
+				E1BB022E24EA9856007D5CDF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

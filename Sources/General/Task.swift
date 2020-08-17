@@ -258,7 +258,7 @@ public class Task<TaskType>: NSObject, Codable {
         try container.encode(validation.rawValue, forKey: .validation)
         if let error = error {
             let errorData: Data
-            if #available(iOS 11.0, *) {
+            if #available(iOS 11.0, macOS 10.13, *) {
                 errorData = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
             } else {
                 errorData = NSKeyedArchiver.archivedData(withRootObject: (error as NSError))
@@ -293,7 +293,7 @@ public class Task<TaskType>: NSObject, Codable {
             $0.verificationType = FileChecksumHelper.VerificationType(rawValue: verificationTypeInt)!
             $0.validation = Validation(rawValue: validationType)!
             if let errorData = try container.decodeIfPresent(Data.self, forKey: .error) {
-                if #available(iOS 11.0, *) {
+                if #available(iOS 11.0, macOS 10.13, *) {
                     $0.error = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSError.self, from: errorData)
                 } else {
                     $0.error = NSKeyedUnarchiver.unarchiveObject(with: errorData) as? NSError

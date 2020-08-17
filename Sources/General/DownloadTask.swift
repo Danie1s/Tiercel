@@ -24,7 +24,11 @@
 //  THE SOFTWARE.
 //
 
-import Foundation
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 public class DownloadTask: Task<DownloadTask> {
     
@@ -128,7 +132,7 @@ public class DownloadTask: Task<DownloadTask> {
         try container.encodeIfPresent(resumeData, forKey: .resumeData)
         if let response = response {
             let responseData: Data
-            if #available(iOS 11.0, *) {
+            if #available(iOS 11.0, macOS 10.13, *) {
                 responseData = try NSKeyedArchiver.archivedData(withRootObject: (response as HTTPURLResponse), requiringSecureCoding: true)
             } else {
                 responseData = NSKeyedArchiver.archivedData(withRootObject: (response as HTTPURLResponse))
@@ -143,7 +147,7 @@ public class DownloadTask: Task<DownloadTask> {
         try super.init(from: superDecoder)
         resumeData = try container.decodeIfPresent(Data.self, forKey: .resumeData)
         if let responseData = try container.decodeIfPresent(Data.self, forKey: .response) {
-            if #available(iOS 11.0, *) {
+            if #available(iOS 11.0, macOS 10.13, *) {
                 response = try? NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData)
             } else {
                 response = NSKeyedUnarchiver.unarchiveObject(with: responseData) as? HTTPURLResponse
