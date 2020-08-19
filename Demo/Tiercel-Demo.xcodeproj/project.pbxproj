@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		743D463924ED082B00BF5432 /* ViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743D463524ED078700BF5432 /* ViewController1.swift */; };
+		743D463A24ED082F00BF5432 /* ViewController1.xib in Resources */ = {isa = PBXBuildFile; fileRef = 743D463624ED078700BF5432 /* ViewController1.xib */; };
 		E1BB021F24EA2949007D5CDF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BB021E24EA2949007D5CDF /* AppDelegate.swift */; };
 		E1BB022124EA2949007D5CDF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BB022024EA2949007D5CDF /* ViewController.swift */; };
 		E1BB022324EA294C007D5CDF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1BB022224EA294C007D5CDF /* Assets.xcassets */; };
@@ -57,6 +59,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		743D463524ED078700BF5432 /* ViewController1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController1.swift; sourceTree = "<group>"; };
+		743D463624ED078700BF5432 /* ViewController1.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController1.xib; sourceTree = "<group>"; };
 		E1BB021C24EA2949007D5CDF /* Tiercel-macOS-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiercel-macOS-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1BB021E24EA2949007D5CDF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E1BB022024EA2949007D5CDF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -107,11 +111,13 @@
 			isa = PBXGroup;
 			children = (
 				E1BB021E24EA2949007D5CDF /* AppDelegate.swift */,
-				E1BB022024EA2949007D5CDF /* ViewController.swift */,
 				E1BB022224EA294C007D5CDF /* Assets.xcassets */,
-				E1BB022424EA294C007D5CDF /* Main.storyboard */,
 				E1BB022724EA294C007D5CDF /* Info.plist */,
+				E1BB022424EA294C007D5CDF /* Main.storyboard */,
 				E1BB022824EA294C007D5CDF /* Tiercel_macOS_Demo.entitlements */,
+				E1BB022024EA2949007D5CDF /* ViewController.swift */,
+				743D463524ED078700BF5432 /* ViewController1.swift */,
+				743D463624ED078700BF5432 /* ViewController1.xib */,
 			);
 			path = "Tiercel-macOS-Demo";
 			sourceTree = "<group>";
@@ -254,6 +260,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				743D463A24ED082F00BF5432 /* ViewController1.xib in Resources */,
 				E1BB022324EA294C007D5CDF /* Assets.xcassets in Resources */,
 				E1BB022624EA294C007D5CDF /* Main.storyboard in Resources */,
 			);
@@ -278,6 +285,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				743D463924ED082B00BF5432 /* ViewController1.swift in Sources */,
 				E1BB022124EA2949007D5CDF /* ViewController.swift in Sources */,
 				E1BB021F24EA2949007D5CDF /* AppDelegate.swift in Sources */,
 			);
