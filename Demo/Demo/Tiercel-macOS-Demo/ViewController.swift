@@ -23,6 +23,10 @@ class ViewController: NSViewController {
         }
     }
 
-
+    @IBAction func buttonAction1(_ sender: Any) {
+        let viewController1 = ViewController1()
+        presentAsSheet(viewController1)
+    }
+    
 }
 
