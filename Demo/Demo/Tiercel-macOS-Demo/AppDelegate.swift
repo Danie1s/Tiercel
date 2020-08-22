@@ -27,7 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     let sessionManager3 = SessionManager("ViewController3", configuration: SessionConfiguration())
     
-    let sessionManager4 = SessionManager("ViewController4", configuration: SessionConfiguration())
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application

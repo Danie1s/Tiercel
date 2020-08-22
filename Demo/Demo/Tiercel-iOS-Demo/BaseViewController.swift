@@ -41,7 +41,7 @@ class BaseViewController: UIViewController {
     }
     
     func setupUI() {
-        // tableView的设置
+        // tableView 的设置
         tableView.dataSource = self
         tableView.delegate = self
         tableView.tableFooterView = UIView()

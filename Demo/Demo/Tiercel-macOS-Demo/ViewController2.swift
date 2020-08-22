@@ -9,29 +9,15 @@
 import Cocoa
 import Tiercel
 
-class ViewController2: NSViewController {
+class ViewController2: BaseViewController {
     
-    @IBOutlet weak var collectionView: NSCollectionView!
-    @IBOutlet weak var totalTasksLabel: NSTextField!
-    @IBOutlet weak var totalSpeedLabel: NSTextField!
-    @IBOutlet weak var timeRemainingLabel: NSTextField!
-    @IBOutlet weak var totalProgressLabel: NSTextField!
-    
-    @IBOutlet weak var taskLimitSwitch: NSSwitch!
-    @IBOutlet weak var cellularAccessSwitch: NSSwitch!
-    
-    var sessionManager: SessionManager!
-    
-    var URLStrings: [String] = []
-    
+
     override func viewDidLoad() {
         
         sessionManager = appDelegate.sessionManager2
         
         super.viewDidLoad()
-        
-        setupUI()
-        
+                
         URLStrings = [
             "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Microsoft_Office_16.24.19041401_Installer.pkg",
             "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.5.2.dmg",
@@ -48,113 +34,16 @@ class ViewController2: NSViewController {
         setupManager()
         
         updateUI()
-        self.collectionView.reloadData()
+        collectionView.reloadData()
         
-    }
-    
-    
-    func setupUI() {
-        // tableView的设置
-        collectionView.register(ActivityCollectionViewItem.self, forItemWithIdentifier: NSUserInterfaceItemIdentifier(rawValue: "ActivityCollectionViewItem"))
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        configureNavigationItem()
-    }
-    
-    func configureNavigationItem() {
-        //        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "编辑",
-        //                                          style: .plain,
-        //                                          target: self,
-        //                                          action: #selector(toggleEditing))
-    }
-    
-    
-    @objc func toggleEditing() {
-        //        tableView.setEditing(!tableView.isEditing, animated: true)
-        //        let button = navigationItem.rightBarButtonItem!
-        //        button.title = tableView.isEditing ? "完成" : "编辑"
-    }
-    
-    func updateUI() {
-        totalTasksLabel.stringValue = "总任务：\(sessionManager.succeededTasks.count)/\(sessionManager.tasks.count)"
-        totalSpeedLabel.stringValue = "总速度：\(sessionManager.speedString)"
-        timeRemainingLabel.stringValue = "剩余时间： \(sessionManager.timeRemainingString)"
-        let per = String(format: "%.2f", sessionManager.progress.fractionCompleted)
-        totalProgressLabel.stringValue = "总进度： \(per)"
-    }
-    
-    func updateSwicth() {
-        taskLimitSwitch.isOn = sessionManager.configuration.maxConcurrentTasksLimit < 3
-        cellularAccessSwitch.isOn = sessionManager.configuration.allowsCellularAccess
-    }
-    
-    func setupManager() {
-        
-        // 设置 manager 的回调
-        sessionManager.progress { [weak self] (manager) in
-            self?.updateUI()
-            
-        }.completion { [weak self] (task) in
-            self?.updateUI()
-            if task.status == .succeeded {
-                // 下载成功
-            } else {
-                // 其他状态
-            }
-        }
     }
 }
 
-extension ViewController2: NSCollectionViewDataSource {
-    func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return sessionManager.tasks.count
-    }
-    
-    func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        let cell = collectionView.makeItem(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "ActivityCollectionViewItem"), for: indexPath)
-        if let c = cell as? ActivityCollectionViewItem {
-            let task = sessionManager.tasks[indexPath.item]
-            c.update(with: task)
-        }
-        return cell
-    }
-}
 
-extension ViewController2: NSCollectionViewDelegate {
-    
-}
 
 // MARK: - tap event
 extension ViewController2 {
     
-    @IBAction func totalStart(_ sender: Any) {
-        sessionManager.totalStart { [weak self] _ in
-            self?.collectionView.reloadData()
-        }
-    }
-
-    @IBAction func totalSuspend(_ sender: Any) {
-        sessionManager.totalSuspend() { [weak self] _ in
-            self?.collectionView.reloadData()
-        }
-    }
-
-    @IBAction func totalCancel(_ sender: Any) {
-        sessionManager.totalCancel() { [weak self] _ in
-            self?.collectionView.reloadData()
-        }
-    }
-
-    @IBAction func totalDelete(_ sender: Any) {
-        sessionManager.totalRemove(completely: false) { [weak self] _ in
-            self?.collectionView.reloadData()
-        }
-    }
-
-    @IBAction func clearDisk(_ sender: Any) {
-        sessionManager.cache.clearDiskCache()
-        updateUI()
-    }
 
     @IBAction func addDownloadTask(_ sender: Any) {
         let downloadURLStrings = sessionManager.tasks.map { $0.url.absoluteString }
@@ -168,15 +57,17 @@ extension ViewController2 {
         }
     }
 
-    @IBAction func deleteDownloadTask(_ sender: Any) {
+    @IBAction func deleteDownloadTask(_ sender: NSButton) {
         let count = sessionManager.tasks.count
         guard count > 0 else { return }
         let index = count - 1
         guard let task = sessionManager.tasks.safeObject(at: index) else { return }
-        // tableView 刷新、 删除 task 都是异步的，如果操作过快会导致数据不一致，所以需要限制 button 的点击
+        // collectionView 刷新、 删除 task 都是异步的，如果操作过快会导致数据不一致，所以需要限制 button 的点击
+        sender.isEnabled = false
         sessionManager.remove(task, completely: false) { [weak self] _ in
             self?.collectionView.deleteItems(at: [IndexPath(item: index, section: 0)])
             self?.updateUI()
+            sender.isEnabled = true
         }
     }
     
@@ -189,6 +80,6 @@ extension ViewController2 {
                 return task2.startDate < task1.startDate
             }
         }
-        self.collectionView.reloadData()
+        collectionView.reloadData()
     }
 }
