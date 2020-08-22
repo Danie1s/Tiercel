@@ -728,6 +728,9 @@
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" size="13" name=".PingFangSC-Regular"/>
                                         </buttonCell>
+                                        <connections>
+                                            <action selector="buttonAction2:" target="XfG-lQ-9wD" id="6ma-Py-vyF"/>
+                                        </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bDR-m8-T1n">
                                         <rect key="frame" x="-6" y="22" width="94" height="32"/>
@@ -735,6 +738,9 @@
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" size="13" name=".PingFangSC-Regular"/>
                                         </buttonCell>
+                                        <connections>
+                                            <action selector="buttonAction3:" target="XfG-lQ-9wD" id="742-gx-Vlu"/>
+                                        </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Iim-3L-dLF">
                                         <rect key="frame" x="-6" y="-7" width="120" height="32"/>
@@ -742,6 +748,9 @@
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" size="13" name=".PingFangSC-Regular"/>
                                         </buttonCell>
+                                        <connections>
+                                            <action selector="buttonAction4:" target="XfG-lQ-9wD" id="E2M-cp-evt"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <visibilityPriorities>

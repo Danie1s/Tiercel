@@ -25,8 +25,18 @@ class ViewController: NSViewController {
 
     @IBAction func buttonAction1(_ sender: Any) {
         let viewController1 = ViewController1()
-        presentAsSheet(viewController1)
+        presentAsModalWindow(viewController1)
     }
     
+    @IBAction func buttonAction2(_ sender: Any) {
+        let viewcontroller2 = ViewController2()
+        presentAsModalWindow(viewcontroller2)
+    }
+    
+    @IBAction func buttonAction3(_ sender: Any) {
+    }
+    
+    @IBAction func buttonAction4(_ sender: Any) {
+    }
 }
 

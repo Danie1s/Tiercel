@@ -7,8 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7400D1DA24F139C60087E5A1 /* ActivityCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7400D1D824F139C60087E5A1 /* ActivityCollectionViewItem.xib */; };
+		7400D1DB24F139C60087E5A1 /* ActivityCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7400D1D924F139C60087E5A1 /* ActivityCollectionViewItem.swift */; };
 		743D463924ED082B00BF5432 /* ViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743D463524ED078700BF5432 /* ViewController1.swift */; };
 		743D463A24ED082F00BF5432 /* ViewController1.xib in Resources */ = {isa = PBXBuildFile; fileRef = 743D463624ED078700BF5432 /* ViewController1.xib */; };
+		743D463D24ED122700BF5432 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 743D463B24ED122700BF5432 /* BaseViewController.swift */; };
+		743D463E24ED122700BF5432 /* BaseViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 743D463C24ED122700BF5432 /* BaseViewController.xib */; };
+		7475579B24F13D8D00A6A748 /* ViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7475579724F13D1D00A6A748 /* ViewController2.swift */; };
+		7475579C24F13D9000A6A748 /* ViewController2.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7475579824F13D1D00A6A748 /* ViewController2.xib */; };
 		E1BB021F24EA2949007D5CDF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BB021E24EA2949007D5CDF /* AppDelegate.swift */; };
 		E1BB022124EA2949007D5CDF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BB022024EA2949007D5CDF /* ViewController.swift */; };
 		E1BB022324EA294C007D5CDF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1BB022224EA294C007D5CDF /* Assets.xcassets */; };
@@ -59,8 +65,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7400D1D824F139C60087E5A1 /* ActivityCollectionViewItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ActivityCollectionViewItem.xib; sourceTree = "<group>"; };
+		7400D1D924F139C60087E5A1 /* ActivityCollectionViewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityCollectionViewItem.swift; sourceTree = "<group>"; };
 		743D463524ED078700BF5432 /* ViewController1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController1.swift; sourceTree = "<group>"; };
 		743D463624ED078700BF5432 /* ViewController1.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController1.xib; sourceTree = "<group>"; };
+		743D463B24ED122700BF5432 /* BaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
+		743D463C24ED122700BF5432 /* BaseViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BaseViewController.xib; sourceTree = "<group>"; };
+		7475579724F13D1D00A6A748 /* ViewController2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController2.swift; sourceTree = "<group>"; };
+		7475579824F13D1D00A6A748 /* ViewController2.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController2.xib; sourceTree = "<group>"; };
 		E1BB021C24EA2949007D5CDF /* Tiercel-macOS-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiercel-macOS-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1BB021E24EA2949007D5CDF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E1BB022024EA2949007D5CDF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -107,17 +119,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7400D1D724F139A20087E5A1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7400D1D924F139C60087E5A1 /* ActivityCollectionViewItem.swift */,
+				7400D1D824F139C60087E5A1 /* ActivityCollectionViewItem.xib */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		E1BB021D24EA2949007D5CDF /* Tiercel-macOS-Demo */ = {
 			isa = PBXGroup;
 			children = (
+				7400D1D724F139A20087E5A1 /* Views */,
 				E1BB021E24EA2949007D5CDF /* AppDelegate.swift */,
 				E1BB022224EA294C007D5CDF /* Assets.xcassets */,
+				743D463B24ED122700BF5432 /* BaseViewController.swift */,
+				743D463C24ED122700BF5432 /* BaseViewController.xib */,
 				E1BB022724EA294C007D5CDF /* Info.plist */,
 				E1BB022424EA294C007D5CDF /* Main.storyboard */,
 				E1BB022824EA294C007D5CDF /* Tiercel_macOS_Demo.entitlements */,
 				E1BB022024EA2949007D5CDF /* ViewController.swift */,
 				743D463524ED078700BF5432 /* ViewController1.swift */,
 				743D463624ED078700BF5432 /* ViewController1.xib */,
+				7475579724F13D1D00A6A748 /* ViewController2.swift */,
+				7475579824F13D1D00A6A748 /* ViewController2.xib */,
 			);
 			path = "Tiercel-macOS-Demo";
 			sourceTree = "<group>";
@@ -261,6 +287,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				743D463A24ED082F00BF5432 /* ViewController1.xib in Resources */,
+				7400D1DA24F139C60087E5A1 /* ActivityCollectionViewItem.xib in Resources */,
+				743D463E24ED122700BF5432 /* BaseViewController.xib in Resources */,
+				7475579C24F13D9000A6A748 /* ViewController2.xib in Resources */,
 				E1BB022324EA294C007D5CDF /* Assets.xcassets in Resources */,
 				E1BB022624EA294C007D5CDF /* Main.storyboard in Resources */,
 			);
@@ -286,8 +315,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				743D463924ED082B00BF5432 /* ViewController1.swift in Sources */,
+				743D463D24ED122700BF5432 /* BaseViewController.swift in Sources */,
 				E1BB022124EA2949007D5CDF /* ViewController.swift in Sources */,
+				7400D1DB24F139C60087E5A1 /* ActivityCollectionViewItem.swift in Sources */,
 				E1BB021F24EA2949007D5CDF /* AppDelegate.swift in Sources */,
+				7475579B24F13D8D00A6A748 /* ViewController2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
