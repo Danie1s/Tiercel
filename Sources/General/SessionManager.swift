@@ -440,6 +440,10 @@ extension SessionManager {
     
     public func start(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
+            guard let _ = self.fetchTask(task.url) else {
+                self.log(.error("can't start downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                return
+            }
             self._start(task, onMainQueue: onMainQueue, handler: handler)
         }
     }
@@ -479,6 +483,10 @@ extension SessionManager {
     
     public func suspend(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
+            guard let _ = self.fetchTask(task.url) else {
+                self.log(.error("can't suspend downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                return
+            }
             task.suspend(onMainQueue: onMainQueue, handler: handler)
         }
     }
@@ -500,6 +508,10 @@ extension SessionManager {
     
     public func cancel(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
+            guard let _ = self.fetchTask(task.url) else {
+                self.log(.error("can't cancel downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                return
+            }
             task.cancel(onMainQueue: onMainQueue, handler: handler)
         }
     }
@@ -526,6 +538,10 @@ extension SessionManager {
     
     public func remove(_ task: DownloadTask, completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
+            guard let _ = self.fetchTask(task.url) else {
+                self.log(.error("can't remove downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                return
+            }
             task.remove(completely: completely, onMainQueue: onMainQueue, handler: handler)
         }
     }
