@@ -45,7 +45,7 @@ public class SessionManager {
     public var completionHandler: (() -> Void)?
 
     public var configuration: SessionConfiguration {
-        get { protectedState.directValue.configuration }
+        get { protectedState.wrappedValue.configuration }
         set {
             operationQueue.sync {
                 protectedState.write {
@@ -98,15 +98,15 @@ public class SessionManager {
     }
     
     
-    private let protectedState: Protector<State>
+    private let protectedState: Protected<State>
 
     public var logger: Logable {
-        get { protectedState.directValue.logger }
+        get { protectedState.wrappedValue.logger }
         set { protectedState.write { $0.logger = newValue } }
     }
     
     public var isControlNetworkActivityIndicator: Bool {
-        get { protectedState.directValue.isControlNetworkActivityIndicator }
+        get { protectedState.wrappedValue.isControlNetworkActivityIndicator }
         set { protectedState.write { $0.isControlNetworkActivityIndicator = newValue } }
     }
     
@@ -116,24 +116,24 @@ public class SessionManager {
     }
     
     private var session: URLSession? {
-        get { protectedState.directValue.session }
+        get { protectedState.wrappedValue.session }
         set { protectedState.write { $0.session = newValue } }
     }
     
     private var shouldCreatSession: Bool {
-        get { protectedState.directValue.shouldCreatSession }
+        get { protectedState.wrappedValue.shouldCreatSession }
         set { protectedState.write { $0.shouldCreatSession = newValue } }
     }
 
     
     private var timer: DispatchSourceTimer? {
-        get { protectedState.directValue.timer }
+        get { protectedState.wrappedValue.timer }
         set { protectedState.write { $0.timer = newValue } }
     }
 
     
     public private(set) var status: Status {
-        get { protectedState.directValue.status }
+        get { protectedState.wrappedValue.status }
         set {
             protectedState.write { $0.status = newValue }
             if newValue == .willSuspend || newValue == .willCancel || newValue == .willRemove {
@@ -145,22 +145,22 @@ public class SessionManager {
     
     
     public private(set) var tasks: [DownloadTask] {
-        get { protectedState.directValue.tasks }
+        get { protectedState.wrappedValue.tasks }
         set { protectedState.write { $0.tasks = newValue } }
     }
     
     private var runningTasks: [DownloadTask] {
-        get { protectedState.directValue.runningTasks }
+        get { protectedState.wrappedValue.runningTasks }
         set { protectedState.write { $0.runningTasks = newValue } }
     }
     
     private var restartTasks: [DownloadTask] {
-        get { protectedState.directValue.restartTasks }
+        get { protectedState.wrappedValue.restartTasks }
         set { protectedState.write { $0.restartTasks = newValue } }
     }
 
     public private(set) var succeededTasks: [DownloadTask] {
-        get { protectedState.directValue.succeededTasks }
+        get { protectedState.wrappedValue.succeededTasks }
         set { protectedState.write { $0.succeededTasks = newValue } }
     }
 
@@ -172,7 +172,7 @@ public class SessionManager {
     }
 
     public private(set) var speed: Int64 {
-        get { protectedState.directValue.speed }
+        get { protectedState.wrappedValue.speed }
         set { protectedState.write { $0.speed = newValue } }
     }
 
@@ -182,7 +182,7 @@ public class SessionManager {
     
     
     public private(set) var timeRemaining: Int64 {
-        get { protectedState.directValue.timeRemaining }
+        get { protectedState.wrappedValue.timeRemaining }
         set { protectedState.write { $0.timeRemaining = newValue } }
     }
 
@@ -191,27 +191,27 @@ public class SessionManager {
     }
     
     private var progressExecuter: Executer<SessionManager>? {
-        get { protectedState.directValue.progressExecuter }
+        get { protectedState.wrappedValue.progressExecuter }
         set { protectedState.write { $0.progressExecuter = newValue } }
     }
     
     private var successExecuter: Executer<SessionManager>? {
-        get { protectedState.directValue.successExecuter }
+        get { protectedState.wrappedValue.successExecuter }
         set { protectedState.write { $0.successExecuter = newValue } }
     }
     
     private var failureExecuter: Executer<SessionManager>? {
-        get { protectedState.directValue.failureExecuter }
+        get { protectedState.wrappedValue.failureExecuter }
         set { protectedState.write { $0.failureExecuter = newValue } }
     }
     
     private var completionExecuter: Executer<SessionManager>? {
-        get { protectedState.directValue.completionExecuter }
+        get { protectedState.wrappedValue.completionExecuter }
         set { protectedState.write { $0.completionExecuter = newValue } }
     }
     
     private var controlExecuter: Executer<SessionManager>? {
-        get { protectedState.directValue.controlExecuter }
+        get { protectedState.wrappedValue.controlExecuter }
         set { protectedState.write { $0.controlExecuter = newValue } }
     }
 
@@ -225,7 +225,7 @@ public class SessionManager {
                                                               autoreleaseFrequency: .workItem)) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
-        protectedState = Protector(
+        protectedState = Protected(
             State(logger: logger ?? Logger(identifier: "\(bundleIdentifier).\(identifier)", option: .default),
                   configuration: configuration)
         )
@@ -792,7 +792,7 @@ extension SessionManager {
         
         // canceled
         if status == .willCancel {
-            let succeededTasksCount = protectedState.directValue.taskMapper.values.count
+            let succeededTasksCount = protectedState.wrappedValue.taskMapper.values.count
             if tasks.count == succeededTasksCount {
                 status = .canceled
                 executeControl()

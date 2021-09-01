@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		E10B78A721E73C3E00DFF2B3 /* ResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */; };
 		E10B78A821E73C3E00DFF2B3 /* SessionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */; };
-		E1438F6823C7274F00C1EC9F /* Protector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1438F6723C7274F00C1EC9F /* Protector.swift */; };
+		E1438F6823C7274F00C1EC9F /* Protected.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1438F6723C7274F00C1EC9F /* Protected.swift */; };
 		E18F465B228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */; };
 		E18F465C228B207A0086BBDF /* CodingUserInfoKey+Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */; };
 		E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A14405228A95FC00B4CD6D /* URLConvertible.swift */; };
@@ -78,7 +78,7 @@
 /* Begin PBXFileReference section */
 		E10B78A521E73C3E00DFF2B3 /* ResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumeDataHelper.swift; sourceTree = "<group>"; };
 		E10B78A621E73C3E00DFF2B3 /* SessionConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionConfiguration.swift; sourceTree = "<group>"; };
-		E1438F6723C7274F00C1EC9F /* Protector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protector.swift; sourceTree = "<group>"; };
+		E1438F6723C7274F00C1EC9F /* Protected.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protected.swift; sourceTree = "<group>"; };
 		E18F465A228B207A0086BBDF /* CodingUserInfoKey+Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+Cache.swift"; sourceTree = "<group>"; };
 		E1A14405228A95FC00B4CD6D /* URLConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConvertible.swift; sourceTree = "<group>"; };
 		E1A14407228A9CA100B4CD6D /* TiercelError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TiercelError.swift; sourceTree = "<group>"; };
@@ -222,7 +222,7 @@
 				E1C1DD49206C9241003665A9 /* SessionDelegate.swift */,
 				E1A14405228A95FC00B4CD6D /* URLConvertible.swift */,
 				E1A14407228A9CA100B4CD6D /* TiercelError.swift */,
-				E1438F6723C7274F00C1EC9F /* Protector.swift */,
+				E1438F6723C7274F00C1EC9F /* Protected.swift */,
 				E1AC760023D5A789008ED7D0 /* Notifications.swift */,
 			);
 			path = General;
@@ -378,7 +378,7 @@
 				E1C1DD4F206C9241003665A9 /* SessionDelegate.swift in Sources */,
 				E1D8EFA221F6CFE9004B70C5 /* DispatchQueue+Safe.swift in Sources */,
 				E1A14408228A9CA100B4CD6D /* TiercelError.swift in Sources */,
-				E1438F6823C7274F00C1EC9F /* Protector.swift in Sources */,
+				E1438F6823C7274F00C1EC9F /* Protected.swift in Sources */,
 				E1A14406228A95FC00B4CD6D /* URLConvertible.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -559,7 +559,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 3.2.2;
+				MARKETING_VERSION = 3.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -589,7 +589,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MARKETING_VERSION = 3.2.2;
+				MARKETING_VERSION = 3.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
