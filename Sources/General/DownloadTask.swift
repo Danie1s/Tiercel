@@ -51,7 +51,7 @@ public class DownloadTask: Task<DownloadTask> {
     
 
     public internal(set) var response: HTTPURLResponse? {
-        get { protectedDownloadState.directValue.response }
+        get { protectedDownloadState.wrappedValue.response }
         set { protectedDownloadState.write { $0.response = newValue } }
     }
     
@@ -81,20 +81,20 @@ public class DownloadTask: Task<DownloadTask> {
         var shouldValidateFile: Bool = false
     }
     
-    private let protectedDownloadState: Protector<DownloadState> = Protector(DownloadState())
+    private let protectedDownloadState: Protected<DownloadState> = Protected(DownloadState())
     
     
     private var resumeData: Data? {
-        get { protectedDownloadState.directValue.resumeData }
+        get { protectedDownloadState.wrappedValue.resumeData }
         set { protectedDownloadState.write { $0.resumeData = newValue } }
     }
     
     internal var tmpFileName: String? {
-        protectedDownloadState.directValue.tmpFileName
+        protectedDownloadState.wrappedValue.tmpFileName
     }
 
     private var shouldValidateFile: Bool {
-        get { protectedDownloadState.directValue.shouldValidateFile }
+        get { protectedDownloadState.wrappedValue.shouldValidateFile }
         set { protectedDownloadState.write { $0.shouldValidateFile = newValue } }
     }
 

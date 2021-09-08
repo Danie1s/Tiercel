@@ -26,7 +26,6 @@
 		E1EBF4AC24E9968900697485 /* Executer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49324E9968900697485 /* Executer.swift */; };
 		E1EBF4AD24E9968900697485 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49424E9968900697485 /* Common.swift */; };
 		E1EBF4AE24E9968900697485 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49524E9968900697485 /* Notifications.swift */; };
-		E1EBF4AF24E9968900697485 /* Protector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49624E9968900697485 /* Protector.swift */; };
 		E1EBF4B024E9968900697485 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49724E9968900697485 /* Cache.swift */; };
 		E1EBF4B124E9968900697485 /* TiercelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49824E9968900697485 /* TiercelError.swift */; };
 		E1EBF4B224E9968900697485 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49924E9968900697485 /* SessionManager.swift */; };
@@ -34,6 +33,7 @@
 		E1EBF4B424E9968900697485 /* SessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49B24E9968900697485 /* SessionDelegate.swift */; };
 		E1EBF4B524E9968900697485 /* ResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49D24E9968900697485 /* ResumeDataHelper.swift */; };
 		E1EBF4B624E9968900697485 /* FileChecksumHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49E24E9968900697485 /* FileChecksumHelper.swift */; };
+		E1FE924826E905E200FA3B2E /* Protected.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FE924726E905E200FA3B2E /* Protected.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,7 +69,6 @@
 		E1EBF49324E9968900697485 /* Executer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Executer.swift; sourceTree = "<group>"; };
 		E1EBF49424E9968900697485 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		E1EBF49524E9968900697485 /* Notifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
-		E1EBF49624E9968900697485 /* Protector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protector.swift; sourceTree = "<group>"; };
 		E1EBF49724E9968900697485 /* Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		E1EBF49824E9968900697485 /* TiercelError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TiercelError.swift; sourceTree = "<group>"; };
 		E1EBF49924E9968900697485 /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
@@ -77,6 +76,7 @@
 		E1EBF49B24E9968900697485 /* SessionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionDelegate.swift; sourceTree = "<group>"; };
 		E1EBF49D24E9968900697485 /* ResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumeDataHelper.swift; sourceTree = "<group>"; };
 		E1EBF49E24E9968900697485 /* FileChecksumHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileChecksumHelper.swift; sourceTree = "<group>"; };
+		E1FE924726E905E200FA3B2E /* Protected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protected.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,7 +168,7 @@
 				E1EBF49024E9968900697485 /* URLConvertible.swift */,
 				E1EBF49824E9968900697485 /* TiercelError.swift */,
 				E1EBF49524E9968900697485 /* Notifications.swift */,
-				E1EBF49624E9968900697485 /* Protector.swift */,
+				E1FE924726E905E200FA3B2E /* Protected.swift */,
 			);
 			path = General;
 			sourceTree = "<group>";
@@ -303,6 +303,7 @@
 				E1EBF4AE24E9968900697485 /* Notifications.swift in Sources */,
 				E1EBF4A024E9968900697485 /* CodingUserInfoKey+Cache.swift in Sources */,
 				E1EBF4B024E9968900697485 /* Cache.swift in Sources */,
+				E1FE924826E905E200FA3B2E /* Protected.swift in Sources */,
 				E1EBF4A124E9968900697485 /* Int64+TaskInfo.swift in Sources */,
 				E1EBF4AC24E9968900697485 /* Executer.swift in Sources */,
 				E1EBF4B624E9968900697485 /* FileChecksumHelper.swift in Sources */,
@@ -310,7 +311,6 @@
 				E1EBF4B524E9968900697485 /* ResumeDataHelper.swift in Sources */,
 				E1EBF4AB24E9968900697485 /* SessionConfiguration.swift in Sources */,
 				E1EBF4AD24E9968900697485 /* Common.swift in Sources */,
-				E1EBF4AF24E9968900697485 /* Protector.swift in Sources */,
 				E1EBF4B224E9968900697485 /* SessionManager.swift in Sources */,
 				E1EBF4B324E9968900697485 /* Task.swift in Sources */,
 				E1EBF4A224E9968900697485 /* URLSession+ResumeData.swift in Sources */,
@@ -474,7 +474,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -501,7 +501,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.1;
+				MARKETING_VERSION = 3.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

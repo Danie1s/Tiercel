@@ -1,5 +1,5 @@
 //
-//  Protector.swift
+//  Protected.swift
 //  Tiercel
 //
 //  Created by Daniels on 2020/1/9.
@@ -62,19 +62,28 @@ final public class UnfairLock {
     }
 }
 
-final public class Protector<T> {
+@propertyWrapper
+final public class Protected<T> {
+    
     private let lock = UnfairLock()
+    
     private var value: T
+    
+    public var wrappedValue: T {
+        get { lock.around { value } }
+        set { lock.around { value = newValue } }
+    }
+    
+    public var projectedValue: Protected<T> { self }
+
 
     public init(_ value: T) {
         self.value = value
     }
-
-    public var directValue: T {
-        get { return lock.around { value } }
-        set { lock.around { value = newValue } }
+    
+    public init(wrappedValue: T) {
+        value = wrappedValue
     }
-
 
     public func read<U>(_ closure: (T) throws -> U) rethrows -> U {
         return try lock.around { try closure(self.value) }
@@ -93,6 +102,7 @@ final public class Debouncer {
     
     private let queue: DispatchQueue
     
+    @Protected
     private var workItems = [String: DispatchWorkItem]()
     
     public init(queue: DispatchQueue) {
