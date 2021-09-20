@@ -100,7 +100,7 @@ final public class Debouncer {
     
     private let lock = UnfairLock()
     
-    private var queue: DispatchQueue
+    private let queue: DispatchQueue
     
     @Protected
     private var workItems = [String: DispatchWorkItem]()
@@ -132,6 +132,56 @@ final public class Debouncer {
                 queue.asyncAfter(deadline: time, execute: workItem)
             } else if let time = time as? DispatchWallTime {
                 queue.asyncAfter(wallDeadline: time, execute: workItem)
+            }
+        }
+    }
+}
+
+final public class Throttler {
+    
+    private let lock = UnfairLock()
+    
+    private let queue: DispatchQueue
+    
+    private var workItems = [String: DispatchWorkItem]()
+    
+    private let latest: Bool
+    
+    public init(queue: DispatchQueue, latest: Bool) {
+        self.queue = queue
+        self.latest = latest
+    }
+    
+    
+    public func execute(label: String, deadline: DispatchTime, execute work: @escaping @convention(block) () -> Void) {
+        execute(label: label, time: deadline, execute: work)
+    }
+    
+    
+    public func execute(label: String, wallDeadline: DispatchWallTime, execute work: @escaping @convention(block) () -> Void) {
+        execute(label: label, time: wallDeadline, execute: work)
+    }
+    
+    private func execute<T: Comparable>(label: String, time: T, execute work: @escaping @convention(block) () -> Void) {
+        lock.around {
+            let workItem = workItems[label]
+            
+            guard workItem == nil || latest else { return }
+            workItem?.cancel()
+            workItems[label] = DispatchWorkItem { [weak self] in
+                self?.workItems.removeValue(forKey: label)
+                work()
+            }
+            
+            guard workItem == nil else { return }
+            if let time = time as? DispatchTime {
+                queue.asyncAfter(deadline: time) { [weak self] in
+                    self?.workItems[label]?.perform()
+                }
+            } else if let time = time as? DispatchWallTime {
+                queue.asyncAfter(wallDeadline: time) { [weak self] in
+                    self?.workItems[label]?.perform()
+                }
             }
         }
     }

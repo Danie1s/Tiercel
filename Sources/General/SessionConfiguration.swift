@@ -24,26 +24,27 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
 public struct SessionConfiguration {
     // 请求超时时间
     public var timeoutIntervalForRequest: TimeInterval = 60.0
+    
+    private static var MaxConcurrentTasksLimit: Int = {
+        if #available(iOS 11.0, *) {
+            return 6
+        } else {
+            return 3
+        }
+    }()
 
     // 最大并发数
     private var _maxConcurrentTasksLimit: Int = MaxConcurrentTasksLimit
     public var maxConcurrentTasksLimit: Int {
-        get {
-            return _maxConcurrentTasksLimit
-        }
+        get { _maxConcurrentTasksLimit }
         set {
-            if newValue > MaxConcurrentTasksLimit {
-                _maxConcurrentTasksLimit = MaxConcurrentTasksLimit
-            } else if newValue < 1 {
-                _maxConcurrentTasksLimit = 1
-            } else {
-                _maxConcurrentTasksLimit = newValue
-            }
+            let limit = min(newValue, Self.MaxConcurrentTasksLimit)
+            _maxConcurrentTasksLimit = max(limit, 1)
         }
     }
         
@@ -60,10 +61,4 @@ public struct SessionConfiguration {
     }
 }
 
-var MaxConcurrentTasksLimit: Int {
-    if #available(iOS 11.0, *) {
-        return 6
-    } else {
-        return 3
-    }
-}
+

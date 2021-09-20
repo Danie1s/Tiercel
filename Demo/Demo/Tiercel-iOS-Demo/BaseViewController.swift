@@ -10,7 +10,7 @@ import UIKit
 import Tiercel
 
 class BaseViewController: UIViewController {
-
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var totalTasksLabel: UILabel!
     @IBOutlet weak var totalSpeedLabel: UILabel!
@@ -20,21 +20,21 @@ class BaseViewController: UIViewController {
     
     @IBOutlet weak var taskLimitSwitch: UISwitch!
     @IBOutlet weak var cellularAccessSwitch: UISwitch!
-
-
+    
+    
     var sessionManager: SessionManager!
-
+    
     var URLStrings: [String] = []
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         setupUI()
         
         // 检查磁盘空间
         let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
-
+        
         sessionManager.logger.option = .default
         
         updateSwicth()
@@ -54,19 +54,19 @@ class BaseViewController: UIViewController {
     }
     
     func configureNavigationItem() {
-        let editingItem = UIBarButtonItem(title: tableView.isEditing ? "完成" : "编辑",
-                                          style: .plain,
-                                          target: self,
-                                          action: #selector(toggleEditing))
-        navigationItem.rightBarButtonItems = [editingItem]
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "编辑",
+                                                            style: .plain,
+                                                            target: self,
+                                                            action: #selector(toggleEditing))
     }
     
     
     @objc func toggleEditing() {
         tableView.setEditing(!tableView.isEditing, animated: true)
-        configureNavigationItem()
+        let button = navigationItem.rightBarButtonItem!
+        button.title = tableView.isEditing ? "完成" : "编辑"
     }
-
+    
     func updateUI() {
         totalTasksLabel.text = "总任务：\(sessionManager.succeededTasks.count)/\(sessionManager.tasks.count)"
         totalSpeedLabel.text = "总速度：\(sessionManager.speedString)"
@@ -79,16 +79,16 @@ class BaseViewController: UIViewController {
         taskLimitSwitch.isOn = sessionManager.configuration.maxConcurrentTasksLimit < 3
         cellularAccessSwitch.isOn = sessionManager.configuration.allowsCellularAccess
     }
-
+    
     func setupManager() {
-
-        // 设置manager的回调
+        
+        // 设置 manager 的回调
         sessionManager.progress { [weak self] (manager) in
             self?.updateUI()
             
-        }.completion { [weak self] (task) in
+        }.completion { [weak self] manager in
             self?.updateUI()
-            if task.status == .succeeded {
+            if manager.status == .succeeded {
                 // 下载成功
             } else {
                 // 其他状态
@@ -103,26 +103,26 @@ extension BaseViewController {
             self?.tableView.reloadData()
         }
     }
-
+    
     @IBAction func totalSuspend(_ sender: Any) {
         sessionManager.totalSuspend() { [weak self] _ in
             self?.tableView.reloadData()
-
+            
         }
     }
-
+    
     @IBAction func totalCancel(_ sender: Any) {
         sessionManager.totalCancel() { [weak self] _ in
             self?.tableView.reloadData()
         }
     }
-
+    
     @IBAction func totalDelete(_ sender: Any) {
         sessionManager.totalRemove(completely: false) { [weak self] _ in
             self?.tableView.reloadData()
         }
     }
-
+    
     @IBAction func clearDisk(_ sender: Any) {
         sessionManager.cache.clearDiskCache()
         updateUI()
@@ -147,68 +147,65 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return sessionManager.tasks.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: DownloadTaskCell.reuseIdentifier, for: indexPath) as! DownloadTaskCell
         return cell
     }
-
-    // 每个cell中的状态更新，应该在willDisplay中执行
+    
+    // 每个 cell 中的状态更新，应该在 willDisplay 中执行
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-
+        
         guard let task = sessionManager.tasks.safeObject(at: indexPath.row),
-            let cell = cell as? DownloadTaskCell else { return }
-                
+              let cell = cell as? DownloadTaskCell
+        else { return }
+        
+        cell.task?.progress { _ in }.success { _ in }.failure { _ in }
+        
+        cell.task = task
+        
         cell.titleLabel.text = task.fileName
         
         cell.updateProgress(task)
         
-        // task的闭包引用了cell，所以这里的task要用weak
         cell.tapClosure = { [weak self] cell in
-            guard let indexPath = self?.tableView.indexPath(for: cell),
-                let task = self?.sessionManager.tasks.safeObject(at: indexPath.row)
-                else { return }
+            guard let task = self?.sessionManager.tasks.safeObject(at: indexPath.row) else { return }
             switch task.status {
-            case .waiting, .running:
-                self?.sessionManager.suspend(task)
-            case .suspended, .failed:
-                self?.sessionManager.start(task)
-            default: break
+                case .waiting, .running:
+                    self?.sessionManager.suspend(task)
+                case .suspended, .failed:
+                    self?.sessionManager.start(task)
+                default:
+                    break
             }
         }
-
-        task.progress { [weak cell] (task) in
-                cell?.updateProgress(task)
+        
+        task.progress { [weak cell] task in
+            cell?.updateProgress(task)
+        }
+        .success { [weak cell] (task) in
+            cell?.updateProgress(task)
+            // 下载任务成功了
+            
+        }
+        .failure { [weak cell] task in
+            cell?.updateProgress(task)
+            if task.status == .suspended {
+                // 下载任务暂停了
             }
-            .success { [weak cell] (task) in
-                cell?.updateProgress(task)
-                // 下载任务成功了
-
+            
+            if task.status == .failed {
+                // 下载任务失败了
             }
-            .failure { [weak cell] (task) in
-                cell?.updateProgress(task)
-                if task.status == .suspended {
-                    // 下载任务暂停了
-                }
-
-                if task.status == .failed {
-                    // 下载任务失败了
-                }
-                if task.status == .canceled {
-                    // 下载任务取消了
-                }
-                if task.status == .removed {
-                    // 下载任务移除了
-                }
+            if task.status == .canceled {
+                // 下载任务取消了
             }
+            if task.status == .removed {
+                // 下载任务移除了
+            }
+        }
     }
-
-    // 由于cell是循环利用的，不在可视范围内的cell，不应该去更新cell的状态
-    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let task = sessionManager.tasks.safeObject(at: indexPath.row) else { return }
-
-        task.progress { _ in }.success { _ in } .failure { _ in }
-    }
+    
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
@@ -231,5 +228,5 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
+    
 }

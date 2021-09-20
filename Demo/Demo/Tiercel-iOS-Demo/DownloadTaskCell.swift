@@ -24,6 +24,8 @@ class DownloadTaskCell: UITableViewCell {
     @IBOutlet weak var statusLabel: UILabel!
     
     var tapClosure: ((DownloadTaskCell) -> Void)?
+    
+    var task: DownloadTask?
 
 
     @IBAction func didTapButton(_ sender: Any) {

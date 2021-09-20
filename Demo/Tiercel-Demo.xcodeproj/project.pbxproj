@@ -1,0 +1,411 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E1EBF4F324E9993300697485 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF4F224E9993300697485 /* AppDelegate.swift */; };
+		E1EBF4FA24E9993300697485 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4F824E9993300697485 /* Main.storyboard */; };
+		E1EBF4FC24E9993500697485 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4FB24E9993500697485 /* Assets.xcassets */; };
+		E1EBF4FF24E9993500697485 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4FD24E9993500697485 /* LaunchScreen.storyboard */; };
+		E1EBF50824E99BAB00697485 /* VideoURLStrings.plist in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF50724E99BAB00697485 /* VideoURLStrings.plist */; };
+		E1EBF51224E99BBC00697485 /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF50924E99BBB00697485 /* BaseViewController.swift */; };
+		E1EBF51324E99BBC00697485 /* DownloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF50A24E99BBB00697485 /* DownloadViewController.swift */; };
+		E1EBF51424E99BBC00697485 /* DownloadTaskCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF50B24E99BBB00697485 /* DownloadTaskCell.xib */; };
+		E1EBF51524E99BBC00697485 /* ViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF50C24E99BBB00697485 /* ViewController1.swift */; };
+		E1EBF51624E99BBC00697485 /* ListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF50D24E99BBB00697485 /* ListViewCell.swift */; };
+		E1EBF51724E99BBC00697485 /* DownloadTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF50E24E99BBB00697485 /* DownloadTaskCell.swift */; };
+		E1EBF51824E99BBC00697485 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF50F24E99BBB00697485 /* ListViewController.swift */; };
+		E1EBF51924E99BBC00697485 /* ViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF51024E99BBB00697485 /* ViewController2.swift */; };
+		E1EBF51A24E99BBC00697485 /* ViewController3.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF51124E99BBC00697485 /* ViewController3.swift */; };
+		E1EBF51D24E99C9900697485 /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1EBF51C24E99C9900697485 /* Tiercel.framework */; };
+		E1EBF51E24E99C9900697485 /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1EBF51C24E99C9900697485 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E1EBF51F24E99C9900697485 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E1EBF51E24E99C9900697485 /* Tiercel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		E1EBF4EF24E9993300697485 /* Tiercel-iOS-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiercel-iOS-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1EBF4F224E9993300697485 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E1EBF4F924E9993300697485 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		E1EBF4FB24E9993500697485 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E1EBF4FE24E9993500697485 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E1EBF50024E9993500697485 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E1EBF50724E99BAB00697485 /* VideoURLStrings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = VideoURLStrings.plist; sourceTree = "<group>"; };
+		E1EBF50924E99BBB00697485 /* BaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseViewController.swift; sourceTree = "<group>"; };
+		E1EBF50A24E99BBB00697485 /* DownloadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadViewController.swift; sourceTree = "<group>"; };
+		E1EBF50B24E99BBB00697485 /* DownloadTaskCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DownloadTaskCell.xib; sourceTree = "<group>"; };
+		E1EBF50C24E99BBB00697485 /* ViewController1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController1.swift; sourceTree = "<group>"; };
+		E1EBF50D24E99BBB00697485 /* ListViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewCell.swift; sourceTree = "<group>"; };
+		E1EBF50E24E99BBB00697485 /* DownloadTaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadTaskCell.swift; sourceTree = "<group>"; };
+		E1EBF50F24E99BBB00697485 /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
+		E1EBF51024E99BBB00697485 /* ViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController2.swift; sourceTree = "<group>"; };
+		E1EBF51124E99BBC00697485 /* ViewController3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController3.swift; sourceTree = "<group>"; };
+		E1EBF51C24E99C9900697485 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E1EBF4EC24E9993300697485 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1EBF51D24E99C9900697485 /* Tiercel.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E1EBF4E624E9993300697485 = {
+			isa = PBXGroup;
+			children = (
+				E1EBF50624E9993C00697485 /* Demo */,
+				E1EBF4F024E9993300697485 /* Products */,
+				E1EBF51B24E99C9900697485 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		E1EBF4F024E9993300697485 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E1EBF4EF24E9993300697485 /* Tiercel-iOS-Demo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E1EBF4F124E9993300697485 /* Tiercel-iOS-Demo */ = {
+			isa = PBXGroup;
+			children = (
+				E1EBF4F224E9993300697485 /* AppDelegate.swift */,
+				E1EBF50924E99BBB00697485 /* BaseViewController.swift */,
+				E1EBF50C24E99BBB00697485 /* ViewController1.swift */,
+				E1EBF51024E99BBB00697485 /* ViewController2.swift */,
+				E1EBF51124E99BBC00697485 /* ViewController3.swift */,
+				E1EBF50F24E99BBB00697485 /* ListViewController.swift */,
+				E1EBF50D24E99BBB00697485 /* ListViewCell.swift */,
+				E1EBF50A24E99BBB00697485 /* DownloadViewController.swift */,
+				E1EBF50E24E99BBB00697485 /* DownloadTaskCell.swift */,
+				E1EBF50B24E99BBB00697485 /* DownloadTaskCell.xib */,
+				E1EBF4F824E9993300697485 /* Main.storyboard */,
+				E1EBF4FB24E9993500697485 /* Assets.xcassets */,
+				E1EBF4FD24E9993500697485 /* LaunchScreen.storyboard */,
+				E1EBF50024E9993500697485 /* Info.plist */,
+				E1EBF50724E99BAB00697485 /* VideoURLStrings.plist */,
+			);
+			path = "Tiercel-iOS-Demo";
+			sourceTree = "<group>";
+		};
+		E1EBF50624E9993C00697485 /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				E1EBF4F124E9993300697485 /* Tiercel-iOS-Demo */,
+			);
+			path = Demo;
+			sourceTree = "<group>";
+		};
+		E1EBF51B24E99C9900697485 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E1EBF51C24E99C9900697485 /* Tiercel.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E1EBF4EE24E9993300697485 /* Tiercel-iOS-Demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E1EBF50324E9993500697485 /* Build configuration list for PBXNativeTarget "Tiercel-iOS-Demo" */;
+			buildPhases = (
+				E1EBF4EB24E9993300697485 /* Sources */,
+				E1EBF4EC24E9993300697485 /* Frameworks */,
+				E1EBF4ED24E9993300697485 /* Resources */,
+				E1EBF51F24E99C9900697485 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Tiercel-iOS-Demo";
+			productName = "Tiercel-Demo";
+			productReference = E1EBF4EF24E9993300697485 /* Tiercel-iOS-Demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E1EBF4E724E9993300697485 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1160;
+				LastUpgradeCheck = 1160;
+				ORGANIZATIONNAME = Daniels;
+				TargetAttributes = {
+					E1EBF4EE24E9993300697485 = {
+						CreatedOnToolsVersion = 11.6;
+					};
+				};
+			};
+			buildConfigurationList = E1EBF4EA24E9993300697485 /* Build configuration list for PBXProject "Tiercel-Demo" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E1EBF4E624E9993300697485;
+			productRefGroup = E1EBF4F024E9993300697485 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E1EBF4EE24E9993300697485 /* Tiercel-iOS-Demo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E1EBF4ED24E9993300697485 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1EBF51424E99BBC00697485 /* DownloadTaskCell.xib in Resources */,
+				E1EBF4FF24E9993500697485 /* LaunchScreen.storyboard in Resources */,
+				E1EBF4FC24E9993500697485 /* Assets.xcassets in Resources */,
+				E1EBF4FA24E9993300697485 /* Main.storyboard in Resources */,
+				E1EBF50824E99BAB00697485 /* VideoURLStrings.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E1EBF4EB24E9993300697485 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E1EBF51524E99BBC00697485 /* ViewController1.swift in Sources */,
+				E1EBF51924E99BBC00697485 /* ViewController2.swift in Sources */,
+				E1EBF51A24E99BBC00697485 /* ViewController3.swift in Sources */,
+				E1EBF4F324E9993300697485 /* AppDelegate.swift in Sources */,
+				E1EBF51724E99BBC00697485 /* DownloadTaskCell.swift in Sources */,
+				E1EBF51624E99BBC00697485 /* ListViewCell.swift in Sources */,
+				E1EBF51324E99BBC00697485 /* DownloadViewController.swift in Sources */,
+				E1EBF51224E99BBC00697485 /* BaseViewController.swift in Sources */,
+				E1EBF51824E99BBC00697485 /* ListViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		E1EBF4F824E9993300697485 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E1EBF4F924E9993300697485 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		E1EBF4FD24E9993500697485 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E1EBF4FE24E9993500697485 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E1EBF50124E9993500697485 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E1EBF50224E9993500697485 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E1EBF50424E9993500697485 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Y3437T5EGX;
+				INFOPLIST_FILE = "$(SRCROOT)/Demo/Tiercel-iOS-Demo/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-iOS-Demo";
+				PRODUCT_NAME = "Tiercel-iOS-Demo";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E1EBF50524E9993500697485 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Y3437T5EGX;
+				INFOPLIST_FILE = "$(SRCROOT)/Demo/Tiercel-iOS-Demo/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Daniels.Tiercel-iOS-Demo";
+				PRODUCT_NAME = "Tiercel-iOS-Demo";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E1EBF4EA24E9993300697485 /* Build configuration list for PBXProject "Tiercel-Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1EBF50124E9993500697485 /* Debug */,
+				E1EBF50224E9993500697485 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E1EBF50324E9993500697485 /* Build configuration list for PBXNativeTarget "Tiercel-iOS-Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1EBF50424E9993500697485 /* Debug */,
+				E1EBF50524E9993500697485 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E1EBF4E724E9993300697485 /* Project object */;
+}

@@ -24,7 +24,7 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
 public class SessionManager {
     
@@ -267,7 +267,7 @@ public class SessionManager {
         sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
         sessionConfiguration.httpMaximumConnectionsPerHost = 100000
         sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
-        if #available(iOS 13, *) {
+        if #available(iOS 13, macOS 10.15, *) {
             sessionConfiguration.allowsConstrainedNetworkAccess = configuration.allowsConstrainedNetworkAccess
             sessionConfiguration.allowsExpensiveNetworkAccess = configuration.allowsExpensiveNetworkAccess
         }

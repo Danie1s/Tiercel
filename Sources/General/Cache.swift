@@ -24,7 +24,7 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
 public class Cache {
 

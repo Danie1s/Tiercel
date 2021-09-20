@@ -24,7 +24,7 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
 
 internal enum ResumeDataHelper {
