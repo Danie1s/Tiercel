@@ -58,7 +58,7 @@ public class Task<TaskType>: NSObject, Codable {
     }
     
     enum InterruptType {
-        case manual
+        case manual(_ fromRunningTask: Bool)
         case error(_ error: Error)
         case statusCode(_ statusCode: Int)
     }

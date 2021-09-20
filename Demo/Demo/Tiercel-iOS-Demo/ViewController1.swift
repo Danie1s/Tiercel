@@ -29,14 +29,14 @@ class ViewController1: UIViewController {
         
         sessionManager.tasks.safeObject(at: 0)?.progress { [weak self] (task) in
             self?.updateUI(task)
-        }.completion { [weak self] (task) in
+        }.completion { [weak self] task in
             self?.updateUI(task)
             if task.status == .succeeded {
                 // 下载成功
             } else {
                 // 其他状态
             }
-        }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5) { [weak self] (task) in
+        }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5) { [weak self] task in
             self?.updateUI(task)
             if task.validation == .correct {
                 // 文件正确
@@ -72,7 +72,7 @@ class ViewController1: UIViewController {
     @IBAction func start(_ sender: UIButton) {
         sessionManager.download(URLString)?.progress { [weak self] (task) in
             self?.updateUI(task)
-        }.completion { [weak self] (task) in
+        }.completion { [weak self] task in
             self?.updateUI(task)
             if task.status == .succeeded {
                 // 下载成功
