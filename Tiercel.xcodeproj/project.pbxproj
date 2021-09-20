@@ -15,7 +15,7 @@
 		E1EBF4A124E9968900697485 /* Int64+TaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48724E9968900697485 /* Int64+TaskInfo.swift */; };
 		E1EBF4A224E9968900697485 /* URLSession+ResumeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48824E9968900697485 /* URLSession+ResumeData.swift */; };
 		E1EBF4A324E9968900697485 /* Array+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48924E9968900697485 /* Array+Safe.swift */; };
-		E1EBF4A424E9968900697485 /* UIDevice+Free.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48A24E9968900697485 /* UIDevice+Free.swift */; };
+		E1EBF4A424E9968900697485 /* FileManager+AvailableCapacity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48A24E9968900697485 /* FileManager+AvailableCapacity.swift */; };
 		E1EBF4A524E9968900697485 /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48B24E9968900697485 /* DispatchQueue+Safe.swift */; };
 		E1EBF4A624E9968900697485 /* String+Hash.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48C24E9968900697485 /* String+Hash.swift */; };
 		E1EBF4A724E9968900697485 /* Double+TaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48D24E9968900697485 /* Double+TaskInfo.swift */; };
@@ -58,7 +58,7 @@
 		E1EBF48724E9968900697485 /* Int64+TaskInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Int64+TaskInfo.swift"; sourceTree = "<group>"; };
 		E1EBF48824E9968900697485 /* URLSession+ResumeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URLSession+ResumeData.swift"; sourceTree = "<group>"; };
 		E1EBF48924E9968900697485 /* Array+Safe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Safe.swift"; sourceTree = "<group>"; };
-		E1EBF48A24E9968900697485 /* UIDevice+Free.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIDevice+Free.swift"; sourceTree = "<group>"; };
+		E1EBF48A24E9968900697485 /* FileManager+AvailableCapacity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileManager+AvailableCapacity.swift"; sourceTree = "<group>"; };
 		E1EBF48B24E9968900697485 /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
 		E1EBF48C24E9968900697485 /* String+Hash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Hash.swift"; sourceTree = "<group>"; };
 		E1EBF48D24E9968900697485 /* Double+TaskInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Double+TaskInfo.swift"; sourceTree = "<group>"; };
@@ -147,7 +147,7 @@
 				E1EBF48D24E9968900697485 /* Double+TaskInfo.swift */,
 				E1EBF48B24E9968900697485 /* DispatchQueue+Safe.swift */,
 				E1EBF48924E9968900697485 /* Array+Safe.swift */,
-				E1EBF48A24E9968900697485 /* UIDevice+Free.swift */,
+				E1EBF48A24E9968900697485 /* FileManager+AvailableCapacity.swift */,
 				E1EBF48E24E9968900697485 /* OperationQueue+DispatchQueue.swift */,
 				E1EBF48624E9968900697485 /* CodingUserInfoKey+Cache.swift */,
 			);
@@ -292,7 +292,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E1EBF49F24E9968900697485 /* Data+Hash.swift in Sources */,
-				E1EBF4A424E9968900697485 /* UIDevice+Free.swift in Sources */,
+				E1EBF4A424E9968900697485 /* FileManager+AvailableCapacity.swift in Sources */,
 				E1EBF4A924E9968900697485 /* URLConvertible.swift in Sources */,
 				E1EBF4A624E9968900697485 /* String+Hash.swift in Sources */,
 				E1EBF4B124E9968900697485 /* TiercelError.swift in Sources */,
@@ -474,7 +474,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.3;
+				MARKETING_VERSION = 3.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -501,7 +501,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.3;
+				MARKETING_VERSION = 3.2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Daniels.Tiercel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
