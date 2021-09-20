@@ -24,7 +24,7 @@
 //  THE SOFTWARE.
 //
 
-import Foundation
+import UIKit
 
 public class DownloadTask: Task<DownloadTask> {
     

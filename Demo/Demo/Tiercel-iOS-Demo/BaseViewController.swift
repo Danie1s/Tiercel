@@ -32,7 +32,7 @@ class BaseViewController: UIViewController {
         setupUI()
         
         // 检查磁盘空间
-        let free = UIDevice.current.tr.freeDiskSpaceInBytes / 1024 / 1024
+        let free = FileManager.default.tr.freeDiskSpaceInBytes / 1024 / 1024
         print("手机剩余储存空间为： \(free)MB")
         
         sessionManager.logger.option = .default
