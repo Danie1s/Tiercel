@@ -169,7 +169,7 @@ public class DownloadTask: Task<DownloadTask> {
 // MARK: - control
 extension DownloadTask {
 
-    internal func download() {
+    internal func tryToDownload() {
         cache.createDirectory()
         guard let manager = manager else { return }
         switch status {
@@ -187,7 +187,7 @@ extension DownloadTask {
             }
         case .succeeded:
             executeControl()
-            succeeded(fromRunning: false, immediately: false)
+            succeeded(fromRunning: false)
         case .running:
             status = .running
             executeControl()
@@ -345,19 +345,17 @@ extension DownloadTask {
     }
 
 
-    internal func succeeded(fromRunning: Bool, immediately: Bool) {
+    internal func succeeded(fromRunning: Bool) {
         if endDate == 0 {
             protectedState.write {
                 $0.endDate = Date().timeIntervalSince1970
                 $0.timeRemaining = 0
             }
         }
-        status = .succeeded
         progress.completedUnitCount = progress.totalUnitCount
         progressExecuter?.execute(self)
-        if immediately {
-          executeCompletion(true)
-        }
+        status = .succeeded
+        executeCompletion(true)
         validateFile()
         manager?.maintainTasks(with: .succeeded(self))
         manager?.determineStatus(fromRunningTask: fromRunning)
@@ -532,7 +530,7 @@ extension DownloadTask {
             case .willSuspend,.willCancel, .willRemove:
                 determineStatus(with: .manual(false))
             case .running:
-                succeeded(fromRunning: false, immediately: true)
+                succeeded(fromRunning: false)
             default:
                 return
             }
@@ -561,7 +559,7 @@ extension DownloadTask {
                     determineStatus(with: .statusCode(statusCode))
                 } else {
                     resumeData = nil
-                    succeeded(fromRunning: true, immediately: true)
+                    succeeded(fromRunning: true)
                 }
             default:
                 return

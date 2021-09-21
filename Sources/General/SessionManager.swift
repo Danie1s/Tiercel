@@ -324,7 +324,7 @@ extension SessionManager {
                     maintainTasks(with: .append(task))
                 }
                 storeTasks()
-                start(task, onMainQueue: onMainQueue, handler: handler)
+                _start(task, onMainQueue: onMainQueue, handler: handler)
             }
             return task
         } catch {
@@ -440,11 +440,7 @@ extension SessionManager {
     
     public func start(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
-            guard let _ = self.fetchTask(task.url) else {
-                self.log(.error("can't start downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
-                return
-            }
-            self._start(task, onMainQueue: onMainQueue, handler: handler)
+            self._start(task.url, onMainQueue: onMainQueue, handler: handler)
         }
     }
     
@@ -460,7 +456,7 @@ extension SessionManager {
         task.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         didStart()
         if !shouldCreatSession {
-            task.download()
+            task.tryToDownload()
         } else {
             task.status = .suspended
             if !restartTasks.contains(task) {
@@ -862,7 +858,7 @@ extension SessionManager {
     
     private func startNextTask() {
         guard let waitingTask = tasks.first (where: { $0.status == .waiting }) else { return }
-        waitingTask.download()
+        waitingTask.tryToDownload()
     }
 }
 
@@ -930,41 +926,18 @@ extension SessionManager {
     @discardableResult
     public func success(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
         successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .succeeded  && completionExecuter == nil{
-            operationQueue.async {
-                self.successExecuter?.execute(self)
-            }
-        }
         return self
     }
     
     @discardableResult
     public func failure(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
         failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if completionExecuter == nil &&
-            (status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .failed) {
-            operationQueue.async {
-                self.failureExecuter?.execute(self)
-            }
-        }
         return self
     }
     
     @discardableResult
     public func completion(onMainQueue: Bool = true, handler: @escaping Handler<SessionManager>) -> Self {
         completionExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .succeeded ||
-            status == .failed  {
-            operationQueue.async {
-                self.completionExecuter?.execute(self)
-            }
-        }
         return self
     }
     

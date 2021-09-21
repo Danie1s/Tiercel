@@ -319,11 +319,6 @@ extension Task {
     @discardableResult
     public func success(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
         successExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .succeeded  && completionExecuter == nil{
-            operationQueue.async {
-                self.execute(self.successExecuter)
-            }
-        }
         return self
 
     }
@@ -331,30 +326,12 @@ extension Task {
     @discardableResult
     public func failure(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
         failureExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if completionExecuter == nil &&
-            (status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .failed) {
-            operationQueue.async {
-                self.execute(self.failureExecuter)
-            }
-        }
         return self
     }
     
     @discardableResult
     public func completion(onMainQueue: Bool = true, handler: @escaping Handler<TaskType>) -> Self {
         completionExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .suspended ||
-            status == .canceled ||
-            status == .removed ||
-            status == .succeeded ||
-            status == .failed  {
-            operationQueue.async {
-                self.execute(self.completionExecuter)
-            }
-        }
         return self
     }
     
