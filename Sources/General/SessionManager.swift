@@ -45,10 +45,10 @@ public class SessionManager {
     public var completionHandler: (() -> Void)?
 
     public var configuration: SessionConfiguration {
-        get { protectedState.wrappedValue.configuration }
+        get { mutableState.configuration }
         set {
             operationQueue.sync {
-                protectedState.write {
+                $mutableState.write {
                     $0.configuration = newValue
                     if $0.status == .running {
                         totalSuspend()
@@ -58,7 +58,7 @@ public class SessionManager {
         }
     }
     
-    private struct State {
+    private struct MutableState {
         var logger: Logable
         var isControlNetworkActivityIndicator: Bool = true
         var configuration: SessionConfiguration {
@@ -82,8 +82,8 @@ public class SessionManager {
         var timer: DispatchSourceTimer?
         var status: Status = .waiting
         var tasks: [DownloadTask] = []
-        var taskMapper: [String: DownloadTask] = [String: DownloadTask]()
-        var urlMapper: [URL: URL] = [URL: URL]()
+        var taskMap: [URL: DownloadTask] = [URL: DownloadTask]()
+        var urlMap: [URL: URL] = [URL: URL]()
         var runningTasks: [DownloadTask] = []
         var restartTasks: [DownloadTask] = []
         var succeededTasks: [DownloadTask] = []
@@ -97,45 +97,45 @@ public class SessionManager {
         var controlExecuter: Executer<SessionManager>?
     }
     
-    
-    private let protectedState: Protected<State>
+    @Protected
+    private var mutableState: MutableState
 
     public var logger: Logable {
-        get { protectedState.wrappedValue.logger }
-        set { protectedState.write { $0.logger = newValue } }
+        get { mutableState.logger }
+        set { mutableState.logger = newValue }
     }
     
     public var isControlNetworkActivityIndicator: Bool {
-        get { protectedState.wrappedValue.isControlNetworkActivityIndicator }
-        set { protectedState.write { $0.isControlNetworkActivityIndicator = newValue } }
+        get { mutableState.isControlNetworkActivityIndicator }
+        set { mutableState.isControlNetworkActivityIndicator = newValue  }
     }
     
 
-    internal var shouldRun: Bool {
+    public var shouldRun: Bool {
         return runningTasks.count < configuration.maxConcurrentTasksLimit
     }
     
     private var session: URLSession? {
-        get { protectedState.wrappedValue.session }
-        set { protectedState.write { $0.session = newValue } }
+        get { mutableState.session }
+        set { mutableState.session = newValue }
     }
     
     private var shouldCreatSession: Bool {
-        get { protectedState.wrappedValue.shouldCreatSession }
-        set { protectedState.write { $0.shouldCreatSession = newValue } }
+        get { mutableState.shouldCreatSession }
+        set { mutableState.shouldCreatSession = newValue }
     }
 
     
     private var timer: DispatchSourceTimer? {
-        get { protectedState.wrappedValue.timer }
-        set { protectedState.write { $0.timer = newValue } }
+        get { mutableState.timer }
+        set { mutableState.timer = newValue }
     }
 
     
     public private(set) var status: Status {
-        get { protectedState.wrappedValue.status }
+        get { mutableState.status }
         set {
-            protectedState.write { $0.status = newValue }
+            mutableState.status = newValue
             if newValue == .willSuspend || newValue == .willCancel || newValue == .willRemove {
                 return
             }
@@ -145,45 +145,46 @@ public class SessionManager {
     
     
     public private(set) var tasks: [DownloadTask] {
-        get { protectedState.wrappedValue.tasks }
-        set { protectedState.write { $0.tasks = newValue } }
+        get { mutableState.tasks }
+        set { mutableState.tasks = newValue }
     }
     
     private var runningTasks: [DownloadTask] {
-        get { protectedState.wrappedValue.runningTasks }
-        set { protectedState.write { $0.runningTasks = newValue } }
+        get { mutableState.runningTasks }
+        set { mutableState.runningTasks = newValue }
     }
     
     private var restartTasks: [DownloadTask] {
-        get { protectedState.wrappedValue.restartTasks }
-        set { protectedState.write { $0.restartTasks = newValue } }
+        get { mutableState.restartTasks }
+        set { mutableState.restartTasks = newValue }
     }
 
     public private(set) var succeededTasks: [DownloadTask] {
-        get { protectedState.wrappedValue.succeededTasks }
-        set { protectedState.write { $0.succeededTasks = newValue } }
+        get { mutableState.succeededTasks }
+        set { mutableState.succeededTasks = newValue }
     }
 
     private let _progress = Progress()
     public var progress: Progress {
-        _progress.completedUnitCount = tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
-        _progress.totalUnitCount = tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
+        $mutableState.read {
+            _progress.completedUnitCount = $0.tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
+            _progress.totalUnitCount = $0.tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
+        }
         return _progress
     }
 
     public private(set) var speed: Int64 {
-        get { protectedState.wrappedValue.speed }
-        set { protectedState.write { $0.speed = newValue } }
+        get { mutableState.speed }
+        set { mutableState.speed = newValue }
     }
 
     public var speedString: String {
         speed.tr.convertSpeedToString()
     }
     
-    
     public private(set) var timeRemaining: Int64 {
-        get { protectedState.wrappedValue.timeRemaining }
-        set { protectedState.write { $0.timeRemaining = newValue } }
+        get { mutableState.timeRemaining }
+        set { mutableState.timeRemaining = newValue }
     }
 
     public var timeRemainingString: String {
@@ -191,28 +192,28 @@ public class SessionManager {
     }
     
     private var progressExecuter: Executer<SessionManager>? {
-        get { protectedState.wrappedValue.progressExecuter }
-        set { protectedState.write { $0.progressExecuter = newValue } }
+        get { mutableState.progressExecuter }
+        set { mutableState.progressExecuter = newValue }
     }
     
     private var successExecuter: Executer<SessionManager>? {
-        get { protectedState.wrappedValue.successExecuter }
-        set { protectedState.write { $0.successExecuter = newValue } }
+        get { mutableState.successExecuter }
+        set { mutableState.successExecuter = newValue }
     }
     
     private var failureExecuter: Executer<SessionManager>? {
-        get { protectedState.wrappedValue.failureExecuter }
-        set { protectedState.write { $0.failureExecuter = newValue } }
+        get { mutableState.failureExecuter }
+        set { mutableState.failureExecuter = newValue }
     }
     
     private var completionExecuter: Executer<SessionManager>? {
-        get { protectedState.wrappedValue.completionExecuter }
-        set { protectedState.write { $0.completionExecuter = newValue } }
+        get { mutableState.completionExecuter }
+        set { mutableState.completionExecuter = newValue }
     }
     
     private var controlExecuter: Executer<SessionManager>? {
-        get { protectedState.wrappedValue.controlExecuter }
-        set { protectedState.write { $0.controlExecuter = newValue } }
+        get { mutableState.controlExecuter }
+        set { mutableState.controlExecuter = newValue }
     }
 
     
@@ -225,21 +226,19 @@ public class SessionManager {
                                                               autoreleaseFrequency: .workItem)) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
-        protectedState = Protected(
-            State(logger: logger ?? Logger(identifier: "\(bundleIdentifier).\(identifier)", option: .default),
-                  configuration: configuration)
-        )
+        mutableState = MutableState(logger: logger ?? Logger(identifier: "\(bundleIdentifier).\(identifier)", option: .default),
+                                    configuration: configuration)
         self.operationQueue = operationQueue
         self.cache = cache ?? Cache(identifier)
         self.cache.manager = self
         self.cache.retrieveAllTasks().forEach { maintainTasks(with: .append($0)) }
         succeededTasks = tasks.filter { $0.status == .succeeded }
         log(.sessionManager("retrieveTasks", manager: self))
-        protectedState.write { state in
+        $mutableState.write { state in
             state.tasks.forEach {
-                $0.manager = self
+                $0.delegate = self
                 $0.operationQueue = operationQueue
-                state.urlMapper[$0.currentURL] = $0.url
+                state.urlMap[$0.currentURL] = $0.url
             }
             state.shouldCreatSession = true
         }
@@ -272,16 +271,15 @@ public class SessionManager {
             sessionConfiguration.allowsExpensiveNetworkAccess = configuration.allowsExpensiveNetworkAccess
         }
         let sessionDelegate = SessionDelegate()
-        sessionDelegate.manager = self
+        sessionDelegate.stateProvider = self
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1,
                                            underlyingQueue: operationQueue,
                                            name: "com.Tiercel.SessionManager.delegateQueue")
-        protectedState.write {
+        $mutableState.write {
             let session = URLSession(configuration: sessionConfiguration,
                                      delegate: sessionDelegate,
                                      delegateQueue: delegateQueue)
             $0.session = session
-            $0.tasks.forEach { $0.session = session }
             $0.shouldCreatSession = false
         }
         completion?()
@@ -319,8 +317,7 @@ extension SessionManager {
                                         fileName: fileName,
                                         cache: cache,
                                         operationQueue: operationQueue)
-                    task.manager = self
-                    task.session = session
+                    task.delegate = self
                     maintainTasks(with: .append(task))
                 }
                 storeTasks()
@@ -387,8 +384,7 @@ extension SessionManager {
                                         fileName: fileName,
                                         cache: cache,
                                         operationQueue: operationQueue)
-                    task.manager = self
-                    task.session = session
+                    task.delegate = self
                     maintainTasks(with: .append(task))
                 }
                 uniqueTasks.append(task)
@@ -413,17 +409,17 @@ extension SessionManager {
     public func fetchTask(_ url: URLConvertible) -> DownloadTask? {
         do {
             let validURL = try url.asURL()
-            return protectedState.read { $0.taskMapper[validURL.absoluteString] }
+            return $mutableState.read { $0.taskMap[validURL] }
         } catch {
             log(.error("fetch task failed", error: TiercelError.invalidURL(url: url)))
             return nil
         }
     }
     
-    internal func mapTask(_ currentURL: URL) -> DownloadTask? {
-        protectedState.read {
-            let url = $0.urlMapper[currentURL] ?? currentURL
-            return $0.taskMapper[url.absoluteString]
+    func mapTask(_ currentURL: URL) -> DownloadTask? {
+        $mutableState.read {
+            let url = $0.urlMap[currentURL] ?? currentURL
+            return $0.taskMap[url]
         }
     }
 
@@ -453,12 +449,12 @@ extension SessionManager {
     }
     
     private func _start(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
-        task.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+        task.mutableState.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         didStart()
-        if !shouldCreatSession {
-            task.tryToDownload()
+        if !shouldCreatSession, let session = session {
+            task.tryToDownload(using: session)
         } else {
-            task.status = .suspended
+            task.suspend()
             if !restartTasks.contains(task) {
                 restartTasks.append(task)
             }
@@ -553,7 +549,7 @@ extension SessionManager {
             if sourceIndex == destinationIndex {
                 return
             }
-            protectedState.write {
+            $mutableState.write {
                 let task = $0.tasks[sourceIndex]
                 $0.tasks.remove(at: sourceIndex)
                 $0.tasks.insert(task, at: destinationIndex)
@@ -606,7 +602,7 @@ extension SessionManager {
     
     public func tasksSort(by areInIncreasingOrder: (DownloadTask, DownloadTask) throws -> Bool) rethrows {
         try operationQueue.sync {
-            try protectedState.write {
+            try $mutableState.write {
                 try $0.tasks.sort(by: areInIncreasingOrder)
             }
         }
@@ -617,60 +613,60 @@ extension SessionManager {
 // MARK: - status handle
 extension SessionManager {
 
-    internal func maintainTasks(with action: MaintainTasksAction) {
+    func maintainTasks(with action: MaintainTasksAction) {
 
         switch action {
-        case let .append(task):
-            protectedState.write { state in
-                state.tasks.append(task)
-                state.taskMapper[task.url.absoluteString] = task
-                state.urlMapper[task.currentURL] = task.url
-            }
-        case let .remove(task):
-            protectedState.write { state in
-                if state.status == .willRemove {
-                    state.taskMapper.removeValue(forKey: task.url.absoluteString)
-                    state.urlMapper.removeValue(forKey: task.currentURL)
-                    if state.taskMapper.values.isEmpty {
-                        state.tasks.removeAll()
-                        state.succeededTasks.removeAll()
-                    }
-                } else if state.status == .willCancel {
-                    state.taskMapper.removeValue(forKey: task.url.absoluteString)
-                    state.urlMapper.removeValue(forKey: task.currentURL)
-                    if state.taskMapper.values.count == state.succeededTasks.count {
-                        state.tasks = state.succeededTasks
-                    }
-                } else {
-                    state.taskMapper.removeValue(forKey: task.url.absoluteString)
-                    state.urlMapper.removeValue(forKey: task.currentURL)
-                    state.tasks.removeAll {
-                        $0.url.absoluteString == task.url.absoluteString
-                    }
-                    if task.status == .removed {
-                        state.succeededTasks.removeAll {
+            case let .append(task):
+                $mutableState.write { state in
+                    state.tasks.append(task)
+                    state.taskMap[task.url] = task
+                    state.urlMap[task.currentURL] = task.url
+                }
+            case let .remove(task):
+                $mutableState.write { state in
+                    if state.status == .willRemove {
+                        state.taskMap.removeValue(forKey: task.url)
+                        state.urlMap.removeValue(forKey: task.currentURL)
+                        if state.taskMap.values.isEmpty {
+                            state.tasks.removeAll()
+                            state.succeededTasks.removeAll()
+                        }
+                    } else if state.status == .willCancel {
+                        state.taskMap.removeValue(forKey: task.url)
+                        state.urlMap.removeValue(forKey: task.currentURL)
+                        if state.taskMap.values.count == state.succeededTasks.count {
+                            state.tasks = state.succeededTasks
+                        }
+                    } else {
+                        state.taskMap.removeValue(forKey: task.url)
+                        state.urlMap.removeValue(forKey: task.currentURL)
+                        state.tasks.removeAll {
                             $0.url.absoluteString == task.url.absoluteString
+                        }
+                        if task.status == .removed {
+                            state.succeededTasks.removeAll {
+                                $0.url.absoluteString == task.url.absoluteString
+                            }
                         }
                     }
                 }
-            }
-        case let .succeeded(task):
-            succeededTasks.append(task)
-        case let .appendRunningTasks(task):
-            protectedState.write { state in
-                state.runningTasks.append(task)
-            }
-        case let .removeRunningTasks(task):
-            protectedState.write { state in
-                state.runningTasks.removeAll {
-                    $0.url.absoluteString == task.url.absoluteString
+            case let .succeeded(task):
+                succeededTasks.append(task)
+            case let .appendRunningTasks(task):
+                $mutableState.write { state in
+                    state.runningTasks.append(task)
                 }
-            }
+            case let .removeRunningTasks(task):
+                $mutableState.write { state in
+                    state.runningTasks.removeAll {
+                        $0.url.absoluteString == task.url.absoluteString
+                    }
+                }
         }
     }
 
-    internal func updateUrlMapper(with task: DownloadTask) {
-        protectedState.write { $0.urlMapper[task.currentURL] = task.url }
+    func updateUrlMapper(with task: DownloadTask) {
+        $mutableState.write { $0.urlMap[task.currentURL] = task.url }
     }
     
     private func restoreStatus() {
@@ -681,12 +677,11 @@ extension SessionManager {
             guard let self = self else { return }
             downloadTasks.forEach { downloadTask in
                 if downloadTask.state == .running,
-                    let currentURL = downloadTask.currentRequest?.url,
-                    let task = self.mapTask(currentURL) {
+                   let currentURL = downloadTask.currentRequest?.url,
+                   let task = self.mapTask(currentURL) {
                     self.didStart()
                     self.maintainTasks(with: .appendRunningTasks(task))
-                    task.status = .running
-                    task.sessionTask = downloadTask
+                    task.restoreRunningStatus(with: downloadTask)
                 }
             }
             //  处理mananger状态
@@ -733,7 +728,7 @@ extension SessionManager {
         }
     }
     
-    internal func didStart() {
+    func didStart() {
         if status != .running {
             createTimer()
             status = .running
@@ -741,7 +736,7 @@ extension SessionManager {
         }
     }
     
-    internal func updateProgress() {
+    func updateProgress() {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
@@ -751,25 +746,12 @@ extension SessionManager {
         NotificationCenter.default.postNotification(name: SessionManager.runningNotification, sessionManager: self)
     }
     
-    internal func didCancelOrRemove(_ task: DownloadTask) {
-        maintainTasks(with: .remove(task))
-        
-        // 处理使用单个任务操作移除最后一个task时，manager状态
-        if tasks.isEmpty {
-            if task.status == .canceled {
-                status = .willCancel
-            }
-            if task.status == .removed {
-                status = .willRemove
-            }
-        }
-    }
 
-    internal func storeTasks() {
+    func storeTasks() {
         cache.storeTasks(tasks)
     }
     
-    internal func determineStatus(fromRunningTask: Bool) {
+    func determineStatus(fromRunningTask: Bool) {
         if isControlNetworkActivityIndicator {
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
@@ -788,7 +770,7 @@ extension SessionManager {
         
         // canceled
         if status == .willCancel {
-            let succeededTasksCount = protectedState.wrappedValue.taskMapper.values.count
+            let succeededTasksCount = mutableState.taskMap.values.count
             if tasks.count == succeededTasksCount {
                 status = .canceled
                 executeControl()
@@ -857,8 +839,10 @@ extension SessionManager {
     
     
     private func startNextTask() {
-        guard let waitingTask = tasks.first (where: { $0.status == .waiting }) else { return }
-        waitingTask.tryToDownload()
+        guard let session = session,
+              let waitingTask = tasks.first (where: { $0.status == .waiting })
+        else { return }
+        waitingTask.tryToDownload(using: session)
     }
 }
 
@@ -884,7 +868,7 @@ extension SessionManager {
         timer = nil
     }
 
-    internal func updateSpeedAndTimeRemaining() {
+    func updateSpeedAndTimeRemaining() {
         let speed = runningTasks.reduce(Int64(0), {
             $1.updateSpeedAndTimeRemaining()
             return $0 + $1.speed
@@ -902,7 +886,7 @@ extension SessionManager {
         } else {
             timeRemaining = 0
         }
-        protectedState.write {
+        $mutableState.write {
             $0.speed = speed
             $0.timeRemaining = Int64(timeRemaining)
         }
@@ -910,7 +894,7 @@ extension SessionManager {
 
 
 
-    internal func log(_ type: LogType) {
+    func log(_ type: LogType) {
         logger.log(type)
     }
 }
@@ -958,10 +942,98 @@ extension SessionManager {
     }
 }
 
+// MARK: - TaskDelegate
+extension SessionManager: TaskDelegate {
+    public func task<TaskType>(_ task: Task<TaskType>, statusDidChange status: Status) {
+        if let task = task as? DownloadTask {
+            log(.downloadTask(status.rawValue, task: task))
+        }
+    }
+    
+    public func taskDidStart<TaskType>(_ task: Task<TaskType>) {
+        if let task = task as? DownloadTask {
+            maintainTasks(with: .appendRunningTasks(task))
+        }
+    }
+    
+    public func taskDidCancelOrRemove<TaskType>(_ task: Task<TaskType>) {
+        if let task = task as? DownloadTask {
+            maintainTasks(with: .remove(task))
+            
+            // 处理使用单个任务操作移除最后一个task时，manager状态
+            if tasks.isEmpty {
+                if task.status == .canceled {
+                    status = .willCancel
+                }
+                if task.status == .removed {
+                    status = .willRemove
+                }
+            }
+        }
+    }
+    
+    public func taskDidCompleteFromRunning<TaskType>(_ task: Task<TaskType>) {
+        if let task = task as? DownloadTask {
+            maintainTasks(with: .removeRunningTasks(task))
+        }
+    }
+    
+    public func taskDidSucceed<TaskType>(_ task: Task<TaskType>, fromRunning: Bool) {
+        if let task = task as? DownloadTask {
+            maintainTasks(with: .succeeded(task))
+        }
+        determineStatus(fromRunningTask: fromRunning)
+    }
+    
+    public func taskDidDetermineStatus<TaskType>(_ task: Task<TaskType>, fromRunning: Bool) {
+        determineStatus(fromRunningTask: fromRunning)
+    }
+    
+    public func taskDidUpdateCurrentURL<TaskType>(_ task: Task<TaskType>) {
+        if let task = task as? DownloadTask {
+            updateUrlMapper(with: task)
+        }
+    }
+    
+    public func taskDidUpdateProgress<TaskType>(_ task: Task<TaskType>) {
+        updateProgress()
+    }
 
-// MARK: - call back
-extension SessionManager {
-    internal func didBecomeInvalidation(withError error: Error?) {
+}
+
+extension SessionManager: DownloadTaskDelegate {
+    public func downloadTaskFileExists(_ task: DownloadTask) {
+        log(.downloadTask("file already exists", task: task))
+    }
+    
+    public func downloadTaskWillValidateFile(_ task: DownloadTask) {
+        storeTasks()
+    }
+    
+    
+    public func downloadTaskDidValidateFile(_ task: DownloadTask, result: Result<Bool, FileChecksumHelper.FileVerificationError>) {
+        switch result {
+            case .success:
+                log(.downloadTask("file validation successful", task: task))
+            case let .failure(error):
+                log(.error("file validation failed, url: \(task.url)", error: error))
+        }
+        storeTasks()
+    }
+    
+}
+
+// MARK: - SessionStateProvider
+extension SessionManager: SessionStateProvider {
+    func task<TaskType, R>(for url: URL, as type: R.Type) -> R? where R : Task<TaskType> {
+        return mapTask(url) as? R
+    }
+    
+    func logError(message: String, error: Error) {
+        log(.error(message, error: error))
+    }
+    
+    func didBecomeInvalidation(withError error: Error?) {
         createSession { [weak self] in
             guard let self = self else { return }
             self.restartTasks.forEach { self._start($0) }
@@ -969,13 +1041,10 @@ extension SessionManager {
         }
     }
     
-    internal func didFinishEvents(forBackgroundURLSession session: URLSession) {
+    func didFinishEvents(forBackgroundURLSession session: URLSession) {
         DispatchQueue.tr.executeOnMain {
             self.completionHandler?()
             self.completionHandler = nil
         }
     }
-    
 }
-
-

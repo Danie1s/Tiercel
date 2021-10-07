@@ -64,5 +64,10 @@ class DownloadTaskCell: UITableViewCell {
         }
         controlButton.setImage(image, for: .normal)
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        task?.progress { _ in }.success { _ in }.failure { _ in }
+    }
 
 }

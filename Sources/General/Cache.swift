@@ -44,7 +44,7 @@ public class Cache {
     
     private let encoder = PropertyListEncoder()
     
-    internal weak var manager: SessionManager?
+    weak var manager: SessionManager?
     
     private let decoder = PropertyListDecoder()
     
@@ -94,7 +94,7 @@ public class Cache {
 
 // MARK: - file
 extension Cache {
-    internal func createDirectory() {
+    func createDirectory() {
         
         if !fileManager.fileExists(atPath: downloadPath) {
             do {
@@ -189,7 +189,7 @@ extension Cache {
 
 // MARK: - retrieve
 extension Cache {
-    internal func retrieveAllTasks() -> [DownloadTask] {
+    func retrieveAllTasks() -> [DownloadTask] {
         return ioQueue.sync {
             let path = (downloadPath as NSString).appendingPathComponent("\(identifier)_Tasks.plist")
             if fileManager.fileExists(atPath: path) {
@@ -197,12 +197,6 @@ extension Cache {
                     let url = URL(fileURLWithPath: path)
                     let data = try Data(contentsOf: url)
                     let tasks = try decoder.decode([DownloadTask].self, from: data)
-                    tasks.forEach { (task) in
-                        task.cache = self
-                        if task.status == .waiting  {
-                            task.protectedState.write { $0.status = .suspended }
-                        }
-                    }
                     return tasks
                 } catch {
                     manager?.log(.error("retrieve all tasks failed", error: TiercelError.cacheError(reason: .cannotRetrieveAllTasks(path: path, error: error))))
@@ -214,7 +208,7 @@ extension Cache {
         }
     }
 
-    internal func retrieveTmpFile(_ tmpFileName: String?) -> Bool {
+    func retrieveTmpFile(_ tmpFileName: String?) -> Bool {
         return ioQueue.sync {
             guard let tmpFileName = tmpFileName, !tmpFileName.isEmpty else { return false }
             let backupFilePath = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
@@ -252,7 +246,7 @@ extension Cache {
 
 // MARK: - store
 extension Cache {
-    internal func storeTasks(_ tasks: [DownloadTask]) {
+    func storeTasks(_ tasks: [DownloadTask]) {
         debouncer.execute(label: "storeTasks", wallDeadline: .now() + 0.2) {
             var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
             do {
@@ -269,7 +263,7 @@ extension Cache {
         }
     }
     
-    internal func storeFile(at srcURL: URL, to dstURL: URL) {
+    func storeFile(at srcURL: URL, to dstURL: URL) {
         ioQueue.sync {
             do {
                 try fileManager.moveItem(at: srcURL, to: dstURL)
@@ -282,7 +276,7 @@ extension Cache {
         }
     }
     
-    internal func storeTmpFile(_ tmpFileName: String?) {
+    func storeTmpFile(_ tmpFileName: String?) {
         ioQueue.sync {
             guard let tmpFileName = tmpFileName, !tmpFileName.isEmpty else { return }
             let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
@@ -309,7 +303,7 @@ extension Cache {
         }
     }
     
-    internal func updateFileName(_ filePath: String, _ newFileName: String) {
+    func updateFileName(_ filePath: String, _ newFileName: String) {
         ioQueue.sync {
             if fileManager.fileExists(atPath: filePath) {
                 let newFilePath = self.filePath(fileName: newFileName)!
@@ -329,15 +323,15 @@ extension Cache {
 
 // MARK: - remove
 extension Cache {
-    internal func remove(_ task: DownloadTask, completely: Bool) {
-        removeTmpFile(task.tmpFileName)
+    func remove(_ task: DownloadTask, completely: Bool) {
+        removeTmpFile(task.mutableDownloadState.tmpFileName)
         
         if completely {
             removeFile(task.filePath)
         }
     }
     
-    internal func removeFile(_ filePath: String) {
+    func removeFile(_ filePath: String) {
         ioQueue.async {
             if self.fileManager.fileExists(atPath: filePath) {
                 do {
@@ -356,7 +350,7 @@ extension Cache {
     /// 删除保留在本地的缓存文件
     ///
     /// - Parameter task:
-    internal func removeTmpFile(_ tmpFileName: String?) {
+    func removeTmpFile(_ tmpFileName: String?) {
         ioQueue.async {
             guard let tmpFileName = tmpFileName, !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)

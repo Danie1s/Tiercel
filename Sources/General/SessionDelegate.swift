@@ -26,30 +26,55 @@
 
 import Foundation
 
-internal class SessionDelegate: NSObject {
-    internal weak var manager: SessionManager?
+protocol SessionStateProvider: AnyObject {
+    func task<TaskType, R: Task<TaskType>>(for url: URL, as type: R.Type) -> R?
+    
+    func didBecomeInvalidation(withError error: Error?)
+        
+    func didFinishEvents(forBackgroundURLSession session: URLSession)
+    
+    func logError(message: String, error: Error)
+}
 
+class SessionDelegate: NSObject {
+    
+    weak var stateProvider: SessionStateProvider?
+
+    func task<TaskType, R: Task<TaskType>>(for url: URL, as type: R.Type) -> R? {
+        guard let provider = stateProvider else {
+            assertionFailure("StateProvider is nil.")
+            return nil
+        }
+
+        return provider.task(for: url, as: type)
+    }
+    
+    func handleError(message: String, error: Error) {
+        guard let provider = stateProvider else {
+            assertionFailure("StateProvider is nil.")
+            return
+        }
+        provider.logError(message: message, error: error)
+    }
 }
 
 
 extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        manager?.didBecomeInvalidation(withError: error)
+        stateProvider?.didBecomeInvalidation(withError: error)
     }
     
     
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        manager?.didFinishEvents(forBackgroundURLSession: session)
+        stateProvider?.didFinishEvents(forBackgroundURLSession: session)
     }
     
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        guard let manager = manager else { return }
         guard let currentURL = downloadTask.currentRequest?.url else { return }
-        guard let task = manager.mapTask(currentURL) else {
-            manager.log(.error("urlSession(_:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)",
-                               error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
-                        )
+        guard let task = task(for: currentURL, as: DownloadTask.self) else {
+            handleError(message: "urlSession(_:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)",
+                        error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
             return
         }
         task.didWriteData(downloadTask: downloadTask, bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
@@ -57,39 +82,40 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     
     
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        guard let manager = manager else { return }
         guard let currentURL = downloadTask.currentRequest?.url else { return }
-        guard let task = manager.mapTask(currentURL) else {
-            manager.log(.error("urlSession(_:downloadTask:didFinishDownloadingTo:)", error: TiercelError.fetchDownloadTaskFailed(url: currentURL)))
+        guard let task = task(for: currentURL, as: DownloadTask.self) else {
+            handleError(message: "urlSession(_:downloadTask:didFinishDownloadingTo:)",
+                        error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
             return
         }
         task.didFinishDownloading(task: downloadTask, to: location)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        guard let manager = manager else { return }
         if let currentURL = task.currentRequest?.url {
-            guard let downloadTask = manager.mapTask(currentURL) else {
-                manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: TiercelError.fetchDownloadTaskFailed(url: currentURL)))
+            guard let downloadTask = self.task(for: currentURL, as: DownloadTask.self) else {
+                handleError(message: "urlSession(_:task:didCompleteWithError:)",
+                            error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
                 return
             }
             downloadTask.didComplete(.network(task: task, error: error))
         } else {
+            // url 不合法
             if let error = error {
                 if let urlError = error as? URLError,
                     let errorURL = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
-                    guard let downloadTask = manager.mapTask(errorURL) else {
-                        manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: TiercelError.fetchDownloadTaskFailed(url: errorURL)))
-                        manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: error))
+                    guard let downloadTask = self.task(for: errorURL, as: DownloadTask.self) else {
+                        handleError(message: "urlSession(_:task:didCompleteWithError:)",
+                                    error: TiercelError.fetchDownloadTaskFailed(url: errorURL))
+                        handleError(message: "urlSession(_:task:didCompleteWithError:)", error: error)
                         return
                     }
                     downloadTask.didComplete(.network(task: task, error: error))
                 } else {
-                    manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: error))
-                    return
+                    handleError(message: "urlSession(_:task:didCompleteWithError:)", error: error)
                 }
             } else {
-                manager.log(.error("urlSession(_:task:didCompleteWithError:)", error: TiercelError.unknown))
+                handleError(message: "urlSession(_:task:didCompleteWithError:)", error: TiercelError.unknown)
             }
         }
     }

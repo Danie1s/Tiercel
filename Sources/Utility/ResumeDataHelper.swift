@@ -27,7 +27,7 @@
 import Foundation
 
 
-internal enum ResumeDataHelper {
+enum ResumeDataHelper {
     
     static let infoVersionKey = "NSURLSessionResumeInfoVersion"
     static let currentRequestKey = "NSURLSessionResumeCurrentRequest"
@@ -38,7 +38,7 @@ internal enum ResumeDataHelper {
     static let bytesReceivedKey = "NSURLSessionResumeBytesReceived"
     static let archiveRootObjectKey = "NSKeyedArchiveRootObjectKey"
     
-    internal static func handleResumeData(_ data: Data) -> Data? {
+    static func handleResumeData(_ data: Data) -> Data? {
         if #available(iOS 11.3, *) {
             return data
         } else if #available(iOS 11.0, *) {
@@ -92,7 +92,7 @@ internal enum ResumeDataHelper {
     ///
     /// - Parameter data:
     /// - Returns:
-    internal static func getResumeDictionary(_ data: Data) -> NSMutableDictionary? {
+    static func getResumeDictionary(_ data: Data) -> NSMutableDictionary? {
         // In beta versions, resumeData is NSKeyedArchive encoded instead of plist
         var object: NSDictionary?
         if #available(OSX 10.11, iOS 9.0, *) {
@@ -124,7 +124,7 @@ internal enum ResumeDataHelper {
 
     }
     
-    internal static func getTmpFileName(_ data: Data) -> String? {
+    static func getTmpFileName(_ data: Data) -> String? {
         guard let resumeDictionary = ResumeDataHelper.getResumeDictionary(data),
             let version = resumeDictionary[infoVersionKey] as? Int
             else { return nil }

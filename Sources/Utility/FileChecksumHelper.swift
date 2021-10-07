@@ -66,14 +66,14 @@ public enum FileChecksumHelper {
                 let data = try Data(contentsOf: url, options: .mappedIfSafe)
                 var string: String
                 switch type {
-                case .md5:
-                    string = data.tr.md5
-                case .sha1:
-                    string = data.tr.sha1
-                case .sha256:
-                    string = data.tr.sha256
-                case .sha512:
-                    string = data.tr.sha512
+                    case .md5:
+                        string = data.tr.md5
+                    case .sha1:
+                        string = data.tr.sha1
+                    case .sha256:
+                        string = data.tr.sha256
+                    case .sha512:
+                        string = data.tr.sha512
                 }
                 let isCorrect = string.lowercased() == code.lowercased()
                 if isCorrect {
@@ -93,14 +93,14 @@ public enum FileChecksumHelper {
 extension FileChecksumHelper.FileVerificationError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .codeEmpty:
-            return "verification code is empty"
-        case let .codeMismatch(code):
-            return "verification code mismatch, code: \(code)"
-        case let .fileDoesnotExist(path):
-            return "file does not exist, path: \(path)"
-        case let .readDataFailed(path):
-            return "read data failed, path: \(path)"
+            case .codeEmpty:
+                return "verification code is empty"
+            case let .codeMismatch(code):
+                return "verification code mismatch, code: \(code)"
+            case let .fileDoesnotExist(path):
+                return "file does not exist, path: \(path)"
+            case let .readDataFailed(path):
+                return "read data failed, path: \(path)"
         }
     }
 

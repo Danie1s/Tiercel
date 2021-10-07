@@ -27,26 +27,29 @@ class ViewController1: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        sessionManager.tasks.safeObject(at: 0)?.progress { [weak self] (task) in
-            self?.updateUI(task)
-        }.completion { [weak self] task in
-            self?.updateUI(task)
-            if task.status == .succeeded {
-                // 下载成功
-            } else {
-                // 其他状态
-            }
-        }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5) { [weak self] task in
-            self?.updateUI(task)
-            if task.validation == .correct {
-                // 文件正确
-            } else {
-                // 文件错误
+        if let task = sessionManager.tasks.first {
+            updateUI(with: task)
+            task.progress { [weak self] (task) in
+                self?.updateUI(with: task)
+            }.completion { [weak self] task in
+                self?.updateUI(with: task)
+                if task.status == .succeeded {
+                    // 下载成功
+                } else {
+                    // 其他状态
+                }
+            }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5) { [weak self] task in
+                self?.updateUI(with: task)
+                if task.validation == .correct {
+                    // 文件正确
+                } else {
+                    // 文件错误
+                }
             }
         }
     }
 
-    private func updateUI(_ task: DownloadTask) {
+    private func updateUI(with task: DownloadTask) {
         let per = task.progress.fractionCompleted
         progressLabel.text = "progress： \(String(format: "%.2f", per * 100))%"
         progressView.observedProgress = task.progress
@@ -71,16 +74,16 @@ class ViewController1: UIViewController {
     
     @IBAction func start(_ sender: UIButton) {
         sessionManager.download(URLString)?.progress { [weak self] (task) in
-            self?.updateUI(task)
+            self?.updateUI(with: task)
         }.completion { [weak self] task in
-            self?.updateUI(task)
+            self?.updateUI(with: task)
             if task.status == .succeeded {
                 // 下载成功
             } else {
                 // 其他状态
             }
         }.validateFile(code: "9e2a3650530b563da297c9246acaad5c", type: .md5) { [weak self] (task) in
-            self?.updateUI(task)
+            self?.updateUI(with: task)
             if task.validation == .correct {
                 // 文件正确
             } else {

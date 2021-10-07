@@ -143,6 +143,7 @@ final public class Throttler {
     
     private let queue: DispatchQueue
     
+    @Protected
     private var workItems = [String: DispatchWorkItem]()
     
     private let latest: Bool

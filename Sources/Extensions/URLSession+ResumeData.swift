@@ -32,7 +32,7 @@ extension URLSession {
     ///
     /// - Parameter resumeData:
     /// - Returns:
-    internal func correctedDownloadTask(withResumeData resumeData: Data) -> URLSessionDownloadTask {
+    func correctedDownloadTask(withResumeData resumeData: Data) -> URLSessionDownloadTask {
         
         let task = downloadTask(withResumeData: resumeData)
         

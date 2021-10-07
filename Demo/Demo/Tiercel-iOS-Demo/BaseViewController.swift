@@ -160,8 +160,6 @@ extension BaseViewController: UITableViewDataSource, UITableViewDelegate {
               let cell = cell as? DownloadTaskCell
         else { return }
         
-        cell.task?.progress { _ in }.success { _ in }.failure { _ in }
-        
         cell.task = task
         
         cell.titleLabel.text = task.fileName

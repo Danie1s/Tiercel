@@ -57,17 +57,17 @@ public struct Logger: Logable {
         var strings = ["************************ TiercelLog ************************"]
         strings.append("identifier    :  \(identifier)")
         switch type {
-        case let .sessionManager(message, manager):
-            strings.append("Message       :  [SessionManager] \(message), tasks.count: \(manager.tasks.count)")
-        case let .downloadTask(message, task):
-            strings.append("Message       :  [DownloadTask] \(message)")
-            strings.append("Task URL      :  \(task.url.absoluteString)")
-            if let error = task.error, task.status == .failed {
-                strings.append("Error         :  \(error)")
-            }
-        case let .error(message, error):
-            strings.append("Message       :  [Error] \(message)")
-            strings.append("Description   :  \(error)")
+            case let .sessionManager(message, manager):
+                strings.append("Message       :  [SessionManager] \(message), tasks.count: \(manager.tasks.count)")
+            case let .downloadTask(message, task):
+                strings.append("Message       :  [DownloadTask] \(message)")
+                strings.append("Task URL      :  \(task.url.absoluteString)")
+                if let error = task.error, task.status == .failed {
+                    strings.append("Error         :  \(error)")
+                }
+            case let .error(message, error):
+                strings.append("Message       :  [Error] \(message)")
+                strings.append("Description   :  \(error)")
         }
         strings.append("")
         print(strings.joined(separator: "\n"))
@@ -89,8 +89,8 @@ public enum Status: String {
 }
 
 public struct TiercelWrapper<Base> {
-    internal let base: Base
-    internal init(_ base: Base) {
+    let base: Base
+    init(_ base: Base) {
         self.base = base
     }
 }
