@@ -239,9 +239,10 @@ extension DownloadTask {
                 progress.totalUnitCount = 0
             }
             progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
-            manager?.maintainTasks(with: .appendRunningTasks(self))
-            executeControl()
             sessionTask?.resume()
+            manager?.maintainTasks(with: .appendRunningTasks(self))
+            manager?.storeTasks()
+            executeControl()
         }
     }
 

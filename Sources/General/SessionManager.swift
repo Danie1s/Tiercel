@@ -693,6 +693,7 @@ extension SessionManager {
                     task.sessionTask = downloadTask
                 }
             }
+            self.storeTasks()
             //  处理mananger状态
             if !self.shouldComplete() {
                 self.shouldSuspend()
