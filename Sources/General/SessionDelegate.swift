@@ -33,7 +33,7 @@ protocol SessionStateProvider: AnyObject {
         
     func didFinishEvents(forBackgroundURLSession session: URLSession)
     
-    func logError(message: String, error: Error)
+    func log(_ error: Error, message: String)
 }
 
 class SessionDelegate: NSObject {
@@ -49,12 +49,12 @@ class SessionDelegate: NSObject {
         return provider.task(for: url, as: type)
     }
     
-    func handleError(message: String, error: Error) {
+    func handle(_ error: Error, message: String) {
         guard let provider = stateProvider else {
             assertionFailure("StateProvider is nil.")
             return
         }
-        provider.logError(message: message, error: error)
+        provider.log(error, message: message)
     }
 }
 
@@ -73,8 +73,8 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         guard let currentURL = downloadTask.currentRequest?.url else { return }
         guard let task = task(for: currentURL, as: DownloadTask.self) else {
-            handleError(message: "urlSession(_:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)",
-                        error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
+            handle(TiercelError.fetchDownloadTaskFailed(url: currentURL),
+                   message: "urlSession(_:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)")
             return
         }
         task.didWriteData(downloadTask: downloadTask, bytesWritten: bytesWritten, totalBytesWritten: totalBytesWritten, totalBytesExpectedToWrite: totalBytesExpectedToWrite)
@@ -84,8 +84,8 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let currentURL = downloadTask.currentRequest?.url else { return }
         guard let task = task(for: currentURL, as: DownloadTask.self) else {
-            handleError(message: "urlSession(_:downloadTask:didFinishDownloadingTo:)",
-                        error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
+            handle(TiercelError.fetchDownloadTaskFailed(url: currentURL),
+                   message: "urlSession(_:downloadTask:didFinishDownloadingTo:)")
             return
         }
         task.didFinishDownloading(task: downloadTask, to: location)
@@ -94,8 +94,8 @@ extension SessionDelegate: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let currentURL = task.currentRequest?.url {
             guard let downloadTask = self.task(for: currentURL, as: DownloadTask.self) else {
-                handleError(message: "urlSession(_:task:didCompleteWithError:)",
-                            error: TiercelError.fetchDownloadTaskFailed(url: currentURL))
+                handle(TiercelError.fetchDownloadTaskFailed(url: currentURL),
+                       message: "urlSession(_:task:didCompleteWithError:)")
                 return
             }
             downloadTask.didComplete(.network(task: task, error: error))
@@ -103,19 +103,19 @@ extension SessionDelegate: URLSessionDownloadDelegate {
             // url 不合法
             if let error = error {
                 if let urlError = error as? URLError,
-                    let errorURL = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
+                   let errorURL = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? URL {
                     guard let downloadTask = self.task(for: errorURL, as: DownloadTask.self) else {
-                        handleError(message: "urlSession(_:task:didCompleteWithError:)",
-                                    error: TiercelError.fetchDownloadTaskFailed(url: errorURL))
-                        handleError(message: "urlSession(_:task:didCompleteWithError:)", error: error)
+                        handle(TiercelError.fetchDownloadTaskFailed(url: errorURL),
+                               message: "urlSession(_:task:didCompleteWithError:)")
+                        handle(error, message: "urlSession(_:task:didCompleteWithError:)")
                         return
                     }
                     downloadTask.didComplete(.network(task: task, error: error))
                 } else {
-                    handleError(message: "urlSession(_:task:didCompleteWithError:)", error: error)
+                    handle(error, message: "urlSession(_:task:didCompleteWithError:)")
                 }
             } else {
-                handleError(message: "urlSession(_:task:didCompleteWithError:)", error: TiercelError.unknown)
+                handle(TiercelError.unknown, message: "urlSession(_:task:didCompleteWithError:)")
             }
         }
     }

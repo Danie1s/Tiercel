@@ -35,7 +35,7 @@ public class SessionManager {
         case appendRunningTasks(DownloadTask)
         case removeRunningTasks(DownloadTask)
     }
-
+    
     public let operationQueue: DispatchQueue
     
     public let cache: Cache
@@ -43,15 +43,38 @@ public class SessionManager {
     public let identifier: String
     
     public var completionHandler: (() -> Void)?
+    
+    private var timer: DispatchSourceTimer?
+    
+    private var session: URLSession?
+    
+    private var shouldCreatSession: Bool = false
+    
+    private var restartTasks: [DownloadTask] = []
 
     public var configuration: SessionConfiguration {
         get { mutableState.configuration }
         set {
-            operationQueue.sync {
-                $mutableState.write {
-                    $0.configuration = newValue
-                    if $0.status == .running {
-                        totalSuspend()
+            var oldMaxConcurrentTasksLimit: Int = 0
+            $mutableState.write {
+                oldMaxConcurrentTasksLimit = $0.configuration.maxConcurrentTasksLimit
+                $0.configuration = newValue
+            }
+            operationQueue.async {
+                if !self.shouldCreatSession {
+                    self.shouldCreatSession = true
+                    self.$mutableState.read {
+                        if $0.status == .running {
+                            if $0.configuration.maxConcurrentTasksLimit <= oldMaxConcurrentTasksLimit {
+                                self.restartTasks = $0.runningTasks + $0.tasks.filter { $0.status == .waiting }
+                            } else {
+                                self.restartTasks = $0.tasks.filter { $0.status == .waiting || $0.status == .running }
+                            }
+                            self.totalSuspend()
+                        } else {
+                            self.session?.invalidateAndCancel()
+                            self.session = nil
+                        }
                     }
                 }
             }
@@ -61,31 +84,12 @@ public class SessionManager {
     private struct MutableState {
         var logger: Logable
         var isControlNetworkActivityIndicator: Bool = true
-        var configuration: SessionConfiguration {
-            didSet {
-                guard !shouldCreatSession else { return }
-                shouldCreatSession = true
-                if status == .running {
-                    if configuration.maxConcurrentTasksLimit <= oldValue.maxConcurrentTasksLimit {
-                        restartTasks = runningTasks + tasks.filter { $0.status == .waiting }
-                    } else {
-                        restartTasks = tasks.filter { $0.status == .waiting || $0.status == .running }
-                    }
-                } else {
-                    session?.invalidateAndCancel()
-                    session = nil
-                }
-            }
-        }
-        var session: URLSession?
-        var shouldCreatSession: Bool = false
-        var timer: DispatchSourceTimer?
+        var configuration: SessionConfiguration
         var status: Status = .waiting
         var tasks: [DownloadTask] = []
         var taskMap: [URL: DownloadTask] = [URL: DownloadTask]()
         var urlMap: [URL: URL] = [URL: URL]()
         var runningTasks: [DownloadTask] = []
-        var restartTasks: [DownloadTask] = []
         var succeededTasks: [DownloadTask] = []
         var speed: Int64 = 0
         var timeRemaining: Int64 = 0
@@ -99,10 +103,9 @@ public class SessionManager {
     
     @Protected
     private var mutableState: MutableState
-
+    
     public var logger: Logable {
-        get { mutableState.logger }
-        set { mutableState.logger = newValue }
+        mutableState.logger
     }
     
     public var isControlNetworkActivityIndicator: Bool {
@@ -110,60 +113,23 @@ public class SessionManager {
         set { mutableState.isControlNetworkActivityIndicator = newValue  }
     }
     
-
-    public var shouldRun: Bool {
-        return runningTasks.count < configuration.maxConcurrentTasksLimit
+    
+    public var canRunImmediately: Bool {
+        $mutableState.read { $0.runningTasks.count < $0.configuration.maxConcurrentTasksLimit }
     }
     
-    private var session: URLSession? {
-        get { mutableState.session }
-        set { mutableState.session = newValue }
+    public var status: Status {
+        mutableState.status
     }
     
-    private var shouldCreatSession: Bool {
-        get { mutableState.shouldCreatSession }
-        set { mutableState.shouldCreatSession = newValue }
-    }
-
-    
-    private var timer: DispatchSourceTimer? {
-        get { mutableState.timer }
-        set { mutableState.timer = newValue }
-    }
-
-    
-    public private(set) var status: Status {
-        get { mutableState.status }
-        set {
-            mutableState.status = newValue
-            if newValue == .willSuspend || newValue == .willCancel || newValue == .willRemove {
-                return
-            }
-            log(.sessionManager(newValue.rawValue, manager: self))
-        }
+    public var tasks: [DownloadTask] {
+        mutableState.tasks
     }
     
-    
-    public private(set) var tasks: [DownloadTask] {
-        get { mutableState.tasks }
-        set { mutableState.tasks = newValue }
+    public var succeededTasks: [DownloadTask] {
+        mutableState.succeededTasks
     }
     
-    private var runningTasks: [DownloadTask] {
-        get { mutableState.runningTasks }
-        set { mutableState.runningTasks = newValue }
-    }
-    
-    private var restartTasks: [DownloadTask] {
-        get { mutableState.restartTasks }
-        set { mutableState.restartTasks = newValue }
-    }
-
-    public private(set) var succeededTasks: [DownloadTask] {
-        get { mutableState.succeededTasks }
-        set { mutableState.succeededTasks = newValue }
-    }
-
     private let _progress = Progress()
     public var progress: Progress {
         $mutableState.read {
@@ -172,21 +138,19 @@ public class SessionManager {
         }
         return _progress
     }
-
-    public private(set) var speed: Int64 {
-        get { mutableState.speed }
-        set { mutableState.speed = newValue }
+    
+    public var speed: Int64 {
+        mutableState.speed
     }
-
+    
     public var speedString: String {
         speed.tr.convertSpeedToString()
     }
     
-    public private(set) var timeRemaining: Int64 {
-        get { mutableState.timeRemaining }
-        set { mutableState.timeRemaining = newValue }
+    public var timeRemaining: Int64 {
+        mutableState.timeRemaining
     }
-
+    
     public var timeRemainingString: String {
         timeRemaining.tr.convertTimeToString()
     }
@@ -215,7 +179,7 @@ public class SessionManager {
         get { mutableState.controlExecuter }
         set { mutableState.controlExecuter = newValue }
     }
-
+    
     
     
     public init(_ identifier: String,
@@ -226,23 +190,23 @@ public class SessionManager {
                                                               autoreleaseFrequency: .workItem)) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
         self.identifier = "\(bundleIdentifier).\(identifier)"
-        mutableState = MutableState(logger: logger ?? Logger(identifier: "\(bundleIdentifier).\(identifier)", option: .default),
+        let logger = logger ?? Logger(identifier: "\(self.identifier)", option: .default)
+        mutableState = MutableState(logger: logger,
                                     configuration: configuration)
         self.operationQueue = operationQueue
         self.cache = cache ?? Cache(identifier)
-        self.cache.manager = self
-        self.cache.retrieveAllTasks().forEach { maintainTasks(with: .append($0)) }
-        succeededTasks = tasks.filter { $0.status == .succeeded }
-        log(.sessionManager("retrieveTasks", manager: self))
+        self.cache.logger = logger
+        self.cache.retrieveAllTasks(with: operationQueue).forEach { maintainTasks(with: .append($0)) }
+        log(.sessionManager(self, message: "retrieveTasks"))
         $mutableState.write { state in
             state.tasks.forEach {
                 $0.delegate = self
-                $0.operationQueue = operationQueue
                 state.urlMap[$0.currentURL] = $0.url
             }
-            state.shouldCreatSession = true
+            state.succeededTasks = state.tasks.filter { $0.status == .succeeded }
         }
         operationQueue.sync {
+            shouldCreatSession = true
             createSession()
             restoreStatus()
         }
@@ -251,37 +215,38 @@ public class SessionManager {
     deinit {
         invalidate()
     }
-
+    
     public func invalidate() {
-        session?.invalidateAndCancel()
-        session = nil
-        cache.invalidate()
-        invalidateTimer()
+        operationQueue.async {
+            self.session?.invalidateAndCancel()
+            self.session = nil
+            self.invalidateTimer()
+        }
     }
-
-
+    
+    
     private func createSession(_ completion: (() -> ())? = nil) {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         guard shouldCreatSession else { return }
         let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: identifier)
-        sessionConfiguration.timeoutIntervalForRequest = configuration.timeoutIntervalForRequest
-        sessionConfiguration.httpMaximumConnectionsPerHost = 100000
-        sessionConfiguration.allowsCellularAccess = configuration.allowsCellularAccess
-        if #available(iOS 13, macOS 10.15, *) {
-            sessionConfiguration.allowsConstrainedNetworkAccess = configuration.allowsConstrainedNetworkAccess
-            sessionConfiguration.allowsExpensiveNetworkAccess = configuration.allowsExpensiveNetworkAccess
+        $mutableState.read { state in
+            sessionConfiguration.timeoutIntervalForRequest = state.configuration.timeoutIntervalForRequest
+            sessionConfiguration.httpMaximumConnectionsPerHost = 100000
+            sessionConfiguration.allowsCellularAccess = state.configuration.allowsCellularAccess
+            if #available(iOS 13, macOS 10.15, *) {
+                sessionConfiguration.allowsConstrainedNetworkAccess = state.configuration.allowsConstrainedNetworkAccess
+                sessionConfiguration.allowsExpensiveNetworkAccess = state.configuration.allowsExpensiveNetworkAccess
+            }
         }
         let sessionDelegate = SessionDelegate()
         sessionDelegate.stateProvider = self
         let delegateQueue = OperationQueue(maxConcurrentOperationCount: 1,
                                            underlyingQueue: operationQueue,
                                            name: "com.Tiercel.SessionManager.delegateQueue")
-        $mutableState.write {
-            let session = URLSession(configuration: sessionConfiguration,
-                                     delegate: sessionDelegate,
-                                     delegateQueue: delegateQueue)
-            $0.session = session
-            $0.shouldCreatSession = false
-        }
+        session = URLSession(configuration: sessionConfiguration,
+                             delegate: sessionDelegate,
+                             delegateQueue: delegateQueue)
+        shouldCreatSession = false
         completion?()
     }
 }
@@ -325,13 +290,13 @@ extension SessionManager {
             }
             return task
         } catch {
-            log(.error("create dowloadTask failed", error: error))
+            log(.error(error, message: "create dowloadTask failed"))
             return nil
         }
-
+        
     }
     
-
+    
     /// 批量开启多个下载任务, 所有任务都会并发下载
     ///
     /// - Parameters:
@@ -346,34 +311,33 @@ extension SessionManager {
                               onMainQueue: Bool = true,
                               handler: Handler<SessionManager>? = nil) -> [DownloadTask] {
         if let headersArray = headersArray,
-            headersArray.count != 0 && headersArray.count != urls.count {
-            log(.error("create multiple dowloadTasks failed", error: TiercelError.headersMatchFailed))
+           headersArray.count != 0 && headersArray.count != urls.count {
+            log(.error(TiercelError.headersMatchFailed, message: "create multiple dowloadTasks failed"))
             return [DownloadTask]()
         }
         
         if let fileNames = fileNames,
-            fileNames.count != 0 && fileNames.count != urls.count {
-            log(.error("create multiple dowloadTasks failed", error: TiercelError.fileNamesMatchFailed))
+           fileNames.count != 0 && fileNames.count != urls.count {
+            log(.error(TiercelError.fileNamesMatchFailed, message: "create multiple dowloadTasks failed"))
             return [DownloadTask]()
         }
-
+        
         var urlSet = Set<URL>()
         var uniqueTasks = [DownloadTask]()
-
+        
         operationQueue.sync {
             for (index, url) in urls.enumerated() {
-                let fileName = fileNames?.safeObject(at: index)
-                let headers = headersArray?.safeObject(at: index)
-
                 guard let validURL = try? url.asURL() else {
-                    log(.error("create dowloadTask failed", error: TiercelError.invalidURL(url: url)))
+                    log(.error(TiercelError.invalidURL(url: url), message: "create dowloadTask failed"))
                     continue
                 }
                 guard urlSet.insert(validURL).inserted else {
-                    log(.error("create dowloadTask failed", error: TiercelError.duplicateURL(url: url)))
+                    log(.error(TiercelError.duplicateURL(url: url), message: "create dowloadTask failed"))
                     continue
                 }
-
+                let fileName = fileNames?.safeObject(at: index)
+                let headers = headersArray?.safeObject(at: index)
+                
                 var task: DownloadTask!
                 task = fetchTask(validURL)
                 if let task = task {
@@ -391,6 +355,7 @@ extension SessionManager {
             }
             storeTasks()
             Executer(onMainQueue: onMainQueue, handler: handler).execute(self)
+            // TODO: - 待优化
             operationQueue.async {
                 uniqueTasks.forEach {
                     if $0.status != .succeeded {
@@ -411,7 +376,7 @@ extension SessionManager {
             let validURL = try url.asURL()
             return $mutableState.read { $0.taskMap[validURL] }
         } catch {
-            log(.error("fetch task failed", error: TiercelError.invalidURL(url: url)))
+            log(.error(TiercelError.invalidURL(url: url), message: "fetch task failed"))
             return nil
         }
     }
@@ -422,7 +387,7 @@ extension SessionManager {
             return $0.taskMap[url]
         }
     }
-
+    
     
     
     /// 开启任务
@@ -442,31 +407,32 @@ extension SessionManager {
     
     private func _start(_ url: URLConvertible, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         guard let task = self.fetchTask(url) else {
-            log(.error("can't start downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+            log(.error(TiercelError.fetchDownloadTaskFailed(url: url), message: "can't start downloadTask"))
             return
         }
         _start(task, onMainQueue: onMainQueue, handler: handler)
     }
     
     private func _start(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         task.mutableState.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
         didStart()
         if !shouldCreatSession, let session = session {
-            task.tryToDownload(using: session)
+            task.start(using: session, immediately: canRunImmediately)
         } else {
             task.suspend()
-            if !restartTasks.contains(task) {
+            if restartTasks.contains(task) {
                 restartTasks.append(task)
             }
         }
     }
-
+    
     
     /// 暂停任务，会触发sessionDelegate的完成回调
     public func suspend(_ url: URLConvertible, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let task = self.fetchTask(url) else {
-                self.log(.error("can't suspend downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                self.log(.error(TiercelError.fetchDownloadTaskFailed(url: url), message: "can't suspend downloadTask"))
                 return
             }
             task.suspend(onMainQueue: onMainQueue, handler: handler)
@@ -476,7 +442,7 @@ extension SessionManager {
     public func suspend(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let _ = self.fetchTask(task.url) else {
-                self.log(.error("can't suspend downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                self.log(.error(TiercelError.fetchDownloadTaskFailed(url: task.url), message: "can't suspend downloadTask"))
                 return
             }
             task.suspend(onMainQueue: onMainQueue, handler: handler)
@@ -491,7 +457,7 @@ extension SessionManager {
     public func cancel(_ url: URLConvertible, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let task = self.fetchTask(url) else {
-                self.log(.error("can't cancel downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                self.log(.error(TiercelError.fetchDownloadTaskFailed(url: url), message: "can't cancel downloadTask"))
                 return
             }
             task.cancel(onMainQueue: onMainQueue, handler: handler)
@@ -501,7 +467,7 @@ extension SessionManager {
     public func cancel(_ task: DownloadTask, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let _ = self.fetchTask(task.url) else {
-                self.log(.error("can't cancel downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                self.log(.error(TiercelError.fetchDownloadTaskFailed(url: task.url), message: "can't cancel downloadTask"))
                 return
             }
             task.cancel(onMainQueue: onMainQueue, handler: handler)
@@ -521,7 +487,7 @@ extension SessionManager {
     public func remove(_ url: URLConvertible, completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let task = self.fetchTask(url) else {
-                self.log(.error("can't remove downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: url)))
+                self.log(.error(TiercelError.fetchDownloadTaskFailed(url: url), message: "can't remove downloadTask"))
                 return
             }
             task.remove(completely: completely, onMainQueue: onMainQueue, handler: handler)
@@ -531,7 +497,8 @@ extension SessionManager {
     public func remove(_ task: DownloadTask, completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         operationQueue.async {
             guard let _ = self.fetchTask(task.url) else {
-                self.log(.error("can't remove downloadTask", error: TiercelError.fetchDownloadTaskFailed(url: task.url)))
+                self.log(.error(TiercelError.fetchDownloadTaskFailed(url: task.url),
+                                message: "can't remove downloadTask"))
                 return
             }
             task.remove(completely: completely, onMainQueue: onMainQueue, handler: handler)
@@ -542,8 +509,8 @@ extension SessionManager {
         operationQueue.sync {
             let range = (0..<tasks.count)
             guard range.contains(sourceIndex) && range.contains(destinationIndex) else {
-                log(.error("move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)",
-                                error: TiercelError.indexOutOfRange))
+                log(.error(TiercelError.indexOutOfRange,
+                           message: "move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)"))
                 return
             }
             if sourceIndex == destinationIndex {
@@ -576,8 +543,10 @@ extension SessionManager {
     public func totalSuspend(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status == .running || self.status == .waiting else { return }
-            self.status = .willSuspend
-            self.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            self.$mutableState.write {
+                $0.status = .willSuspend
+                $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            }
             self.tasks.forEach { $0.suspend() }
         }
     }
@@ -585,8 +554,10 @@ extension SessionManager {
     public func totalCancel(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status != .succeeded && self.status != .canceled else { return }
-            self.status = .willCancel
-            self.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            self.$mutableState.write {
+                $0.status = .willCancel
+                $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            }
             self.tasks.forEach { $0.cancel() }
         }
     }
@@ -594,8 +565,10 @@ extension SessionManager {
     public func totalRemove(completely: Bool = false, onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
             guard self.status != .removed else { return }
-            self.status = .willRemove
-            self.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            self.$mutableState.write {
+                $0.status = .willRemove
+                $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            }
             self.tasks.forEach { $0.remove(completely: completely) }
         }
     }
@@ -612,9 +585,9 @@ extension SessionManager {
 
 // MARK: - status handle
 extension SessionManager {
-
-    func maintainTasks(with action: MaintainTasksAction) {
-
+    
+    private func maintainTasks(with action: MaintainTasksAction) {
+        
         switch action {
             case let .append(task):
                 $mutableState.write { state in
@@ -651,7 +624,7 @@ extension SessionManager {
                     }
                 }
             case let .succeeded(task):
-                succeededTasks.append(task)
+                $mutableState.write{ $0.succeededTasks.append(task) }
             case let .appendRunningTasks(task):
                 $mutableState.write { state in
                     state.runningTasks.append(task)
@@ -664,12 +637,13 @@ extension SessionManager {
                 }
         }
     }
-
-    func updateUrlMapper(with task: DownloadTask) {
+    
+    private func updateUrlMapper(with task: DownloadTask) {
         $mutableState.write { $0.urlMap[task.currentURL] = task.url }
     }
     
     private func restoreStatus() {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         if self.tasks.isEmpty {
             return
         }
@@ -680,8 +654,8 @@ extension SessionManager {
                    let currentURL = downloadTask.currentRequest?.url,
                    let task = self.mapTask(currentURL) {
                     self.didStart()
-                    self.maintainTasks(with: .appendRunningTasks(task))
                     task.restoreRunningStatus(with: downloadTask)
+                    self.taskDidStart(task)
                 }
             }
             //  处理mananger状态
@@ -696,29 +670,33 @@ extension SessionManager {
         
         let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
         let isCompleted = isSucceeded ? isSucceeded :
-                                        self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+        self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
         guard isCompleted else { return false }
-
+        
         if status == .succeeded || status == .failed {
             return true
         }
-        timeRemaining = 0
+        mutableState.timeRemaining = 0
         progressExecuter?.execute(self)
-        status = isSucceeded ? .succeeded : .failed
+        let status: Status = isSucceeded ? .succeeded : .failed
+        mutableState.status = status
+        didChangeStatus(to: status)
         executeCompletion(isSucceeded)
         return true
     }
     
-
-
+    
+    
     private func shouldSuspend() {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         let isSuspended = tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
-
+        
         if isSuspended {
             if status == .suspended {
                 return
             }
-            status = .suspended
+            mutableState.status = .suspended
+            didChangeStatus(to: .suspended)
             executeControl()
             executeCompletion(false)
             if shouldCreatSession {
@@ -728,40 +706,38 @@ extension SessionManager {
         }
     }
     
-    func didStart() {
+    private func didStart() {
         if status != .running {
+            if isControlNetworkActivityIndicator {
+                DispatchQueue.tr.executeOnMain {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                }
+            }
             createTimer()
-            status = .running
+            mutableState.status = .running
+            didChangeStatus(to: .running)
             progressExecuter?.execute(self)
         }
     }
     
-    func updateProgress() {
-        if isControlNetworkActivityIndicator {
-            DispatchQueue.tr.executeOnMain {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            }
-        }
+    private func updateProgress() {
         progressExecuter?.execute(self)
         NotificationCenter.default.postNotification(name: SessionManager.runningNotification, sessionManager: self)
     }
     
-
-    func storeTasks() {
+    
+    private func storeTasks() {
         cache.storeTasks(tasks)
     }
     
-    func determineStatus(fromRunningTask: Bool) {
-        if isControlNetworkActivityIndicator {
-            DispatchQueue.tr.executeOnMain {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            }
-        }
-
+    private func determineStatus(fromRunningTask: Bool) {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
+        
         // removed
         if status == .willRemove {
             if tasks.isEmpty {
-                status = .removed
+                mutableState.status = .removed
+                didChangeStatus(to: .removed)
                 executeControl()
                 ending(false)
             }
@@ -772,10 +748,10 @@ extension SessionManager {
         if status == .willCancel {
             let succeededTasksCount = mutableState.taskMap.values.count
             if tasks.count == succeededTasksCount {
-                status = .canceled
+                mutableState.status = .canceled
+                didChangeStatus(to: .canceled)
                 executeControl()
                 ending(false)
-                return
             }
             return
         }
@@ -788,25 +764,30 @@ extension SessionManager {
                 storeTasks()
                 return
             }
-            timeRemaining = 0
+            mutableState.timeRemaining = 0
             progressExecuter?.execute(self)
             let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
-            status = isSucceeded ? .succeeded : .failed
+            let status: Status = isSucceeded ? .succeeded : .failed
+            mutableState.status = status
+            didChangeStatus(to: status)
             ending(isSucceeded)
             return
         }
         
         // suspended
-        let isSuspended = tasks.allSatisfy { $0.status == .suspended ||
-                                             $0.status == .succeeded ||
-                                             $0.status == .failed }
-
+        let isSuspended = tasks.allSatisfy {
+            $0.status == .suspended ||
+            $0.status == .succeeded ||
+            $0.status == .failed
+        }
+        
         if isSuspended {
             if status == .suspended {
                 storeTasks()
                 return
             }
-            status = .suspended
+            mutableState.status = .suspended
+            didChangeStatus(to: .suspended)
             if shouldCreatSession {
                 session?.invalidateAndCancel()
                 session = nil
@@ -839,22 +820,22 @@ extension SessionManager {
     
     
     private func startNextTask() {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         guard let session = session,
               let waitingTask = tasks.first (where: { $0.status == .waiting })
         else { return }
-        waitingTask.tryToDownload(using: session)
+        waitingTask.start(using: session, immediately: canRunImmediately)
     }
 }
 
 // MARK: - info
 extension SessionManager {
-
-    static let refreshInterval: Double = 1
-
+        
     private func createTimer() {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         if timer == nil {
             timer = DispatchSource.makeTimerSource(flags: .strict, queue: operationQueue)
-            timer?.schedule(deadline: .now(), repeating: Self.refreshInterval)
+            timer?.schedule(deadline: .now(), repeating: 1)
             timer?.setEventHandler(handler: { [weak self] in
                 guard let self = self else { return }
                 self.updateSpeedAndTimeRemaining()
@@ -862,17 +843,20 @@ extension SessionManager {
             timer?.resume()
         }
     }
-
+    
     private func invalidateTimer() {
+        dispatchPrecondition(condition: .onQueue(operationQueue))
         timer?.cancel()
         timer = nil
     }
-
-    func updateSpeedAndTimeRemaining() {
-        let speed = runningTasks.reduce(Int64(0), {
-            $1.updateSpeedAndTimeRemaining()
-            return $0 + $1.speed
-        })
+    
+    private func updateSpeedAndTimeRemaining() {
+        let speed: Int64 = $mutableState.read { state in
+            state.runningTasks.reduce(Int64(0), {
+                $1.updateSpeedAndTimeRemaining()
+                return $0 + $1.speed
+            })
+        }
         updateTimeRemaining(speed)
     }
     
@@ -891,10 +875,19 @@ extension SessionManager {
             $0.timeRemaining = Int64(timeRemaining)
         }
     }
-
-
-
-    func log(_ type: LogType) {
+    
+    private func didChangeStatus(to newValue: Status) {
+        log(.sessionManager(self, message: newValue.rawValue))
+        if newValue == .canceled || newValue == .removed || newValue == .succeeded || newValue == .failed {
+            if isControlNetworkActivityIndicator {
+                DispatchQueue.tr.executeOnMain {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
+            }
+        }
+    }
+    
+    private func log(_ type: LogType) {
         logger.log(type)
     }
 }
@@ -944,15 +937,16 @@ extension SessionManager {
 
 // MARK: - TaskDelegate
 extension SessionManager: TaskDelegate {
-    public func task<TaskType>(_ task: Task<TaskType>, statusDidChange status: Status) {
+    public func task<TaskType>(_ task: Task<TaskType>, didChangeStatusTo newValue: Status) {
         if let task = task as? DownloadTask {
-            log(.downloadTask(status.rawValue, task: task))
+            log(.downloadTask(task, message: newValue.rawValue))
         }
     }
     
     public func taskDidStart<TaskType>(_ task: Task<TaskType>) {
         if let task = task as? DownloadTask {
             maintainTasks(with: .appendRunningTasks(task))
+            storeTasks()
         }
     }
     
@@ -961,12 +955,14 @@ extension SessionManager: TaskDelegate {
             maintainTasks(with: .remove(task))
             
             // 处理使用单个任务操作移除最后一个task时，manager状态
-            if tasks.isEmpty {
-                if task.status == .canceled {
-                    status = .willCancel
-                }
-                if task.status == .removed {
-                    status = .willRemove
+            $mutableState.write {
+                if $0.tasks.isEmpty {
+                    if task.status == .canceled {
+                        $0.status = .willCancel
+                    }
+                    if task.status == .removed {
+                        $0.status = .willRemove
+                    }
                 }
             }
         }
@@ -978,14 +974,14 @@ extension SessionManager: TaskDelegate {
         }
     }
     
-    public func taskDidSucceed<TaskType>(_ task: Task<TaskType>, fromRunning: Bool) {
+    public func task<TaskType>(_ task: Task<TaskType>, didSucceed fromRunning: Bool) {
         if let task = task as? DownloadTask {
             maintainTasks(with: .succeeded(task))
         }
         determineStatus(fromRunningTask: fromRunning)
     }
     
-    public func taskDidDetermineStatus<TaskType>(_ task: Task<TaskType>, fromRunning: Bool) {
+    public func task<TaskType>(_ task: Task<TaskType>, didDetermineStatus fromRunning: Bool) {
         determineStatus(fromRunningTask: fromRunning)
     }
     
@@ -998,25 +994,24 @@ extension SessionManager: TaskDelegate {
     public func taskDidUpdateProgress<TaskType>(_ task: Task<TaskType>) {
         updateProgress()
     }
-
+    
 }
 
 extension SessionManager: DownloadTaskDelegate {
     public func downloadTaskFileExists(_ task: DownloadTask) {
-        log(.downloadTask("file already exists", task: task))
+        log(.downloadTask(task, message: "file already exists"))
     }
     
     public func downloadTaskWillValidateFile(_ task: DownloadTask) {
         storeTasks()
     }
     
-    
-    public func downloadTaskDidValidateFile(_ task: DownloadTask, result: Result<Bool, FileChecksumHelper.FileVerificationError>) {
+    public func downloadTask(_ task: DownloadTask, didValidateFile result: Result<Bool, FileChecksumHelper.FileVerificationError>) {
         switch result {
             case .success:
-                log(.downloadTask("file validation successful", task: task))
+                log(.downloadTask(task, message: "file validation successful"))
             case let .failure(error):
-                log(.error("file validation failed, url: \(task.url)", error: error))
+                log(.error(error, message: "file validation failed, url: \(task.url)"))
         }
         storeTasks()
     }
@@ -1029,8 +1024,8 @@ extension SessionManager: SessionStateProvider {
         return mapTask(url) as? R
     }
     
-    func logError(message: String, error: Error) {
-        log(.error(message, error: error))
+    func log(_ error: Error, message: String) {
+        log(.error(error, message: message))
     }
     
     func didBecomeInvalidation(withError error: Error?) {

@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E16EEFEB27244C5500761D5B /* DownloadResumeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16EEFEA27244C5500761D5B /* DownloadResumeData.swift */; };
 		E1EBF45024E9957E00697485 /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1EBF44624E9957E00697485 /* Tiercel.framework */; };
 		E1EBF45524E9957E00697485 /* TiercelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF45424E9957E00697485 /* TiercelTests.swift */; };
 		E1EBF45724E9957E00697485 /* Tiercel.h in Headers */ = {isa = PBXBuildFile; fileRef = E1EBF44924E9957E00697485 /* Tiercel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E1EBF49F24E9968900697485 /* Data+Hash.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48524E9968900697485 /* Data+Hash.swift */; };
 		E1EBF4A024E9968900697485 /* CodingUserInfoKey+Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48624E9968900697485 /* CodingUserInfoKey+Cache.swift */; };
 		E1EBF4A124E9968900697485 /* Int64+TaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48724E9968900697485 /* Int64+TaskInfo.swift */; };
-		E1EBF4A224E9968900697485 /* URLSession+ResumeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48824E9968900697485 /* URLSession+ResumeData.swift */; };
 		E1EBF4A324E9968900697485 /* Array+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48924E9968900697485 /* Array+Safe.swift */; };
 		E1EBF4A424E9968900697485 /* FileManager+AvailableCapacity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48A24E9968900697485 /* FileManager+AvailableCapacity.swift */; };
 		E1EBF4A524E9968900697485 /* DispatchQueue+Safe.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF48B24E9968900697485 /* DispatchQueue+Safe.swift */; };
@@ -31,7 +31,6 @@
 		E1EBF4B224E9968900697485 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49924E9968900697485 /* SessionManager.swift */; };
 		E1EBF4B324E9968900697485 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49A24E9968900697485 /* Task.swift */; };
 		E1EBF4B424E9968900697485 /* SessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49B24E9968900697485 /* SessionDelegate.swift */; };
-		E1EBF4B524E9968900697485 /* ResumeDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49D24E9968900697485 /* ResumeDataHelper.swift */; };
 		E1EBF4B624E9968900697485 /* FileChecksumHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF49E24E9968900697485 /* FileChecksumHelper.swift */; };
 		E1FE924826E905E200FA3B2E /* Protected.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FE924726E905E200FA3B2E /* Protected.swift */; };
 /* End PBXBuildFile section */
@@ -47,6 +46,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E16EEFEA27244C5500761D5B /* DownloadResumeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadResumeData.swift; sourceTree = "<group>"; };
 		E1EBF44624E9957E00697485 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1EBF44924E9957E00697485 /* Tiercel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tiercel.h; sourceTree = "<group>"; };
 		E1EBF44A24E9957E00697485 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -56,7 +56,6 @@
 		E1EBF48524E9968900697485 /* Data+Hash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Data+Hash.swift"; sourceTree = "<group>"; };
 		E1EBF48624E9968900697485 /* CodingUserInfoKey+Cache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CodingUserInfoKey+Cache.swift"; sourceTree = "<group>"; };
 		E1EBF48724E9968900697485 /* Int64+TaskInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Int64+TaskInfo.swift"; sourceTree = "<group>"; };
-		E1EBF48824E9968900697485 /* URLSession+ResumeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URLSession+ResumeData.swift"; sourceTree = "<group>"; };
 		E1EBF48924E9968900697485 /* Array+Safe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Safe.swift"; sourceTree = "<group>"; };
 		E1EBF48A24E9968900697485 /* FileManager+AvailableCapacity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileManager+AvailableCapacity.swift"; sourceTree = "<group>"; };
 		E1EBF48B24E9968900697485 /* DispatchQueue+Safe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Safe.swift"; sourceTree = "<group>"; };
@@ -74,7 +73,6 @@
 		E1EBF49924E9968900697485 /* SessionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
 		E1EBF49A24E9968900697485 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		E1EBF49B24E9968900697485 /* SessionDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionDelegate.swift; sourceTree = "<group>"; };
-		E1EBF49D24E9968900697485 /* ResumeDataHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResumeDataHelper.swift; sourceTree = "<group>"; };
 		E1EBF49E24E9968900697485 /* FileChecksumHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileChecksumHelper.swift; sourceTree = "<group>"; };
 		E1FE924726E905E200FA3B2E /* Protected.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protected.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -142,7 +140,6 @@
 			children = (
 				E1EBF48C24E9968900697485 /* String+Hash.swift */,
 				E1EBF48524E9968900697485 /* Data+Hash.swift */,
-				E1EBF48824E9968900697485 /* URLSession+ResumeData.swift */,
 				E1EBF48724E9968900697485 /* Int64+TaskInfo.swift */,
 				E1EBF48D24E9968900697485 /* Double+TaskInfo.swift */,
 				E1EBF48B24E9968900697485 /* DispatchQueue+Safe.swift */,
@@ -162,6 +159,7 @@
 				E1EBF49724E9968900697485 /* Cache.swift */,
 				E1EBF49A24E9968900697485 /* Task.swift */,
 				E1EBF49124E9968900697485 /* DownloadTask.swift */,
+				E16EEFEA27244C5500761D5B /* DownloadResumeData.swift */,
 				E1EBF49224E9968900697485 /* SessionConfiguration.swift */,
 				E1EBF49924E9968900697485 /* SessionManager.swift */,
 				E1EBF49B24E9968900697485 /* SessionDelegate.swift */,
@@ -176,7 +174,6 @@
 		E1EBF49C24E9968900697485 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				E1EBF49D24E9968900697485 /* ResumeDataHelper.swift */,
 				E1EBF49E24E9968900697485 /* FileChecksumHelper.swift */,
 			);
 			path = Utility;
@@ -293,6 +290,7 @@
 			files = (
 				E1EBF49F24E9968900697485 /* Data+Hash.swift in Sources */,
 				E1EBF4A424E9968900697485 /* FileManager+AvailableCapacity.swift in Sources */,
+				E16EEFEB27244C5500761D5B /* DownloadResumeData.swift in Sources */,
 				E1EBF4A924E9968900697485 /* URLConvertible.swift in Sources */,
 				E1EBF4A624E9968900697485 /* String+Hash.swift in Sources */,
 				E1EBF4B124E9968900697485 /* TiercelError.swift in Sources */,
@@ -308,12 +306,10 @@
 				E1EBF4AC24E9968900697485 /* Executer.swift in Sources */,
 				E1EBF4B624E9968900697485 /* FileChecksumHelper.swift in Sources */,
 				E1EBF4A724E9968900697485 /* Double+TaskInfo.swift in Sources */,
-				E1EBF4B524E9968900697485 /* ResumeDataHelper.swift in Sources */,
 				E1EBF4AB24E9968900697485 /* SessionConfiguration.swift in Sources */,
 				E1EBF4AD24E9968900697485 /* Common.swift in Sources */,
 				E1EBF4B224E9968900697485 /* SessionManager.swift in Sources */,
 				E1EBF4B324E9968900697485 /* Task.swift in Sources */,
-				E1EBF4A224E9968900697485 /* URLSession+ResumeData.swift in Sources */,
 				E1EBF4B424E9968900697485 /* SessionDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

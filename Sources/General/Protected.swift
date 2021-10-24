@@ -86,13 +86,13 @@ final public class Protected<T> {
     }
 
     public func read<U>(_ closure: (T) throws -> U) rethrows -> U {
-        return try lock.around { try closure(self.value) }
+        try lock.around { try closure(self.value) }
     }
 
 
     @discardableResult
     public func write<U>(_ closure: (inout T) throws -> U) rethrows -> U {
-        return try lock.around { try closure(&self.value) }
+        try lock.around { try closure(&self.value) }
     }
 }
 

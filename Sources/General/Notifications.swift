@@ -43,11 +43,11 @@ public extension SessionManager {
 extension Notification: TiercelCompatible { }
 extension TiercelWrapper where Base == Notification {
     public var downloadTask: DownloadTask? {
-        return base.userInfo?[String.downloadTaskKey] as? DownloadTask
+        base.userInfo?[String.downloadTaskKey] as? DownloadTask
     }
     
     public var sessionManager: SessionManager? {
-        return base.userInfo?[String.sessionManagerKey] as? SessionManager
+        base.userInfo?[String.sessionManagerKey] as? SessionManager
     }
 }
 

@@ -27,18 +27,16 @@
 import Foundation
 
 public protocol TaskDelegate: AnyObject {
-    
-    var shouldRun: Bool { get }
-    
-    func task<TaskType>(_ task: Task<TaskType>, statusDidChange: Status)
+        
+    func task<TaskType>(_ task: Task<TaskType>, didChangeStatusTo newValue: Status)
     
     func taskDidStart<TaskType>(_ task: Task<TaskType>)
 
     func taskDidCancelOrRemove<TaskType>(_ task: Task<TaskType>)
     
-    func taskDidSucceed<TaskType>(_ task: Task<TaskType>, fromRunning: Bool)
+    func task<TaskType>(_ task: Task<TaskType>, didSucceed fromRunning: Bool)
     
-    func taskDidDetermineStatus<TaskType>(_ task: Task<TaskType>, fromRunning: Bool)
+    func task<TaskType>(_ task: Task<TaskType>, didDetermineStatus fromRunning: Bool)
     
     func taskDidUpdateCurrentURL<TaskType>(_ task: Task<TaskType>)
     
@@ -87,9 +85,9 @@ public class Task<TaskType>: NSObject, Codable {
 
     weak var delegate: TaskDelegate?
 
-    var cache: Cache
+    let cache: Cache
 
-    var operationQueue: DispatchQueue
+    let operationQueue: DispatchQueue
 
     public let url: URL
     
@@ -217,8 +215,8 @@ public class Task<TaskType>: NSObject, Codable {
         let currentURL = try container.decode(URL.self, forKey: .currentURL)
         let fileName = try container.decode(String.self, forKey: .fileName)
         mutableState = MutableState(currentURL: currentURL, fileName: fileName)
-        cache = decoder.userInfo[.cache] as? Cache ?? Cache("default")
-        operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
+        cache = decoder.userInfo[.cache] as! Cache
+        operationQueue = decoder.userInfo[.operationQueue] as! DispatchQueue
         super.init()
 
         progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)

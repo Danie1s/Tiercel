@@ -27,40 +27,42 @@
 import Foundation
 
 public class Cache {
-
+    
     private let ioQueue: DispatchQueue
     
     private var debouncer: Debouncer
     
     public let downloadPath: String
-
+    
     public let downloadTmpPath: String
     
     public let downloadFilePath: String
     
     public let identifier: String
-        
+    
     private let fileManager = FileManager.default
     
     private let encoder = PropertyListEncoder()
     
-    weak var manager: SessionManager?
+    weak var logger: Logable?
     
-    private let decoder = PropertyListDecoder()
     
     public static func defaultDiskCachePathClosure(_ cacheName: String) -> String {
         let dstPath = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first!
         return (dstPath as NSString).appendingPathComponent(cacheName)
     }
     
-
+    
     /// 初始化方法
     /// - Parameters:
     ///   - identifier: 不同的identifier代表不同的下载模块。如果没有自定义下载目录，Cache会提供默认的目录，这些目录跟identifier相关
     ///   - downloadPath: 存放用于DownloadTask持久化的数据，默认提供的downloadTmpPath、downloadFilePath也是在里面
     ///   - downloadTmpPath: 存放下载中的临时文件
     ///   - downloadFilePath: 存放下载完成后的文件
-    public init(_ identifier: String, downloadPath: String? = nil, downloadTmpPath: String? = nil, downloadFilePath: String? = nil) {
+    public init(_ identifier: String,
+                downloadPath: String? = nil,
+                downloadTmpPath: String? = nil,
+                downloadFilePath: String? = nil) {
         self.identifier = identifier
         
         let ioQueueName = "com.Tiercel.Cache.ioQueue.\(identifier)"
@@ -71,24 +73,20 @@ public class Cache {
         let cacheName = "com.Daniels.Tiercel.Cache.\(identifier)"
         
         let diskCachePath = Cache.defaultDiskCachePathClosure(cacheName)
-                
+        
         let path = downloadPath ?? (diskCachePath as NSString).appendingPathComponent("Downloads")
-                
+        
         self.downloadPath = path
-
+        
         self.downloadTmpPath = downloadTmpPath ?? (path as NSString).appendingPathComponent("Tmp")
         
         self.downloadFilePath = downloadFilePath ?? (path as NSString).appendingPathComponent("File")
         
         createDirectory()
 
-        decoder.userInfo[.cache] = self
         
     }
     
-    public func invalidate() {
-        decoder.userInfo[.cache] = nil
-    }
 }
 
 
@@ -100,9 +98,9 @@ extension Cache {
             do {
                 try fileManager.createDirectory(atPath: downloadPath, withIntermediateDirectories: true, attributes: nil)
             } catch  {
-                manager?.log(.error("create directory failed",
-                                    error: TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadPath,
-                                                                                                  error: error))))
+                logger?.log(.error(TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadPath,
+                                                                                          error: error)),
+                                   message: "create directory failed"))
             }
         }
         
@@ -110,9 +108,9 @@ extension Cache {
             do {
                 try fileManager.createDirectory(atPath: downloadTmpPath, withIntermediateDirectories: true, attributes: nil)
             } catch  {
-                manager?.log(.error("create directory failed",
-                                    error: TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadTmpPath,
-                                                                                                  error: error))))
+                logger?.log(.error(TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadTmpPath,
+                                                                                          error: error)),
+                                   message: "create directory failed"))
             }
         }
         
@@ -120,9 +118,9 @@ extension Cache {
             do {
                 try fileManager.createDirectory(atPath: downloadFilePath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                manager?.log(.error("create directory failed",
-                                    error: TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadFilePath,
-                                                                                                  error: error))))
+                logger?.log(.error(TiercelError.cacheError(reason: .cannotCreateDirectory(path: downloadFilePath,
+                                                                                          error: error)),
+                                   message: "create directory failed"))
             }
         }
     }
@@ -174,9 +172,9 @@ extension Cache {
             do {
                 try self.fileManager.removeItem(atPath: self.downloadPath)
             } catch {
-                self.manager?.log(.error("clear disk cache failed",
-                                    error: TiercelError.cacheError(reason: .cannotRemoveItem(path: self.downloadPath,
-                                                                                                  error: error))))
+                self.logger?.log(.error(TiercelError.cacheError(reason: .cannotRemoveItem(path: self.downloadPath,
+                                                                                          error: error)),
+                                        message: "clear disk cache failed"))
             }
             self.createDirectory()
             if let handler = handler {
@@ -189,28 +187,32 @@ extension Cache {
 
 // MARK: - retrieve
 extension Cache {
-    func retrieveAllTasks() -> [DownloadTask] {
+    func retrieveAllTasks(with operationQueue: DispatchQueue) -> [DownloadTask] {
         return ioQueue.sync {
             let path = (downloadPath as NSString).appendingPathComponent("\(identifier)_Tasks.plist")
             if fileManager.fileExists(atPath: path) {
                 do {
                     let url = URL(fileURLWithPath: path)
                     let data = try Data(contentsOf: url)
+                    let decoder = PropertyListDecoder()
+                    decoder.userInfo[.cache] = self
+                    decoder.userInfo[.operationQueue] = operationQueue
                     let tasks = try decoder.decode([DownloadTask].self, from: data)
                     return tasks
                 } catch {
-                    manager?.log(.error("retrieve all tasks failed", error: TiercelError.cacheError(reason: .cannotRetrieveAllTasks(path: path, error: error))))
+                    logger?.log(.error(TiercelError.cacheError(reason: .cannotRetrieveAllTasks(path: path, error: error)),
+                                       message: "retrieve all tasks failed"))
                     return [DownloadTask]()
                 }
             } else {
-               return  [DownloadTask]()
+                return  [DownloadTask]()
             }
         }
     }
-
-    func retrieveTmpFile(_ tmpFileName: String?) -> Bool {
+    
+    func retrieveTmpFile(_ tmpFileName: String) -> Bool {
         return ioQueue.sync {
-            guard let tmpFileName = tmpFileName, !tmpFileName.isEmpty else { return false }
+            guard !tmpFileName.isEmpty else { return false }
             let backupFilePath = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             let originFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             let backupFileExists = fileManager.fileExists(atPath: backupFilePath)
@@ -221,26 +223,26 @@ extension Cache {
                 do {
                     try fileManager.removeItem(atPath: backupFilePath)
                 } catch {
-                    self.manager?.log(.error("retrieve tmpFile failed",
-                                             error: TiercelError.cacheError(reason: .cannotRemoveItem(path: backupFilePath,
-                                                                                                      error: error))))
+                    logger?.log(.error(TiercelError.cacheError(reason: .cannotRemoveItem(path: backupFilePath,
+                                                                                         error: error)),
+                                       message: "retrieve tmpFile failed"))
                 }
             } else {
                 do {
                     try fileManager.moveItem(atPath: backupFilePath, toPath: originFilePath)
                 } catch {
-                    self.manager?.log(.error("retrieve tmpFile failed",
-                                             error: TiercelError.cacheError(reason: .cannotMoveItem(atPath: backupFilePath,
-                                                                                                    toPath: originFilePath,
-                                                                                                    error: error))))
+                    logger?.log(.error(TiercelError.cacheError(reason: .cannotMoveItem(atPath: backupFilePath,
+                                                                                       toPath: originFilePath,
+                                                                                       error: error)),
+                                       message: "retrieve tmpFile failed"))
                 }
             }
             return true
         }
- 
+        
     }
-
-
+    
+    
 }
 
 
@@ -254,9 +256,9 @@ extension Cache {
                 let url = URL(fileURLWithPath: path)
                 try data.write(to: url)
             } catch {
-                self.manager?.log(.error("store tasks failed",
-                                         error: TiercelError.cacheError(reason: .cannotEncodeTasks(path: path,
-                                                                                                   error: error))))
+                self.logger?.log(.error(TiercelError.cacheError(reason: .cannotEncodeTasks(path: path,
+                                                                                           error: error)),
+                                        message: "store tasks failed"))
             }
             path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)Tasks.plist")
             try? self.fileManager.removeItem(atPath: path)
@@ -268,36 +270,36 @@ extension Cache {
             do {
                 try fileManager.moveItem(at: srcURL, to: dstURL)
             } catch {
-                self.manager?.log(.error("store file failed",
-                                         error: TiercelError.cacheError(reason: .cannotMoveItem(atPath: srcURL.absoluteString,
-                                                                                                toPath: dstURL.absoluteString,
-                                                                                                error: error))))
+                self.logger?.log(.error(TiercelError.cacheError(reason: .cannotMoveItem(atPath: srcURL.absoluteString,
+                                                                                        toPath: dstURL.absoluteString,
+                                                                                        error: error)),
+                                        message: "store file failed"))
             }
         }
     }
     
-    func storeTmpFile(_ tmpFileName: String?) {
+    func storeTmpFile(_ tmpFileName: String) {
         ioQueue.sync {
-            guard let tmpFileName = tmpFileName, !tmpFileName.isEmpty else { return }
+            guard !tmpFileName.isEmpty else { return }
             let tmpPath = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             let destination = (downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             if fileManager.fileExists(atPath: destination) {
                 do {
                     try fileManager.removeItem(atPath: destination)
                 } catch {
-                    self.manager?.log(.error("store tmpFile failed",
-                                             error: TiercelError.cacheError(reason: .cannotRemoveItem(path: destination,
-                                                                                                      error: error))))
+                    self.logger?.log(.error(TiercelError.cacheError(reason: .cannotRemoveItem(path: destination,
+                                                                                              error: error)),
+                                            message: "store tmpFile failed"))
                 }
             }
             if fileManager.fileExists(atPath: tmpPath) {
                 do {
                     try fileManager.copyItem(atPath: tmpPath, toPath: destination)
                 } catch {
-                    self.manager?.log(.error("store tmpFile failed",
-                                             error: TiercelError.cacheError(reason: .cannotCopyItem(atPath: tmpPath,
-                                                                                                    toPath: destination,
-                                                                                                    error: error))))
+                    self.logger?.log(.error(TiercelError.cacheError(reason: .cannotCopyItem(atPath: tmpPath,
+                                                                                            toPath: destination,
+                                                                                            error: error)),
+                                            message: "store tmpFile failed"))
                 }
             }
         }
@@ -310,10 +312,10 @@ extension Cache {
                 do {
                     try fileManager.moveItem(atPath: filePath, toPath: newFilePath)
                 } catch {
-                    self.manager?.log(.error("update fileName failed",
-                                             error: TiercelError.cacheError(reason: .cannotMoveItem(atPath: filePath,
-                                                                                                    toPath: newFilePath,
-                                                                                                      error: error))))
+                    self.logger?.log(.error(TiercelError.cacheError(reason: .cannotMoveItem(atPath: filePath,
+                                                                                            toPath: newFilePath,
+                                                                                            error: error)),
+                                            message: "update fileName failed"))
                 }
             }
         }
@@ -324,7 +326,9 @@ extension Cache {
 // MARK: - remove
 extension Cache {
     func remove(_ task: DownloadTask, completely: Bool) {
-        removeTmpFile(task.mutableDownloadState.tmpFileName)
+        if let tmpFileName = task.mutableDownloadState.resumeData?.tmpFileName {
+            removeTmpFile(tmpFileName)
+        }
         
         if completely {
             removeFile(task.filePath)
@@ -337,22 +341,22 @@ extension Cache {
                 do {
                     try self.fileManager.removeItem(atPath: filePath)
                 } catch {
-                    self.manager?.log(.error("remove file failed",
-                                             error: TiercelError.cacheError(reason: .cannotRemoveItem(path: filePath,
-                                                                                                      error: error))))
+                    self.logger?.log(.error(TiercelError.cacheError(reason: .cannotRemoveItem(path: filePath,
+                                                                                              error: error)),
+                                            message: "remove file failed"))
                 }
             }
         }
     }
     
-
+    
     
     /// 删除保留在本地的缓存文件
     ///
     /// - Parameter task:
-    func removeTmpFile(_ tmpFileName: String?) {
+    func removeTmpFile(_ tmpFileName: String) {
         ioQueue.async {
-            guard let tmpFileName = tmpFileName, !tmpFileName.isEmpty else { return }
+            guard !tmpFileName.isEmpty else { return }
             let path1 = (self.downloadTmpPath as NSString).appendingPathComponent(tmpFileName)
             let path2 = (NSTemporaryDirectory() as NSString).appendingPathComponent(tmpFileName)
             [path1, path2].forEach { (path) in
@@ -360,13 +364,13 @@ extension Cache {
                     do {
                         try self.fileManager.removeItem(atPath: path)
                     } catch {
-                        self.manager?.log(.error("remove tmpFile failed",
-                                                 error: TiercelError.cacheError(reason: .cannotRemoveItem(path: path,
-                                                                                                          error: error))))
+                        self.logger?.log(.error(TiercelError.cacheError(reason: .cannotRemoveItem(path: path,
+                                                                                                  error: error)),
+                                                message: "remove tmpFile failed"))
                     }
                 }
             }
-
+            
         }
     }
 }

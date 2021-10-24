@@ -33,12 +33,12 @@ public enum LogOption {
 }
 
 public enum LogType {
-    case sessionManager(_ message: String, manager: SessionManager)
-    case downloadTask(_ message: String, task: DownloadTask)
-    case error(_ message: String, error: Error)
+    case sessionManager(_ manager: SessionManager, message: String)
+    case downloadTask(_ task: DownloadTask, message: String)
+    case error(_ error: Error, message: String)
 }
 
-public protocol Logable {
+public protocol Logable: AnyObject {
     var identifier: String { get }
     
     var option: LogOption { get set }
@@ -46,26 +46,31 @@ public protocol Logable {
     func log(_ type: LogType)
 }
 
-public struct Logger: Logable {
+public class Logger: Logable {
     
     public let identifier: String
     
     public var option: LogOption
+    
+    init(identifier: String, option: LogOption = .default) {
+        self.identifier = identifier
+        self.option = option
+    }
     
     public func log(_ type: LogType) {
         guard option == .default else { return }
         var strings = ["************************ TiercelLog ************************"]
         strings.append("identifier    :  \(identifier)")
         switch type {
-            case let .sessionManager(message, manager):
+            case let .sessionManager(manager, message):
                 strings.append("Message       :  [SessionManager] \(message), tasks.count: \(manager.tasks.count)")
-            case let .downloadTask(message, task):
+            case let .downloadTask(task, message):
                 strings.append("Message       :  [DownloadTask] \(message)")
                 strings.append("Task URL      :  \(task.url.absoluteString)")
                 if let error = task.error, task.status == .failed {
                     strings.append("Error         :  \(error)")
                 }
-            case let .error(message, error):
+            case let .error(error, message):
                 strings.append("Message       :  [Error] \(message)")
                 strings.append("Description   :  \(error)")
         }
