@@ -189,8 +189,9 @@ public class SessionManager {
                 operationQueue: DispatchQueue = DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue",
                                                               autoreleaseFrequency: .workItem)) {
         let bundleIdentifier = Bundle.main.bundleIdentifier ?? "com.Daniels.Tiercel"
-        self.identifier = "\(bundleIdentifier).\(identifier)"
-        let logger = logger ?? Logger(identifier: "\(self.identifier)", option: .default)
+        let composeIdentifier = "\(bundleIdentifier).\(identifier)"
+        self.identifier = composeIdentifier
+        let logger = logger ?? Logger(identifier: composeIdentifier, option: .default)
         mutableState = MutableState(logger: logger,
                                     configuration: configuration)
         self.operationQueue = operationQueue
@@ -311,13 +312,13 @@ extension SessionManager {
                               onMainQueue: Bool = true,
                               handler: Handler<SessionManager>? = nil) -> [DownloadTask] {
         if let headersArray = headersArray,
-           headersArray.count != 0 && headersArray.count != urls.count {
+           !headersArray.isEmpty && headersArray.count != urls.count {
             log(.error(TiercelError.headersMatchFailed, message: "create multiple dowloadTasks failed"))
             return [DownloadTask]()
         }
         
         if let fileNames = fileNames,
-           fileNames.count != 0 && fileNames.count != urls.count {
+           !fileNames.isEmpty && fileNames.count != urls.count {
             log(.error(TiercelError.fileNamesMatchFailed, message: "create multiple dowloadTasks failed"))
             return [DownloadTask]()
         }
@@ -507,8 +508,8 @@ extension SessionManager {
     
     public func moveTask(at sourceIndex: Int, to destinationIndex: Int) {
         operationQueue.sync {
-            let range = (0..<tasks.count)
-            guard range.contains(sourceIndex) && range.contains(destinationIndex) else {
+            let indices = mutableState.tasks.indices
+            guard indices ~= sourceIndex && indices ~= destinationIndex else {
                 log(.error(TiercelError.indexOutOfRange,
                            message: "move task failed, sourceIndex: \(sourceIndex), destinationIndex: \(destinationIndex)"))
                 return
@@ -531,7 +532,7 @@ extension SessionManager {
     
     public func totalStart(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
-            self.tasks.forEach { task in
+            self.mutableState.tasks.forEach { task in
                 if task.status != .succeeded {
                     self._start(task)
                 }
@@ -542,34 +543,34 @@ extension SessionManager {
     
     public func totalSuspend(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
-            guard self.status == .running || self.status == .waiting else { return }
             self.$mutableState.write {
+                guard $0.status == .running || $0.status == .waiting else { return }
                 $0.status = .willSuspend
                 $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+                $0.tasks.forEach { $0.suspend() }
             }
-            self.tasks.forEach { $0.suspend() }
         }
     }
     
     public func totalCancel(onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
-            guard self.status != .succeeded && self.status != .canceled else { return }
             self.$mutableState.write {
+                guard $0.status != .succeeded || $0.status != .canceled else { return }
                 $0.status = .willCancel
                 $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+                $0.tasks.forEach { $0.cancel() }
             }
-            self.tasks.forEach { $0.cancel() }
         }
     }
     
     public func totalRemove(completely: Bool = false, onMainQueue: Bool = true, handler: Handler<SessionManager>? = nil) {
         operationQueue.async {
-            guard self.status != .removed else { return }
             self.$mutableState.write {
+                guard $0.status != .removed else { return }
                 $0.status = .willRemove
                 $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+                $0.tasks.forEach { $0.remove(completely: completely) }
             }
-            self.tasks.forEach { $0.remove(completely: completely) }
         }
     }
     
@@ -588,15 +589,13 @@ extension SessionManager {
     
     private func maintainTasks(with action: MaintainTasksAction) {
         
-        switch action {
-            case let .append(task):
-                $mutableState.write { state in
+        $mutableState.write { state in
+            switch action {
+                case let .append(task):
                     state.tasks.append(task)
                     state.taskMap[task.url] = task
                     state.urlMap[task.currentURL] = task.url
-                }
-            case let .remove(task):
-                $mutableState.write { state in
+                case let .remove(task):
                     if state.status == .willRemove {
                         state.taskMap.removeValue(forKey: task.url)
                         state.urlMap.removeValue(forKey: task.currentURL)
@@ -622,19 +621,15 @@ extension SessionManager {
                             }
                         }
                     }
-                }
-            case let .succeeded(task):
-                $mutableState.write{ $0.succeededTasks.append(task) }
-            case let .appendRunningTasks(task):
-                $mutableState.write { state in
+                case let .succeeded(task):
+                    state.succeededTasks.append(task)
+                case let .appendRunningTasks(task):
                     state.runningTasks.append(task)
-                }
-            case let .removeRunningTasks(task):
-                $mutableState.write { state in
+                case let .removeRunningTasks(task):
                     state.runningTasks.removeAll {
                         $0.url.absoluteString == task.url.absoluteString
                     }
-                }
+            }
         }
     }
     
@@ -644,7 +639,7 @@ extension SessionManager {
     
     private func restoreStatus() {
         dispatchPrecondition(condition: .onQueue(operationQueue))
-        if self.tasks.isEmpty {
+        if self.mutableState.tasks.isEmpty {
             return
         }
         session?.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
@@ -658,66 +653,60 @@ extension SessionManager {
                     self.taskDidStart(task)
                 }
             }
-            //  处理mananger状态
-            if !self.shouldComplete() {
-                self.shouldSuspend()
+            if downloadTasks.isEmpty {
+                //  处理 mananger 状态
+                self.shouldSuspendOrComplete()
             }
         }
     }
     
     
-    private func shouldComplete() -> Bool {
-        
-        let isSucceeded = self.tasks.allSatisfy { $0.status == .succeeded }
-        let isCompleted = isSucceeded ? isSucceeded :
-        self.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
-        guard isCompleted else { return false }
-        
-        if status == .succeeded || status == .failed {
-            return true
-        }
-        mutableState.timeRemaining = 0
-        progressExecuter?.execute(self)
-        let status: Status = isSucceeded ? .succeeded : .failed
-        mutableState.status = status
-        didChangeStatus(to: status)
-        executeCompletion(isSucceeded)
-        return true
-    }
-    
-    
-    
-    private func shouldSuspend() {
+    private func shouldSuspendOrComplete() {
         dispatchPrecondition(condition: .onQueue(operationQueue))
-        let isSuspended = tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
         
-        if isSuspended {
-            if status == .suspended {
-                return
+        let (isSuspended, isCompleted, isSucceeded) = $mutableState.read { state -> (Bool, Bool, Bool) in
+            let isSucceeded = state.tasks.allSatisfy { $0.status == .succeeded }
+            if isSucceeded {
+                return (false, true, true)
             }
+            
+            let isCompleted = state.tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
+            if isCompleted {
+                return (false, true, false)
+            }
+            
+            let isSuspended = state.tasks.allSatisfy { $0.status == .suspended || $0.status == .succeeded || $0.status == .failed }
+            return (isSuspended, false, false)
+        }
+        
+        if isCompleted {
+            mutableState.timeRemaining = 0
+            progressExecuter?.execute(self)
+            let status: Status = isSucceeded ? .succeeded : .failed
+            mutableState.status = status
+            didChangeStatus(to: status)
+            executeCompletion(isSucceeded)
+        } else if isSuspended {
             mutableState.status = .suspended
             didChangeStatus(to: .suspended)
             executeControl()
             executeCompletion(false)
-            if shouldCreatSession {
-                session?.invalidateAndCancel()
-                session = nil
-            }
         }
     }
     
     private func didStart() {
-        if status != .running {
-            if isControlNetworkActivityIndicator {
-                DispatchQueue.tr.executeOnMain {
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = true
-                }
+        guard mutableState.status != .running else { return }
+        
+        if isControlNetworkActivityIndicator {
+            DispatchQueue.tr.executeOnMain {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
-            createTimer()
-            mutableState.status = .running
-            didChangeStatus(to: .running)
-            progressExecuter?.execute(self)
         }
+        createTimer()
+        mutableState.status = .running
+        didChangeStatus(to: .running)
+        progressExecuter?.execute(self)
+        
     }
     
     private func updateProgress() {
@@ -727,43 +716,47 @@ extension SessionManager {
     
     
     private func storeTasks() {
-        cache.storeTasks(tasks)
+        cache.storeTasks(mutableState.tasks)
     }
     
     private func determineStatus(fromRunningTask: Bool) {
         dispatchPrecondition(condition: .onQueue(operationQueue))
         
-        // removed
-        if status == .willRemove {
-            if tasks.isEmpty {
-                mutableState.status = .removed
-                didChangeStatus(to: .removed)
-                executeControl()
-                ending(false)
-            }
-            return
+        let (currentStatus, tasks, taskMap) = $mutableState.read {
+            ($0.status, $0.tasks, $0.taskMap)
         }
         
-        // canceled
-        if status == .willCancel {
-            let succeededTasksCount = mutableState.taskMap.values.count
-            if tasks.count == succeededTasksCount {
-                mutableState.status = .canceled
-                didChangeStatus(to: .canceled)
-                executeControl()
-                ending(false)
-            }
-            return
+        switch currentStatus {
+            case .willSuspend:
+                return
+            case .willRemove:
+                if tasks.isEmpty {
+                    mutableState.status = .removed
+                    didChangeStatus(to: .removed)
+                    executeControl()
+                    ending(false)
+                }
+                return
+            case .willCancel:
+                let succeededTasksCount = taskMap.values.count
+                if tasks.count == succeededTasksCount {
+                    mutableState.status = .canceled
+                    didChangeStatus(to: .canceled)
+                    executeControl()
+                    ending(false)
+                }
+                return
+            case .suspended, .succeeded, .failed:
+                storeTasks()
+                return
+            default:
+                break
         }
-        
+
         // completed
         let isCompleted = tasks.allSatisfy { $0.status == .succeeded || $0.status == .failed }
         
         if isCompleted {
-            if status == .succeeded || status == .failed {
-                storeTasks()
-                return
-            }
             mutableState.timeRemaining = 0
             progressExecuter?.execute(self)
             let isSucceeded = tasks.allSatisfy { $0.status == .succeeded }
@@ -782,10 +775,6 @@ extension SessionManager {
         }
         
         if isSuspended {
-            if status == .suspended {
-                storeTasks()
-                return
-            }
             mutableState.status = .suspended
             didChangeStatus(to: .suspended)
             if shouldCreatSession {
@@ -795,10 +784,6 @@ extension SessionManager {
                 executeControl()
                 ending(false)
             }
-            return
-        }
-        
-        if status == .willSuspend {
             return
         }
         
@@ -822,7 +807,7 @@ extension SessionManager {
     private func startNextTask() {
         dispatchPrecondition(condition: .onQueue(operationQueue))
         guard let session = session,
-              let waitingTask = tasks.first (where: { $0.status == .waiting })
+              let waitingTask = mutableState.tasks.first (where: { $0.status == .waiting })
         else { return }
         waitingTask.start(using: session, immediately: canRunImmediately)
     }

@@ -305,18 +305,18 @@ extension Cache {
         }
     }
     
-    func updateFileName(_ filePath: String, _ newFileName: String) {
+    func updateFileName(_ oldFileName: String, to newFileName: String) {
         ioQueue.sync {
-            if fileManager.fileExists(atPath: filePath) {
-                let newFilePath = self.filePath(fileName: newFileName)!
-                do {
-                    try fileManager.moveItem(atPath: filePath, toPath: newFilePath)
-                } catch {
-                    self.logger?.log(.error(TiercelError.cacheError(reason: .cannotMoveItem(atPath: filePath,
-                                                                                            toPath: newFilePath,
-                                                                                            error: error)),
-                                            message: "update fileName failed"))
-                }
+            guard let oldfilePath = filePath(fileName: oldFileName) else { return }
+            guard fileManager.fileExists(atPath: oldfilePath) else { return }
+            let newFilePath = self.filePath(fileName: newFileName)!
+            do {
+                try fileManager.moveItem(atPath: oldfilePath, toPath: newFilePath)
+            } catch {
+                self.logger?.log(.error(TiercelError.cacheError(reason: .cannotMoveItem(atPath: oldfilePath,
+                                                                                        toPath: newFilePath,
+                                                                                        error: error)),
+                                        message: "update fileName failed"))
             }
         }
     }

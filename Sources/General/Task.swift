@@ -187,26 +187,29 @@ public class Task<TaskType>: NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(url, forKey: .url)
-        try container.encode(mutableState.currentURL, forKey: .currentURL)
-        try container.encode(fileName, forKey: .fileName)
-        try container.encodeIfPresent(mutableState.headers, forKey: .headers)
-        try container.encode(startDate, forKey: .startDate)
-        try container.encode(endDate, forKey: .endDate)
         try container.encode(progress.totalUnitCount, forKey: .totalBytes)
         try container.encode(progress.completedUnitCount, forKey: .completedBytes)
-        try container.encode(status.rawValue, forKey: .status)
-        try container.encodeIfPresent(mutableState.verificationCode, forKey: .verificationCode)
-        try container.encode(mutableState.verificationType.rawValue, forKey: .verificationType)
-        try container.encode(validation.rawValue, forKey: .validation)
-        if let error = error {
-            let errorData: Data
-            if #available(iOS 11.0, *) {
-                errorData = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
-            } else {
-                errorData = NSKeyedArchiver.archivedData(withRootObject: (error as NSError))
+        try $mutableState.read {
+            try container.encode($0.currentURL, forKey: .currentURL)
+            try container.encode($0.fileName, forKey: .fileName)
+            try container.encodeIfPresent($0.headers, forKey: .headers)
+            try container.encode($0.startDate, forKey: .startDate)
+            try container.encode($0.endDate, forKey: .endDate)
+            try container.encode($0.status.rawValue, forKey: .status)
+            try container.encodeIfPresent($0.verificationCode, forKey: .verificationCode)
+            try container.encode($0.verificationType.rawValue, forKey: .verificationType)
+            try container.encode($0.validation.rawValue, forKey: .validation)
+            if let error = $0.error {
+                let errorData: Data
+                if #available(iOS 11.0, *) {
+                    errorData = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
+                } else {
+                    errorData = NSKeyedArchiver.archivedData(withRootObject: (error as NSError))
+                }
+                try container.encode(errorData, forKey: .error)
             }
-            try container.encode(errorData, forKey: .error)
         }
+
     }
     
     public required init(from decoder: Decoder) throws {
@@ -222,18 +225,17 @@ public class Task<TaskType>: NSObject, Codable {
         progress.totalUnitCount = try container.decode(Int64.self, forKey: .totalBytes)
         progress.completedUnitCount = try container.decode(Int64.self, forKey: .completedBytes)
         
-        let statusString = try container.decode(String.self, forKey: .status)
-        let verificationTypeInt = try container.decode(Int.self, forKey: .verificationType)
-        let validationType = try container.decode(Int.self, forKey: .validation)
-        
         try $mutableState.write {
             $0.headers = try container.decodeIfPresent([String: String].self, forKey: .headers)
             $0.startDate = try container.decode(Double.self, forKey: .startDate)
             $0.endDate = try container.decode(Double.self, forKey: .endDate)
             $0.verificationCode = try container.decodeIfPresent(String.self, forKey: .verificationCode)
+            let statusString = try container.decode(String.self, forKey: .status)
             let status = Status(rawValue: statusString)!
             $0.status = status == .waiting ? .suspended : status
+            let verificationTypeInt = try container.decode(Int.self, forKey: .verificationType)
             $0.verificationType = FileChecksumHelper.VerificationType(rawValue: verificationTypeInt)!
+            let validationType = try container.decode(Int.self, forKey: .validation)
             $0.validation = Validation(rawValue: validationType)!
             if let errorData = try container.decodeIfPresent(Data.self, forKey: .error) {
                 if #available(iOS 11.0, *) {

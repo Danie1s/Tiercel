@@ -47,7 +47,7 @@ public class DownloadTask: Task<DownloadTask> {
     
     public var response: HTTPURLResponse? {
         $mutableDownloadState.read {
-            $0.response ?? $0.downloadTask?.response as? HTTPURLResponse
+            $0.response ?? $0.underlyingDownloadTask?.response as? HTTPURLResponse
         }
     }
     
@@ -66,7 +66,23 @@ public class DownloadTask: Task<DownloadTask> {
         var resumeData: DownloadResumeData?
         var response: HTTPURLResponse?
         var shouldValidateFile: Bool = false
-        var downloadTask: URLSessionDownloadTask?
+        var underlyingDownloadTask: URLSessionDownloadTask?
+    }
+    
+    private var underlyingDownloadTask: URLSessionDownloadTask? {
+        get {
+            mutableDownloadState.underlyingDownloadTask
+        }
+        set {
+            $mutableDownloadState.write {
+                $0.underlyingDownloadTask?.removeObserver(self, forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest))
+                newValue?.addObserver(self,
+                                     forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest),
+                                     options: [.new],
+                                     context: nil)
+                $0.underlyingDownloadTask = newValue
+            }
+        }
     }
     
     @Protected
@@ -131,21 +147,27 @@ public class DownloadTask: Task<DownloadTask> {
     
     
     deinit {
-        mutableDownloadState.downloadTask?.removeObserver(self, forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest))
+        underlyingDownloadTask = nil
         NotificationCenter.default.removeObserver(self)
     }
     
-    func restoreRunningStatus(with sessionDownloadTask: URLSessionDownloadTask) {
-        mutableDownloadState.downloadTask = sessionDownloadTask
-        mutableState.status = .running
+    func restoreRunningStatus(with underlyingDownloadTask: URLSessionDownloadTask) {
+        self.underlyingDownloadTask = underlyingDownloadTask
+        $mutableState.write {
+            $0.status = .running
+            if let url = underlyingDownloadTask.currentRequest?.url {
+                $0.currentURL = url
+            }
+        }
+        delegate?.taskDidUpdateCurrentURL(self)
         delegate?.task(self, didChangeStatusTo: .running)
     }
     
     @objc private func fixDelegateMethodError() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.$mutableDownloadState.read {
-                $0.downloadTask?.suspend()
-                $0.downloadTask?.resume()
+                $0.underlyingDownloadTask?.suspend()
+                $0.underlyingDownloadTask?.resume()
             }
         }
     }
@@ -164,7 +186,7 @@ extension DownloadTask {
     
     func start(using session: URLSession, immediately: Bool) {
         cache.createDirectory()
-        switch status {
+        switch mutableState.status {
             case .waiting, .suspended, .failed:
                 if cache.fileExists(fileName: fileName) {
                     prepareForStart(using: session, fileExists: true)
@@ -215,108 +237,106 @@ extension DownloadTask {
                 self.didComplete(.local)
             }
         } else {
-            var headers: [String: String]?
-            var resumeData: DownloadResumeData?
-            var downloadTask: URLSessionDownloadTask?
-            $mutableState.read {
-                headers = $0.headers
-            }
-            $mutableDownloadState.read {
-                resumeData = $0.resumeData
-                downloadTask = $0.downloadTask
-            }
-            downloadTask?.removeObserver(self,
-                                         forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest))
-            if let resumeData = resumeData,
+            let underlyingDownloadTask: URLSessionDownloadTask
+            if let resumeData = mutableDownloadState.resumeData,
                let tmpFileName = resumeData.tmpFileName,
                cache.retrieveTmpFile(tmpFileName) {
                 if #available(iOS 10.2, *) {
-                    downloadTask = session.downloadTask(withResumeData: resumeData.data)
+                    underlyingDownloadTask = session.downloadTask(withResumeData: resumeData.data)
                 } else if #available(iOS 10.0, *) {
-                    downloadTask = session.correctedDownloadTask(withResumeData: resumeData)
+                    underlyingDownloadTask = session.correctedDownloadTask(withResumeData: resumeData)
                 } else {
-                    downloadTask = session.downloadTask(withResumeData: resumeData.data)
+                    underlyingDownloadTask = session.downloadTask(withResumeData: resumeData.data)
                 }
             } else {
                 var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
-                if let headers = headers {
+                if let headers = mutableState.headers {
                     request.allHTTPHeaderFields = headers
                 }
-                downloadTask = session.downloadTask(with: request)
+                underlyingDownloadTask = session.downloadTask(with: request)
                 progress.completedUnitCount = 0
                 progress.totalUnitCount = 0
             }
-            downloadTask?.addObserver(self,
-                                      forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest),
-                                      options: [.new],
-                                      context: nil)
-            mutableDownloadState.downloadTask = downloadTask
+            mutableDownloadState.underlyingDownloadTask = underlyingDownloadTask
             progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
             delegate?.taskDidStart(self)
             executeControl()
-            downloadTask?.resume()
+            underlyingDownloadTask.resume()
         }
     }
     
     
     func suspend(onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
-        guard status == .running || status == .waiting else { return }
-        mutableState.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .running {
-            mutableState.status = .willSuspend
-            mutableDownloadState.downloadTask?.cancel(byProducingResumeData: { _ in })
-        } else {
-            mutableState.status = .willSuspend
-            operationQueue.async {
-                self.didComplete(.local)
+        $mutableState.write {
+            guard $0.status == .running || $0.status == .waiting else { return }
+            $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            if $0.status == .running {
+                $0.status = .willSuspend
+                mutableDownloadState.underlyingDownloadTask?.cancel(byProducingResumeData: { _ in })
+            } else {
+                $0.status = .willSuspend
+                operationQueue.async {
+                    self.didComplete(.local)
+                }
             }
         }
+
     }
     
     func cancel(onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
-        guard status != .succeeded else { return }
-        mutableState.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .running {
-            mutableState.status = .willCancel
-            mutableDownloadState.downloadTask?.cancel()
-        } else {
-            mutableState.status = .willCancel
-            operationQueue.async {
-                self.didComplete(.local)
+        $mutableState.write {
+            guard $0.status != .succeeded else { return }
+            $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            if $0.status == .running {
+                $0.status = .willCancel
+                mutableDownloadState.underlyingDownloadTask?.cancel()
+            } else {
+                $0.status = .willCancel
+                operationQueue.async {
+                    self.didComplete(.local)
+                }
             }
         }
+
     }
     
     
     
     func remove(completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         dispatchPrecondition(condition: .onQueue(operationQueue))
-        mutableState.isRemoveCompletely = completely
-        mutableState.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .running {
-            mutableState.status = .willRemove
-            mutableDownloadState.downloadTask?.cancel()
-        } else {
-            mutableState.status = .willRemove
-            operationQueue.async {
-                self.didComplete(.local)
+        $mutableState.write {
+            $0.isRemoveCompletely = completely
+            $0.controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
+            if $0.status == .running {
+                $0.status = .willRemove
+                mutableDownloadState.underlyingDownloadTask?.cancel()
+            } else {
+                $0.status = .willRemove
+                operationQueue.async {
+                    self.didComplete(.local)
+                }
             }
         }
+
     }
     
     
     func update(_ newHeaders: [String: String]? = nil, newFileName: String? = nil) {
-        mutableState.headers = newHeaders
-        if let newFileName = newFileName, !newFileName.isEmpty {
-            cache.updateFileName(filePath, newFileName)
-            mutableState.fileName = newFileName
+        $mutableState.write {
+            $0.headers = newHeaders
+            if let newFileName = newFileName,
+                !newFileName.isEmpty,
+                $0.fileName != newFileName {
+                cache.updateFileName($0.fileName, to: newFileName)
+                $0.fileName = newFileName
+            }
         }
     }
     
     private func validateFile() {
         guard let validateHandler = mutableState.validateExecuter else { return }
         
-        if !mutableDownloadState.shouldValidateFile {
+        guard mutableDownloadState.shouldValidateFile else {
             validateHandler.execute(self)
             return
         }
@@ -422,7 +442,7 @@ extension DownloadTask {
                 fromRunning = fromRunningTask
         }
         
-        switch status {
+        switch mutableState.status {
             case .willSuspend:
                 mutableState.status = .suspended
                 delegate?.task(self, didChangeStatusTo: .suspended)
@@ -470,7 +490,7 @@ extension DownloadTask {
                 (self.delegate as? DownloadTaskDelegate)?.downloadTaskWillValidateFile(self)
             }
             self.mutableState.validateExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-            if self.status == .succeeded {
+            if self.mutableState.status == .succeeded {
                 self.validateFile()
             }
         }
@@ -500,7 +520,7 @@ extension DownloadTask {
 extension DownloadTask {
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(URLSessionDownloadTask.currentRequest),
-           let change = change, let newRequest = change[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
+           let newRequest = change?[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
             mutableState.currentURL = url
             delegate?.taskDidUpdateCurrentURL(self)
         }
@@ -566,7 +586,7 @@ extension DownloadTask {
     func didComplete(_ type: CompletionType) {
         switch type {
             case .local:
-                switch status {
+                switch mutableState.status {
                     case .willSuspend,.willCancel, .willRemove:
                         determineStatus(with: .manual(false))
                     case .running:
@@ -576,9 +596,9 @@ extension DownloadTask {
                 }
             case let .network(task, error):
                 delegate?.taskDidCompleteFromRunning(self)
-                mutableDownloadState.downloadTask = nil
+                mutableDownloadState.underlyingDownloadTask = nil
                 
-                switch status {
+                switch mutableState.status {
                     case .willCancel, .willRemove:
                         determineStatus(with: .manual(true))
                     default:
