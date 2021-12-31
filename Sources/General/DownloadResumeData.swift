@@ -12,7 +12,6 @@ final class DownloadResumeData: Codable {
     
     private enum CodingKeys: CodingKey {
         case data
-        case dictionary
     }
     
     private enum Keys {

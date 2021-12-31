@@ -69,17 +69,23 @@ public class DownloadTask: Task<DownloadTask> {
         var underlyingDownloadTask: URLSessionDownloadTask?
     }
     
+    private var currentRequestObservation: NSKeyValueObservation?
+    
     private var underlyingDownloadTask: URLSessionDownloadTask? {
         get {
             mutableDownloadState.underlyingDownloadTask
         }
         set {
             $mutableDownloadState.write {
-                $0.underlyingDownloadTask?.removeObserver(self, forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest))
-                newValue?.addObserver(self,
-                                     forKeyPath: #keyPath(URLSessionDownloadTask.currentRequest),
-                                     options: [.new],
-                                     context: nil)
+                currentRequestObservation?.invalidate()
+                currentRequestObservation = newValue?.observe(\.currentRequest,
+                                                               options: .new) { [weak self] task, change in
+                    guard let self = self else { return }
+                    if let newRequest = change.newValue, let url = newRequest?.url {
+                        self.mutableState.currentURL = url
+                        self.delegate?.taskDidUpdateCurrentURL(self)
+                    }
+                }
                 $0.underlyingDownloadTask = newValue
             }
         }
@@ -147,7 +153,7 @@ public class DownloadTask: Task<DownloadTask> {
     
     
     deinit {
-        underlyingDownloadTask = nil
+        currentRequestObservation?.invalidate()
         NotificationCenter.default.removeObserver(self)
     }
     
@@ -515,17 +521,6 @@ extension DownloadTask {
 }
 
 
-
-// MARK: - KVO
-extension DownloadTask {
-    override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == #keyPath(URLSessionDownloadTask.currentRequest),
-           let newRequest = change?[NSKeyValueChangeKey.newKey] as? URLRequest, let url = newRequest.url {
-            mutableState.currentURL = url
-            delegate?.taskDidUpdateCurrentURL(self)
-        }
-    }
-}
 
 // MARK: - info
 extension DownloadTask {
