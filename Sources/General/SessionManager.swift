@@ -748,9 +748,11 @@ extension SessionManager {
     
     internal func updateProgress() {
         if isControlNetworkActivityIndicator {
+#if !os(visionOS)
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
+#endif
         }
         progressExecuter?.execute(self)
         NotificationCenter.default.postNotification(name: SessionManager.runningNotification, sessionManager: self)
@@ -776,9 +778,11 @@ extension SessionManager {
     
     internal func determineStatus(fromRunningTask: Bool) {
         if isControlNetworkActivityIndicator {
+#if !os(visionOS)
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }
+#endif
         }
 
         // removed
