@@ -675,6 +675,7 @@ extension SessionManager {
 
     internal func updateUrlMapper(with task: DownloadTask) {
         protectedState.write { $0.urlMapper[task.currentURL] = task.url }
+        storeTasks()
     }
     
     private func restoreStatus() {
