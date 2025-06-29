@@ -66,7 +66,7 @@ public class Cache {
         let ioQueueName = "com.Tiercel.Cache.ioQueue.\(identifier)"
         ioQueue = DispatchQueue(label: ioQueueName, autoreleaseFrequency: .workItem)
         
-        debouncer = Debouncer(queue: ioQueue)
+        debouncer = Debouncer(timeInterval: .milliseconds(200))
         
         let cacheName = "com.Daniels.Tiercel.Cache.\(identifier)"
         
@@ -253,7 +253,7 @@ extension Cache {
 // MARK: - store
 extension Cache {
     internal func storeTasks(_ tasks: [DownloadTask]) {
-        debouncer.execute(label: "storeTasks", wallDeadline: .now() + 0.2) {
+        debouncer.execute(on: ioQueue) {
             var path = (self.downloadPath as NSString).appendingPathComponent("\(self.identifier)_Tasks.plist")
             do {
                 let data = try self.encoder.encode(tasks)
