@@ -37,56 +37,7 @@ internal enum ResumeDataHelper {
     static let infoLocalPathKey = "NSURLSessionResumeInfoLocalPath"
     static let bytesReceivedKey = "NSURLSessionResumeBytesReceived"
     static let archiveRootObjectKey = "NSKeyedArchiveRootObjectKey"
-    
-    internal static func handleResumeData(_ data: Data) -> Data? {
-        if #available(iOS 11.3, *) {
-            return data
-        } else if #available(iOS 11.0, *) {
-            // 修复 11.0 - 11.2 bug
-            return deleteResumeByteRange(data)
-        } else if #available(iOS 10.2, *) {
-            return data
-        } else if #available(iOS 10.0, *) {
-            // 修复 10.0 - 10.1 bug
-            return correctResumeData(data)
-        } else {
-            return data
-        }
-    }
-    
-    
-    /// 修复 11.0 - 11.2 resumeData bug
-    ///
-    /// - Parameter data:
-    /// - Returns:
-    private static func deleteResumeByteRange(_ data: Data) -> Data? {
-        guard let resumeDictionary = getResumeDictionary(data) else { return nil }
-        resumeDictionary.removeObject(forKey: resumeByteRangeKey)
-        return try? PropertyListSerialization.data(fromPropertyList: resumeDictionary,
-                                                         format: PropertyListSerialization.PropertyListFormat.xml,
-                                                         options: PropertyListSerialization.WriteOptions())
-    }
-    
-    
-    /// 修复 10.0 - 10.1 resumeData bug
-    ///
-    /// - Parameter data:
-    /// - Returns:
-    private static func correctResumeData(_ data: Data) -> Data? {
-        guard let resumeDictionary = getResumeDictionary(data) else { return nil }
-        
-        if let currentRequest = resumeDictionary[currentRequestKey] as? Data {
-            resumeDictionary[currentRequestKey] = correct(with: currentRequest)
-        }
-        if let originalRequest = resumeDictionary[originalRequestKey] as? Data {
-            resumeDictionary[originalRequestKey] = correct(with: originalRequest)
-        }
-        
-        return try? PropertyListSerialization.data(fromPropertyList: resumeDictionary,
-                                                         format: PropertyListSerialization.PropertyListFormat.xml,
-                                                         options: PropertyListSerialization.WriteOptions())
-    }
-    
+
     
     /// 把resumeData解析成字典
     ///
