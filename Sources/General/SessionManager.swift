@@ -23,8 +23,9 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
-
+#if os(iOS)
 import UIKit
+#endif
 
 public class SessionManager {
     
@@ -749,7 +750,7 @@ extension SessionManager {
     
     internal func updateProgress() {
         if isControlNetworkActivityIndicator {
-#if !os(visionOS)
+#if os(iOS)
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
