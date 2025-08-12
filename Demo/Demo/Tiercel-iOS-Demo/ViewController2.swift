@@ -17,7 +17,8 @@ class ViewController2: BaseViewController {
 
         super.viewDidLoad()
 
-
+        self.navigationController?.title = "多文件下载"
+        self.title = "多文件下载"
         URLStrings = [
             "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Microsoft_Office_16.24.19041401_Installer.pkg",
             "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.5.2.dmg",

@@ -26,7 +26,8 @@ class ViewController1: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.navigationController?.title = "单个文件下载"
+        self.title = "单个文件下载"
         sessionManager.tasks.safeObject(at: 0)?.progress { [weak self] (task) in
             self?.updateUI(task)
         }.completion { [weak self] task in

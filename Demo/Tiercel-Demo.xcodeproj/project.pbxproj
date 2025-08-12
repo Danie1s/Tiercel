@@ -3,10 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3DBC88F32E4B680B0066B550 /* Tiercel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBC88F22E4B680B0066B550 /* Tiercel.framework */; };
+		3DBC88F42E4B680B0066B550 /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3DBC88F22E4B680B0066B550 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1EBF4F324E9993300697485 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EBF4F224E9993300697485 /* AppDelegate.swift */; };
 		E1EBF4FA24E9993300697485 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4F824E9993300697485 /* Main.storyboard */; };
 		E1EBF4FC24E9993500697485 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1EBF4FB24E9993500697485 /* Assets.xcassets */; };
@@ -25,7 +27,35 @@
 		E1EBF51E24E99C9900697485 /* Tiercel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1EBF51C24E99C9900697485 /* Tiercel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		3DBC88D82E4B63B10066B550 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1EBF4E724E9993300697485 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBC88C62E4B63B00066B550;
+			remoteInfo = "Tiercel-Mac-Demo";
+		};
+		3DBC88E22E4B63B10066B550 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E1EBF4E724E9993300697485 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBC88C62E4B63B00066B550;
+			remoteInfo = "Tiercel-Mac-Demo";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
+		3DBC88F52E4B680B0066B550 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				3DBC88F42E4B680B0066B550 /* Tiercel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1EBF51F24E99C9900697485 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -40,6 +70,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3DBC88C72E4B63B00066B550 /* Tiercel-Mac-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiercel-Mac-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DBC88D72E4B63B10066B550 /* Tiercel-Mac-DemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tiercel-Mac-DemoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DBC88E12E4B63B10066B550 /* Tiercel-Mac-DemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tiercel-Mac-DemoUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DBC88F22E4B680B0066B550 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1EBF4EF24E9993300697485 /* Tiercel-iOS-Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiercel-iOS-Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1EBF4F224E9993300697485 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E1EBF4F924E9993300697485 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -59,7 +93,45 @@
 		E1EBF51C24E99C9900697485 /* Tiercel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Tiercel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3DBC88F72E4B70820066B550 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3DBC88C62E4B63B00066B550 /* Tiercel-Mac-Demo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3DBC88C82E4B63B00066B550 /* Tiercel-Mac-Demo */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3DBC88F72E4B70820066B550 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "Tiercel-Mac-Demo"; sourceTree = "<group>"; };
+		3DBC88DA2E4B63B10066B550 /* Tiercel-Mac-DemoTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Tiercel-Mac-DemoTests"; sourceTree = "<group>"; };
+		3DBC88E42E4B63B10066B550 /* Tiercel-Mac-DemoUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Tiercel-Mac-DemoUITests"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		3DBC88C42E4B63B00066B550 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DBC88F32E4B680B0066B550 /* Tiercel.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DBC88D42E4B63B10066B550 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DBC88DE2E4B63B10066B550 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1EBF4EC24E9993300697485 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -75,6 +147,9 @@
 			isa = PBXGroup;
 			children = (
 				E1EBF50624E9993C00697485 /* Demo */,
+				3DBC88C82E4B63B00066B550 /* Tiercel-Mac-Demo */,
+				3DBC88DA2E4B63B10066B550 /* Tiercel-Mac-DemoTests */,
+				3DBC88E42E4B63B10066B550 /* Tiercel-Mac-DemoUITests */,
 				E1EBF4F024E9993300697485 /* Products */,
 				E1EBF51B24E99C9900697485 /* Frameworks */,
 			);
@@ -84,6 +159,9 @@
 			isa = PBXGroup;
 			children = (
 				E1EBF4EF24E9993300697485 /* Tiercel-iOS-Demo.app */,
+				3DBC88C72E4B63B00066B550 /* Tiercel-Mac-Demo.app */,
+				3DBC88D72E4B63B10066B550 /* Tiercel-Mac-DemoTests.xctest */,
+				3DBC88E12E4B63B10066B550 /* Tiercel-Mac-DemoUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,6 +199,7 @@
 		E1EBF51B24E99C9900697485 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3DBC88F22E4B680B0066B550 /* Tiercel.framework */,
 				E1EBF51C24E99C9900697485 /* Tiercel.framework */,
 			);
 			name = Frameworks;
@@ -129,6 +208,75 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3DBC88C62E4B63B00066B550 /* Tiercel-Mac-Demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DBC88EF2E4B63B10066B550 /* Build configuration list for PBXNativeTarget "Tiercel-Mac-Demo" */;
+			buildPhases = (
+				3DBC88C32E4B63B00066B550 /* Sources */,
+				3DBC88C42E4B63B00066B550 /* Frameworks */,
+				3DBC88C52E4B63B00066B550 /* Resources */,
+				3DBC88F52E4B680B0066B550 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3DBC88C82E4B63B00066B550 /* Tiercel-Mac-Demo */,
+			);
+			name = "Tiercel-Mac-Demo";
+			packageProductDependencies = (
+			);
+			productName = "Tiercel-Mac-Demo";
+			productReference = 3DBC88C72E4B63B00066B550 /* Tiercel-Mac-Demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3DBC88D62E4B63B10066B550 /* Tiercel-Mac-DemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DBC88F02E4B63B10066B550 /* Build configuration list for PBXNativeTarget "Tiercel-Mac-DemoTests" */;
+			buildPhases = (
+				3DBC88D32E4B63B10066B550 /* Sources */,
+				3DBC88D42E4B63B10066B550 /* Frameworks */,
+				3DBC88D52E4B63B10066B550 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3DBC88D92E4B63B10066B550 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3DBC88DA2E4B63B10066B550 /* Tiercel-Mac-DemoTests */,
+			);
+			name = "Tiercel-Mac-DemoTests";
+			packageProductDependencies = (
+			);
+			productName = "Tiercel-Mac-DemoTests";
+			productReference = 3DBC88D72E4B63B10066B550 /* Tiercel-Mac-DemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		3DBC88E02E4B63B10066B550 /* Tiercel-Mac-DemoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DBC88F12E4B63B10066B550 /* Build configuration list for PBXNativeTarget "Tiercel-Mac-DemoUITests" */;
+			buildPhases = (
+				3DBC88DD2E4B63B10066B550 /* Sources */,
+				3DBC88DE2E4B63B10066B550 /* Frameworks */,
+				3DBC88DF2E4B63B10066B550 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3DBC88E32E4B63B10066B550 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3DBC88E42E4B63B10066B550 /* Tiercel-Mac-DemoUITests */,
+			);
+			name = "Tiercel-Mac-DemoUITests";
+			packageProductDependencies = (
+			);
+			productName = "Tiercel-Mac-DemoUITests";
+			productReference = 3DBC88E12E4B63B10066B550 /* Tiercel-Mac-DemoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		E1EBF4EE24E9993300697485 /* Tiercel-iOS-Demo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E1EBF50324E9993500697485 /* Build configuration list for PBXNativeTarget "Tiercel-iOS-Demo" */;
@@ -153,10 +301,21 @@
 		E1EBF4E724E9993300697485 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1160;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1160;
 				ORGANIZATIONNAME = Daniels;
 				TargetAttributes = {
+					3DBC88C62E4B63B00066B550 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					3DBC88D62E4B63B10066B550 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 3DBC88C62E4B63B00066B550;
+					};
+					3DBC88E02E4B63B10066B550 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 3DBC88C62E4B63B00066B550;
+					};
 					E1EBF4EE24E9993300697485 = {
 						CreatedOnToolsVersion = 11.6;
 					};
@@ -176,11 +335,35 @@
 			projectRoot = "";
 			targets = (
 				E1EBF4EE24E9993300697485 /* Tiercel-iOS-Demo */,
+				3DBC88C62E4B63B00066B550 /* Tiercel-Mac-Demo */,
+				3DBC88D62E4B63B10066B550 /* Tiercel-Mac-DemoTests */,
+				3DBC88E02E4B63B10066B550 /* Tiercel-Mac-DemoUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3DBC88C52E4B63B00066B550 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DBC88D52E4B63B10066B550 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DBC88DF2E4B63B10066B550 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1EBF4ED24E9993300697485 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -196,6 +379,27 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3DBC88C32E4B63B00066B550 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DBC88D32E4B63B10066B550 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DBC88DD2E4B63B10066B550 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E1EBF4EB24E9993300697485 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -213,6 +417,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3DBC88D92E4B63B10066B550 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DBC88C62E4B63B00066B550 /* Tiercel-Mac-Demo */;
+			targetProxy = 3DBC88D82E4B63B10066B550 /* PBXContainerItemProxy */;
+		};
+		3DBC88E32E4B63B10066B550 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DBC88C62E4B63B00066B550 /* Tiercel-Mac-Demo */;
+			targetProxy = 3DBC88E22E4B63B10066B550 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E1EBF4F824E9993300697485 /* Main.storyboard */ = {
@@ -234,6 +451,185 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		3DBC88E92E4B63B10066B550 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = "Tiercel-Mac-Demo/Tiercel_Mac_Demo.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 266GUV99GN;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tiercel-Mac-Demo/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Daniels. All rights reserved.";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.self.learn.Tiercel-Mac-Demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3DBC88EA2E4B63B10066B550 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = "Tiercel-Mac-Demo/Tiercel_Mac_Demo.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 266GUV99GN;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tiercel-Mac-Demo/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Daniels. All rights reserved.";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.self.learn.Tiercel-Mac-Demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3DBC88EB2E4B63B10066B550 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L6MQVKQMV5;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.self.learn.Tiercel-Mac-DemoTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tiercel-Mac-Demo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tiercel-Mac-Demo";
+			};
+			name = Debug;
+		};
+		3DBC88EC2E4B63B10066B550 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L6MQVKQMV5;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.self.learn.Tiercel-Mac-DemoTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tiercel-Mac-Demo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tiercel-Mac-Demo";
+			};
+			name = Release;
+		};
+		3DBC88ED2E4B63B10066B550 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L6MQVKQMV5;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.self.learn.Tiercel-Mac-DemoUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "Tiercel-Mac-Demo";
+			};
+			name = Debug;
+		};
+		3DBC88EE2E4B63B10066B550 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L6MQVKQMV5;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.self.learn.Tiercel-Mac-DemoUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "Tiercel-Mac-Demo";
+			};
+			name = Release;
+		};
 		E1EBF50124E9993500697485 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -389,6 +785,33 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3DBC88EF2E4B63B10066B550 /* Build configuration list for PBXNativeTarget "Tiercel-Mac-Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DBC88E92E4B63B10066B550 /* Debug */,
+				3DBC88EA2E4B63B10066B550 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3DBC88F02E4B63B10066B550 /* Build configuration list for PBXNativeTarget "Tiercel-Mac-DemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DBC88EB2E4B63B10066B550 /* Debug */,
+				3DBC88EC2E4B63B10066B550 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3DBC88F12E4B63B10066B550 /* Build configuration list for PBXNativeTarget "Tiercel-Mac-DemoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DBC88ED2E4B63B10066B550 /* Debug */,
+				3DBC88EE2E4B63B10066B550 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E1EBF4EA24E9993300697485 /* Build configuration list for PBXProject "Tiercel-Demo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

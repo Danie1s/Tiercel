@@ -13,7 +13,8 @@ class ViewController3: BaseViewController {
 
 
     override func viewDidLoad() {
-        
+        self.navigationController?.title = "批量下载"
+        self.title = "批量下载"
         sessionManager = appDelegate.sessionManager3
 
         super.viewDidLoad()
