@@ -35,10 +35,20 @@ class ViewController: NSViewController {
             "http://gxiami.alicdn.com/xiami-desktop/update/XiamiMac-03051058.dmg",
             "http://113.113.73.41/r/baiducdnct-gd.inter.iqiyi.com/cdn/pcclient/20190413/13/25/iQIYIMedia_005.dmg?dis_dz=CT-GuangDong_GuangZhou&dis_st=36",
             "http://pcclient.download.youku.com/ikumac/youkumac_1.6.7.04093.dmg?spm=a2hpd.20022519.m_235549.5!2~5~5~5!2~P!3~A&file=youkumac_1.6.7.04093.dmg",
-            "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg"
+            "http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg",
+            "https://r1---sn-ni5eln7e.gvt1-cn.com/edgedl/android/studio/install/2025.1.1.13/android-studio-2025.1.1.13-mac_arm.dmg",
+            "https://dldir.y.qq.com/ecosfile/music_clntupate/mac/other/QQMusicMac10.7.0Build01.dmg"
         ]
         
-        sessionManager = SessionManager("ViewController3", configuration: SessionConfiguration())
+        
+        var configuration = SessionConfiguration()
+        configuration.allowsCellularAccess = true
+        let path = Cache.defaultDiskCachePathClosure("Test")
+        let cacahe = Cache("ViewController2", downloadPath: path)
+        
+        let manager = SessionManager("ViewController2", configuration: configuration, cache: cacahe, operationQueue: DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue"))
+        sessionManager = manager
+        
         
         sessionManager.configuration.maxConcurrentTasksLimit = 3
         
