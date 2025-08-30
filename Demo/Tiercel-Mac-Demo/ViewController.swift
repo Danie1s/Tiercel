@@ -17,6 +17,8 @@ class ViewController: NSViewController {
     @IBOutlet weak var timeRemainingLabel: NSTextField!
     @IBOutlet weak var totalProgressLabel: NSTextField!
     
+    @IBOutlet weak var collectionView: NSCollectionView!
+    
     var sessionManager: SessionManager!
     
     var URLStrings: [String] = []
@@ -28,10 +30,9 @@ class ViewController: NSViewController {
         
         URLStrings = [
             "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/Microsoft_Office_16.24.19041401_Installer.pkg",
-            "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.5.2.dmg",
             "http://pcclient.download.youku.com/ikumac/youkumac_1.6.7.04093.dmg?spm=a2hpd.20022519.m_235549.5!2~5~5~5!2~P!3~A&file=youkumac_1.6.7.04093.dmg",
             "https://d1.music.126.net/dmusic/NeteaseCloudMusic_Music_official_3.0.17.2833_arm64.dmg",
-//            "https://r1---sn-ni5eln7e.gvt1-cn.com/edgedl/android/studio/install/2025.1.1.13/android-studio-2025.1.1.13-mac_arm.dmg",
+            "https://r1---sn-ni5eln7e.gvt1-cn.com/edgedl/android/studio/install/2025.1.1.13/android-studio-2025.1.1.13-mac_arm.dmg",
         ]
         
         
@@ -55,8 +56,15 @@ class ViewController: NSViewController {
         updateUI()
     }
 
-   
+   let identify = NSUserInterfaceItemIdentifier("DownloadTaskCell")
     func setupUI() {
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        
+//        collectionView.register(DownloadTaskCell.self, forItemWithIdentifier: NSUserInterfaceItemIdentifier("DownloadTaskCell"))
+        let nib = NSNib(nibNamed: "DownloadTaskCell", bundle: nil)
+
+        collectionView.register(nib, forItemWithIdentifier: identify)
         
     }
     
@@ -106,7 +114,6 @@ class ViewController: NSViewController {
     
     
     @IBAction func downAllAction(_ sender: Any) {
-        
         var urls = self.URLStrings
         
         print(" now we have \(sessionManager.tasks.count) task")
@@ -205,47 +212,144 @@ class ViewController: NSViewController {
         
         self.sessionManager?.multiDownload(self.URLStrings) { [weak self] _ in
             self?.updateUI()
-            
-        
         }
         
+        
+        self.collectionView.reloadData()
         
     }
     
     
     
     @IBAction func totalStart(_ sender: Any) {
-        sessionManager.totalStart { [weak self] _ in
-             
-        }
-        
+        sessionManager.totalStart()
+        self.collectionView.reloadData()
+
         
     }
     
     @IBAction func totalSuspend(_ sender: Any) {
-        sessionManager.totalSuspend() { [weak self] _ in
-            
-            
-        }
+        sessionManager.totalSuspend()
+        self.collectionView.reloadData()
+
     }
     
     @IBAction func totalCancel(_ sender: Any) {
         sessionManager.totalCancel() { [weak self] _ in
             
         }
+        
+        self.collectionView.reloadData()
+
     }
     
     @IBAction func totalDelete(_ sender: Any) {
         sessionManager.totalRemove(completely: false) { [weak self] _ in
             
         }
+        self.collectionView.reloadData()
+
     }
     
     @IBAction func clearDisk(_ sender: Any) {
         sessionManager.cache.clearDiskCache()
         updateUI()
+        
+        self.collectionView.reloadData()
+
     }
     
     
+}
+
+extension ViewController: NSCollectionViewDataSource {
+    func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
+        sessionManager.tasks.count
+    }
+    
+    func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
+        
+       let item = collectionView.makeItem(withIdentifier: identify, for: indexPath)
+    
+        guard let collectionViewItem = item as? DownloadTaskCell else { return item }
+
+        return item
+        
+    }
+    
+    
+}
+
+extension ViewController: NSCollectionViewDelegate {
+    func collectionView(_ collectionView: NSCollectionView, willDisplay item: NSCollectionViewItem, forRepresentedObjectAt indexPath: IndexPath) {
+        guard let task = sessionManager.tasks.safeObject(at: indexPath.item),
+              let cell = item as? DownloadTaskCell
+        else { return }
+        
+        cell.task?.progress { _ in }.success { _ in }.failure { _ in }
+        
+        cell.task = task
+        
+        cell.titleLabel.stringValue = task.fileName
+        
+        cell.updateProgress(task)
+        
+        cell.tapClosure = { [weak self] cell in
+            guard let task = self?.sessionManager.tasks.safeObject(at: indexPath.item) else { return }
+            switch task.status {
+                case .waiting, .running:
+                    self?.sessionManager.suspend(task)
+                case .suspended, .failed:
+                    self?.sessionManager.start(task)
+                default:
+                    break
+            }
+        }
+        
+        cell.removeClosure = {  [weak self] cell in
+            guard let task = self?.sessionManager.tasks.safeObject(at: indexPath.item) else { return }
+            self?.sessionManager.remove(task, completely: false) { [weak self] _ in
+//                self?.tableView.deleteRows(at: [indexPath], with: .automatic)
+                self?.updateView()
+            }
+        }
+        
+        task.progress { [weak cell] task in
+            cell?.updateProgress(task)
+        }
+        .success { [weak cell] (task) in
+            cell?.updateProgress(task)
+            // 下载任务成功了
+            
+        }
+        .failure { [weak cell] task in
+            cell?.updateProgress(task)
+            if task.status == .suspended {
+                // 下载任务暂停了
+            }
+            
+            if task.status == .failed {
+                // 下载任务失败了
+            }
+            if task.status == .canceled {
+                // 下载任务取消了
+            }
+            if task.status == .removed {
+                // 下载任务移除了
+            }
+        }
+    }
+    
+    func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+        
+    }
+    
+    func collectionView(_ collectionView: NSCollectionView, didDeselectItemsAt indexPaths: Set<IndexPath>) {
+        collectionView.deselectItems(at: indexPaths)
+    }
+    
+    func updateView() {
+        self.collectionView.reloadData()
+    }
 }
 

@@ -901,7 +901,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="715" height="158"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                             <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="10" minimumLineSpacing="10" id="i0G-4s-VGm">
-                                                <size key="itemSize" width="50" height="50"/>
+                                                <size key="itemSize" width="480" height="200"/>
                                             </collectionViewFlowLayout>
                                             <color key="primaryBackgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </collectionView>
@@ -928,6 +928,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="collectionView" destination="IBb-D6-QDf" id="JH7-ix-W5H"/>
                         <outlet property="timeRemainingLabel" destination="ZS0-XD-ySY" id="uV7-yT-rep"/>
                         <outlet property="totalProgressLabel" destination="AnM-Jc-YKO" id="siK-F3-oyr"/>
                         <outlet property="totalSpeedLabel" destination="kSo-FU-YYw" id="J4j-qq-o6u"/>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23727" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23727"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="DownloadTaskCell" customModule="Tiercel_Mac_Demo">
+            <connections>
+                <outlet property="bytesLabel" destination="DIW-Sn-OdT" id="5i0-fl-nPf"/>
+                <outlet property="controlButton" destination="Ula-bj-VIn" id="gOH-3N-nJZ"/>
+                <outlet property="endDateLabel" destination="bc9-zu-dvA" id="Kf9-ot-09Q"/>
+                <outlet property="progressView" destination="go4-rb-6at" id="T7K-P8-svy"/>
+                <outlet property="speedLabel" destination="ACz-dk-j1g" id="XxD-gL-Omt"/>
+                <outlet property="startDateLabel" destination="F8p-6P-heY" id="yq0-cp-anx"/>
+                <outlet property="statusLabel" destination="yJS-wl-MW4" id="7y9-FN-Zfa"/>
+                <outlet property="timeRemainingLabel" destination="F8p-6P-heY" id="MJ9-aN-qU5"/>
+                <outlet property="titleLabel" destination="u7V-PW-vLR" id="NyT-39-2D3"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="Hz6-mo-xeY">
+            <rect key="frame" x="0.0" y="0.0" width="480" height="200"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ula-bj-VIn">
+                    <rect key="frame" x="363" y="83" width="94" height="32"/>
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="FNe-tm-iBf">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                        <imageReference key="image" image="play" catalog="system" symbolScale="large" renderingMode="original"/>
+                        <imageReference key="alternateImage" image="play.fill" catalog="system" symbolScale="large" renderingMode="original"/>
+                    </buttonCell>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="80" id="Mvf-ie-ryn"/>
+                    </constraints>
+                    <connections>
+                        <action selector="didTapButton:" target="-2" id="2jq-p8-geF"/>
+                    </connections>
+                </button>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="u7V-PW-vLR" userLabel="name">
+                    <rect key="frame" x="18" y="174" width="38" height="16"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="name" id="1S4-f7-m4N">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="F8p-6P-heY" userLabel="name">
+                    <rect key="frame" x="18" y="141" width="60" height="13"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="开始时间:" id="yR9-mA-yGE">
+                        <font key="font" size="13" name=".PingFangUITextSC-Regular"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bc9-zu-dvA" userLabel="name">
+                    <rect key="frame" x="18" y="108" width="60" height="13"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="结束时间:" id="U06-aK-m4h">
+                        <font key="font" size="13" name=".PingFangUITextSC-Regular"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DIW-Sn-OdT" userLabel="name">
+                    <rect key="frame" x="18" y="72" width="38" height="16"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="bytes" id="NKj-u7-ZGX">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ACz-dk-j1g" userLabel="name">
+                    <rect key="frame" x="312" y="72" width="30" height="16"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="kb/s" id="5tG-9N-nkk">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <progressIndicator maxValue="100" doubleValue="50" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="go4-rb-6at">
+                    <rect key="frame" x="20" y="19" width="320" height="20"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="320" id="eaz-TR-9eD"/>
+                    </constraints>
+                </progressIndicator>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yJS-wl-MW4" userLabel="name">
+                    <rect key="frame" x="389" y="50" width="43" height="20"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="9Rp-N5-lC5"/>
+                    </constraints>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="等待中" id="UcV-Il-9t1">
+                        <font key="font" size="13" name=".PingFangUITextSC-Regular"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uh0-4f-NqR">
+                    <rect key="frame" x="385" y="11" width="52" height="32"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="W42-be-pcW">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                        <imageReference key="image" image="delete.forward" catalog="system" symbolScale="large"/>
+                        <imageReference key="alternateImage" image="delete.forward.fill" catalog="system" symbolScale="large"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="removeAction:" target="-2" id="jtm-Yg-29F"/>
+                    </connections>
+                </button>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="cQ1-bU-XVr" userLabel="name">
+                    <rect key="frame" x="389" y="164" width="56" height="16"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="剩余时间" id="N4x-AQ-1FZ">
+                        <font key="font" size="13" name=".PingFangUITextSC-Regular"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+            <constraints>
+                <constraint firstItem="DIW-Sn-OdT" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="9Ic-jy-VFF"/>
+                <constraint firstItem="bc9-zu-dvA" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="AsP-br-Ll0"/>
+                <constraint firstItem="bc9-zu-dvA" firstAttribute="top" secondItem="F8p-6P-heY" secondAttribute="bottom" constant="20" id="Gba-DT-spm"/>
+                <constraint firstItem="F8p-6P-heY" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="J0K-A5-S0b"/>
+                <constraint firstItem="ACz-dk-j1g" firstAttribute="centerY" secondItem="DIW-Sn-OdT" secondAttribute="centerY" id="LwM-eB-LOC"/>
+                <constraint firstItem="yJS-wl-MW4" firstAttribute="top" secondItem="Ula-bj-VIn" secondAttribute="bottom" constant="20" id="PKG-32-BDj"/>
+                <constraint firstItem="go4-rb-6at" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="PPE-i1-1Nt"/>
+                <constraint firstItem="u7V-PW-vLR" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="cHI-xF-7a0"/>
+                <constraint firstItem="u7V-PW-vLR" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" constant="10" id="e2R-5F-MLa"/>
+                <constraint firstItem="F8p-6P-heY" firstAttribute="top" secondItem="u7V-PW-vLR" secondAttribute="bottom" constant="20" id="fax-Il-F0u"/>
+                <constraint firstItem="Ula-bj-VIn" firstAttribute="centerY" secondItem="Hz6-mo-xeY" secondAttribute="centerY" id="i4I-S0-fnV"/>
+                <constraint firstAttribute="trailing" secondItem="Ula-bj-VIn" secondAttribute="trailing" constant="30" id="lbO-eS-h4n"/>
+                <constraint firstItem="DIW-Sn-OdT" firstAttribute="top" secondItem="bc9-zu-dvA" secondAttribute="bottom" constant="20" id="oaI-AQ-ctT"/>
+                <constraint firstAttribute="bottom" secondItem="go4-rb-6at" secondAttribute="bottom" constant="20" symbolic="YES" id="onX-OU-458"/>
+                <constraint firstItem="ACz-dk-j1g" firstAttribute="trailing" secondItem="go4-rb-6at" secondAttribute="trailing" id="rhX-BU-7cz"/>
+                <constraint firstItem="yJS-wl-MW4" firstAttribute="centerX" secondItem="Ula-bj-VIn" secondAttribute="centerX" id="zTi-cD-372"/>
+            </constraints>
+            <point key="canvasLocation" x="39.5" y="-75"/>
+        </customView>
+        <collectionViewItem id="QdK-Io-Acw" customClass="DownloadTaskCell" customModule="Tiercel_Mac_Demo"/>
+    </objects>
+    <resources>
+        <image name="delete.forward" catalog="system" width="22" height="18"/>
+        <image name="delete.forward.fill" catalog="system" width="22" height="18"/>
+        <image name="play" catalog="system" width="15" height="17"/>
+        <image name="play.fill" catalog="system" width="15" height="17"/>
+    </resources>
+</document>
