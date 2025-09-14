@@ -1,5 +1,5 @@
 //
-//  UIDevice+Free.swift
+//  FileManager+AvailableCapacity.swift
 //  Tiercel
 //
 //  Created by Daniels on 2019/1/22.
@@ -24,28 +24,16 @@
 //  THE SOFTWARE.
 //
 
-#if os(macOS)
-import AppKit
-#else
-import UIKit
+import Foundation
 
-extension UIDevice: TiercelCompatible {}
-extension TiercelWrapper where Base: UIDevice {
+extension FileManager: TiercelCompatible {}
+extension TiercelWrapper where Base: FileManager {
     public var freeDiskSpaceInBytes: Int64 {
-        if #available(iOS 11.0, *) {
-            if let space = try? URL(fileURLWithPath: NSHomeDirectory() as String).resourceValues(forKeys: [URLResourceKey.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage {
-                return space
-            } else {
-                return 0
-            }
+        if let space = try? URL(fileURLWithPath: NSHomeDirectory()).resourceValues(forKeys: [URLResourceKey.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage {
+            return space
         } else {
-            if let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory() as String),
-                let freeSpace = (systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber)?.int64Value {
-                return freeSpace
-            } else {
-                return 0
-            }
+            return 0
         }
     }
 }
-#endif
+

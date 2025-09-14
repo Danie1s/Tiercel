@@ -24,10 +24,10 @@
 //  THE SOFTWARE.
 //
 
-#if os(macOS)
-import AppKit
-#else
+#if os(ios)
 import UIKit
+#else
+import Foundation
 #endif
 
 public class DownloadTask: Task<DownloadTask> {
@@ -54,14 +54,11 @@ public class DownloadTask: Task<DownloadTask> {
     }
     
 
-    public internal(set) var response: HTTPURLResponse? {
-        get { protectedDownloadState.directValue.response }
+    public private(set) var response: HTTPURLResponse? {
+        get { protectedDownloadState.wrappedValue.response }
         set { protectedDownloadState.write { $0.response = newValue } }
     }
     
-    public var statusCode: Int? {
-        response?.statusCode
-    }
 
     public var filePath: String {
         return cache.filePath(fileName: fileName)!
@@ -85,20 +82,20 @@ public class DownloadTask: Task<DownloadTask> {
         var shouldValidateFile: Bool = false
     }
     
-    private let protectedDownloadState: Protector<DownloadState> = Protector(DownloadState())
+    private let protectedDownloadState: Protected<DownloadState> = Protected(DownloadState())
     
     
     private var resumeData: Data? {
-        get { protectedDownloadState.directValue.resumeData }
+        get { protectedDownloadState.wrappedValue.resumeData }
         set { protectedDownloadState.write { $0.resumeData = newValue } }
     }
     
     internal var tmpFileName: String? {
-        protectedDownloadState.directValue.tmpFileName
+        protectedDownloadState.wrappedValue.tmpFileName
     }
 
     private var shouldValidateFile: Bool {
-        get { protectedDownloadState.directValue.shouldValidateFile }
+        get { protectedDownloadState.wrappedValue.shouldValidateFile }
         set { protectedDownloadState.write { $0.shouldValidateFile = newValue } }
     }
 
@@ -115,9 +112,7 @@ public class DownloadTask: Task<DownloadTask> {
         if let fileName = fileName, !fileName.isEmpty {
             self.fileName = fileName
         }
-        #if os(macOS)
-        //        TODO: - didBecomeActiveNotification
-        #else
+        #if os(ios)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(fixDelegateMethodError),
                                                name: UIApplication.didBecomeActiveNotification,
@@ -131,12 +126,7 @@ public class DownloadTask: Task<DownloadTask> {
         try super.encode(to: superEncoder)
         try container.encodeIfPresent(resumeData, forKey: .resumeData)
         if let response = response {
-            let responseData: Data
-            if #available(iOS 11.0, macOS 10.13, *) {
-                responseData = try NSKeyedArchiver.archivedData(withRootObject: (response as HTTPURLResponse), requiringSecureCoding: true)
-            } else {
-                responseData = NSKeyedArchiver.archivedData(withRootObject: (response as HTTPURLResponse))
-            }
+            let responseData: Data = try NSKeyedArchiver.archivedData(withRootObject: (response as HTTPURLResponse), requiringSecureCoding: true)
             try container.encode(responseData, forKey: .response)
         }
     }
@@ -147,11 +137,7 @@ public class DownloadTask: Task<DownloadTask> {
         try super.init(from: superDecoder)
         resumeData = try container.decodeIfPresent(Data.self, forKey: .resumeData)
         if let responseData = try container.decodeIfPresent(Data.self, forKey: .response) {
-            if #available(iOS 11.0, macOS 10.13, *) {
-                response = try? NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData)
-            } else {
-                response = NSKeyedUnarchiver.unarchiveObject(with: responseData) as? HTTPURLResponse
-            }
+            response = try? NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData)
         }
     }
     
@@ -198,7 +184,7 @@ extension DownloadTask {
             }
         case .succeeded:
             executeControl()
-            succeeded(fromRunning: false)
+            succeeded(fromRunning: false, immediately: false)
         case .running:
             status = .running
             executeControl()
@@ -233,13 +219,7 @@ extension DownloadTask {
         } else {
             if let resumeData = resumeData,
                 cache.retrieveTmpFile(tmpFileName) {
-                if #available(iOS 10.2, *) {
-                    sessionTask = session?.downloadTask(withResumeData: resumeData)
-                } else if #available(iOS 10.0, *) {
-                    sessionTask = session?.correctedDownloadTask(withResumeData: resumeData)
-                } else {
-                    sessionTask = session?.downloadTask(withResumeData: resumeData)
-                }
+                sessionTask = session?.downloadTask(withResumeData: resumeData)
             } else {
                 var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 0)
                 if let headers = headers {
@@ -250,9 +230,10 @@ extension DownloadTask {
                 progress.totalUnitCount = 0
             }
             progress.setUserInfoObject(progress.completedUnitCount, forKey: .fileCompletedCountKey)
-            manager?.maintainTasks(with: .appendRunningTasks(self))
-            executeControl()
             sessionTask?.resume()
+            manager?.maintainTasks(with: .appendRunningTasks(self))
+            manager?.storeTasks()
+            executeControl()
         }
     }
 
@@ -260,28 +241,34 @@ extension DownloadTask {
     internal func suspend(onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         guard status == .running || status == .waiting else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .running {
+        switch status {
+        case .running:
             status = .willSuspend
             sessionTask?.cancel(byProducingResumeData: { _ in })
-        } else {
+        case .waiting, .suspended, .failed, .succeeded, .canceled, .removed:
             status = .willSuspend
             operationQueue.async {
                 self.didComplete(.local)
             }
+        case .willSuspend, .willCancel, .willRemove:
+            break
         }
     }
 
     internal func cancel(onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         guard status != .succeeded else { return }
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .running {
+        switch status {
+        case .running:
             status = .willCancel
             sessionTask?.cancel()
-        } else {
+        case .waiting, .suspended, .failed, .succeeded, .canceled, .removed:
             status = .willCancel
             operationQueue.async {
                 self.didComplete(.local)
             }
+        case .willSuspend, .willCancel, .willRemove:
+            break
         }
     }
 
@@ -290,14 +277,17 @@ extension DownloadTask {
     internal func remove(completely: Bool = false, onMainQueue: Bool = true, handler: Handler<DownloadTask>? = nil) {
         isRemoveCompletely = completely
         controlExecuter = Executer(onMainQueue: onMainQueue, handler: handler)
-        if status == .running {
+        switch status {
+        case .running:
             status = .willRemove
             sessionTask?.cancel()
-        } else {
+        case .waiting, .suspended, .failed, .succeeded, .canceled, .removed:
             status = .willRemove
             operationQueue.async {
                 self.didComplete(.local)
             }
+        case .willSuspend, .willCancel, .willRemove:
+            break
         }
     }
 
@@ -356,7 +346,7 @@ extension DownloadTask {
     }
 
 
-    internal func succeeded(fromRunning: Bool) {
+    internal func succeeded(fromRunning: Bool, immediately: Bool) {
         if endDate == 0 {
             protectedState.write {
                 $0.endDate = Date().timeIntervalSince1970
@@ -366,7 +356,9 @@ extension DownloadTask {
         status = .succeeded
         progress.completedUnitCount = progress.totalUnitCount
         progressExecuter?.execute(self)
-        executeCompletion(true)
+        if immediately {
+          executeCompletion(true)
+        }
         validateFile()
         manager?.maintainTasks(with: .succeeded(self))
         manager?.determineStatus(fromRunningTask: fromRunning)
@@ -380,7 +372,7 @@ extension DownloadTask {
             self.error = error
             var tempStatus = status
             if let resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
-                self.resumeData = ResumeDataHelper.handleResumeData(resumeData)
+                self.resumeData = resumeData
                 cache.storeTmpFile(tmpFileName)
             }
             if let _ = (error as NSError).userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int {
@@ -393,8 +385,8 @@ extension DownloadTask {
         case let .statusCode(statusCode):
             self.error = TiercelError.unacceptableStatusCode(code: statusCode)
             status = .failed
-        case .manual:
-            fromRunning = false
+        case let .manual(fromRunningTask):
+            fromRunning = fromRunningTask
         }
         
         switch status {
@@ -514,9 +506,10 @@ extension DownloadTask {
 
 // MARK: - callback
 extension DownloadTask {
-    internal func didWriteData(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+    internal func didWriteData(downloadTask: URLSessionDownloadTask, bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         progress.completedUnitCount = totalBytesWritten
         progress.totalUnitCount = totalBytesExpectedToWrite
+        response = downloadTask.response as? HTTPURLResponse
         progressExecuter?.execute(self)
         manager?.updateProgress()
         NotificationCenter.default.postNotification(name: DownloadTask.runningNotification, downloadTask: self)
@@ -538,9 +531,9 @@ extension DownloadTask {
             
             switch status {
             case .willSuspend,.willCancel, .willRemove:
-                determineStatus(with: .manual)
+                determineStatus(with: .manual(false))
             case .running:
-                succeeded(fromRunning: false)
+                succeeded(fromRunning: false, immediately: true)
             default:
                 return
             }
@@ -551,7 +544,7 @@ extension DownloadTask {
 
             switch status {
             case .willCancel, .willRemove:
-                determineStatus(with: .manual)
+                determineStatus(with: .manual(true))
                 return
             case .willSuspend, .running:
                 progress.totalUnitCount = task.countOfBytesExpectedToReceive
@@ -569,7 +562,7 @@ extension DownloadTask {
                     determineStatus(with: .statusCode(statusCode))
                 } else {
                     resumeData = nil
-                    succeeded(fromRunning: true)
+                    succeeded(fromRunning: true, immediately: true)
                 }
             default:
                 return

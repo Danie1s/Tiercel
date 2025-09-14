@@ -58,7 +58,7 @@ public class Task<TaskType>: NSObject, Codable {
     }
     
     enum InterruptType {
-        case manual
+        case manual(_ fromRunningTask: Bool)
         case error(_ error: Error)
         case statusCode(_ statusCode: Int)
     }
@@ -98,35 +98,35 @@ public class Task<TaskType>: NSObject, Codable {
     }
     
     
-    internal let protectedState: Protector<State>
+    internal let protectedState: Protected<State>
     
     internal var session: URLSession? {
-        get { protectedState.directValue.session }
+        get { protectedState.wrappedValue.session }
         set { protectedState.write { $0.session = newValue } }
     }
     
     internal var headers: [String: String]? {
-        get { protectedState.directValue.headers }
+        get { protectedState.wrappedValue.headers }
         set { protectedState.write { $0.headers = newValue } }
     }
     
     internal var verificationCode: String? {
-        get { protectedState.directValue.verificationCode }
+        get { protectedState.wrappedValue.verificationCode }
         set { protectedState.write { $0.verificationCode = newValue } }
     }
     
     internal var verificationType: FileChecksumHelper.VerificationType {
-        get { protectedState.directValue.verificationType }
+        get { protectedState.wrappedValue.verificationType }
         set { protectedState.write { $0.verificationType = newValue } }
     }
     
     internal var isRemoveCompletely: Bool {
-        get { protectedState.directValue.isRemoveCompletely }
+        get { protectedState.wrappedValue.isRemoveCompletely }
         set { protectedState.write { $0.isRemoveCompletely = newValue } }
     }
 
     public internal(set) var status: Status {
-        get { protectedState.directValue.status }
+        get { protectedState.wrappedValue.status }
         set {
             protectedState.write { $0.status = newValue }
             if newValue == .willSuspend || newValue == .willCancel || newValue == .willRemove {
@@ -139,18 +139,18 @@ public class Task<TaskType>: NSObject, Codable {
     }
     
     public internal(set) var validation: Validation {
-        get { protectedState.directValue.validation }
+        get { protectedState.wrappedValue.validation }
         set { protectedState.write { $0.validation = newValue } }
     }
     
     internal var currentURL: URL {
-        get { protectedState.directValue.currentURL }
+        get { protectedState.wrappedValue.currentURL }
         set { protectedState.write { $0.currentURL = newValue } }
     }
 
 
     public internal(set) var startDate: Double {
-        get { protectedState.directValue.startDate }
+        get { protectedState.wrappedValue.startDate }
         set { protectedState.write { $0.startDate = newValue } }
     }
     
@@ -159,7 +159,7 @@ public class Task<TaskType>: NSObject, Codable {
     }
 
     public internal(set) var endDate: Double {
-       get { protectedState.directValue.endDate }
+       get { protectedState.wrappedValue.endDate }
        set { protectedState.write { $0.endDate = newValue } }
     }
     
@@ -169,7 +169,7 @@ public class Task<TaskType>: NSObject, Codable {
 
 
     public internal(set) var speed: Int64 {
-        get { protectedState.directValue.speed }
+        get { protectedState.wrappedValue.speed }
         set { protectedState.write { $0.speed = newValue } }
     }
     
@@ -179,12 +179,12 @@ public class Task<TaskType>: NSObject, Codable {
 
     /// 默认为url的md5加上文件扩展名
     public internal(set) var fileName: String {
-        get { protectedState.directValue.fileName }
+        get { protectedState.wrappedValue.fileName }
         set { protectedState.write { $0.fileName = newValue } }
     }
 
     public internal(set) var timeRemaining: Int64 {
-        get { protectedState.directValue.timeRemaining }
+        get { protectedState.wrappedValue.timeRemaining }
         set { protectedState.write { $0.timeRemaining = newValue } }
     }
     
@@ -193,38 +193,38 @@ public class Task<TaskType>: NSObject, Codable {
     }
 
     public internal(set) var error: Error? {
-        get { protectedState.directValue.error }
+        get { protectedState.wrappedValue.error }
         set { protectedState.write { $0.error = newValue } }
     }
 
 
     internal var progressExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.progressExecuter }
+        get { protectedState.wrappedValue.progressExecuter }
         set { protectedState.write { $0.progressExecuter = newValue } }
     }
 
     internal var successExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.successExecuter }
+        get { protectedState.wrappedValue.successExecuter }
         set { protectedState.write { $0.successExecuter = newValue } }
     }
 
     internal var failureExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.failureExecuter }
+        get { protectedState.wrappedValue.failureExecuter }
         set { protectedState.write { $0.failureExecuter = newValue } }
     }
 
     internal var completionExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.completionExecuter }
+        get { protectedState.wrappedValue.completionExecuter }
         set { protectedState.write { $0.completionExecuter = newValue } }
     }
     
     internal var controlExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.controlExecuter }
+        get { protectedState.wrappedValue.controlExecuter }
         set { protectedState.write { $0.controlExecuter = newValue } }
     }
 
     internal var validateExecuter: Executer<TaskType>? {
-        get { protectedState.directValue.validateExecuter }
+        get { protectedState.wrappedValue.validateExecuter }
         set { protectedState.write { $0.validateExecuter = newValue } }
     }
 
@@ -237,7 +237,7 @@ public class Task<TaskType>: NSObject, Codable {
         self.cache = cache
         self.url = url
         self.operationQueue = operationQueue
-        protectedState = Protector(State(currentURL: url, fileName: url.tr.fileName))
+        protectedState = Protected(State(currentURL: url, fileName: url.tr.fileName))
         super.init()
         self.headers = headers
     }
@@ -257,12 +257,7 @@ public class Task<TaskType>: NSObject, Codable {
         try container.encode(verificationType.rawValue, forKey: .verificationType)
         try container.encode(validation.rawValue, forKey: .validation)
         if let error = error {
-            let errorData: Data
-            if #available(iOS 11.0, macOS 10.13, *) {
-                errorData = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
-            } else {
-                errorData = NSKeyedArchiver.archivedData(withRootObject: (error as NSError))
-            }
+            let errorData: Data = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
             try container.encode(errorData, forKey: .error)
         }
     }
@@ -272,7 +267,7 @@ public class Task<TaskType>: NSObject, Codable {
         url = try container.decode(URL.self, forKey: .url)
         let currentURL = try container.decode(URL.self, forKey: .currentURL)
         let fileName = try container.decode(String.self, forKey: .fileName)
-        protectedState = Protector(State(currentURL: currentURL, fileName: fileName))
+        protectedState = Protected(State(currentURL: currentURL, fileName: fileName))
         cache = decoder.userInfo[.cache] as? Cache ?? Cache("default")
         operationQueue = decoder.userInfo[.operationQueue] as? DispatchQueue ?? DispatchQueue(label: "com.Tiercel.SessionManager.operationQueue")
         super.init()
@@ -293,11 +288,7 @@ public class Task<TaskType>: NSObject, Codable {
             $0.verificationType = FileChecksumHelper.VerificationType(rawValue: verificationTypeInt)!
             $0.validation = Validation(rawValue: validationType)!
             if let errorData = try container.decodeIfPresent(Data.self, forKey: .error) {
-                if #available(iOS 11.0, macOS 10.13, *) {
-                    $0.error = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSError.self, from: errorData)
-                } else {
-                    $0.error = NSKeyedUnarchiver.unarchiveObject(with: errorData) as? NSError
-                }
+                $0.error = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSError.self, from: errorData)
             }
         }
     }

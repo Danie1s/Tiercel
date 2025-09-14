@@ -51,8 +51,8 @@ Tiercel 3.0 大幅提高了性能，拥有更完善的错误处理，提供了�
 
 ## 环境要求
 
-- iOS 10.0+
-- Xcode 11.0+
+- iOS 12.0+
+- Xcode 15.0+
 - Swift 5.0+
 
 
@@ -126,10 +126,10 @@ let tasks = sessionManager.multiDownload(URLStrings)
 ```swift
 let task = sessionManager.download("http://dldir1.qq.com/qqfile/QQforMac/QQ_V4.2.4.dmg")
 
-task?.progress(onMainQueue: true, { (task) in
+task?.progress(onMainQueue: true) { (task) in
     let progress = task.progress.fractionCompleted
     print("下载中, 进度：\(progress)")
-}).success { (task) in
+}.success { (task) in
     print("下载完成")
 }.failure { (task) in
     print("下载失败")
@@ -202,5 +202,4 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 ## License
 
 Tiercel is available under the MIT license. See the LICENSE file for more info.
-
 

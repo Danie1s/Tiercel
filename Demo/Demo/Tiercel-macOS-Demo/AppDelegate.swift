@@ -11,7 +11,7 @@ import Tiercel
 
 let appDelegate = NSApplication.shared.delegate as! AppDelegate
 
-@NSApplicationMain
+@main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     let sessionManager1 = SessionManager("ViewController1", configuration: SessionConfiguration())
@@ -35,7 +35,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
     }
-
+    
+    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+        return true
+    }
 
 }
 
