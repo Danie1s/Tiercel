@@ -40,7 +40,10 @@ public class DownloadTask: Task<DownloadTask> {
             _sessionTask?.removeObserver(self, forKeyPath: "currentRequest")
         }
         didSet {
-            _sessionTask?.addObserver(self, forKeyPath: "currentRequest", options: [.new], context: nil)
+            _sessionTask?.addObserver(
+                self, forKeyPath: "currentRequest", options: [.new], context: nil
+            )
+            _sessionTask?.tiercelTask = self
         }
     }
     
@@ -108,18 +111,21 @@ public class DownloadTask: Task<DownloadTask> {
         if let fileName = fileName, !fileName.isEmpty {
             self.fileName = fileName
         }
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(fixDelegateMethodError),
-                                               name: UIApplication.didBecomeActiveNotification,
-                                               object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(fixDelegateMethodError),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
     }
     
     public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let superEncoder = container.superEncoder()
         try super.encode(to: superEncoder)
-        try container.encodeIfPresent(resumeData, forKey: .resumeData)
-        if let response = response {
+        let downloadState = protectedDownloadState.read { $0 }
+        try container.encodeIfPresent(downloadState.resumeData, forKey: .resumeData)
+        if let response = downloadState.response {
             let responseData: Data = try NSKeyedArchiver.archivedData(withRootObject: (response as HTTPURLResponse), requiringSecureCoding: true)
             try container.encode(responseData, forKey: .response)
         }
@@ -351,7 +357,7 @@ extension DownloadTask {
         progress.completedUnitCount = progress.totalUnitCount
         progressExecuter?.execute(self)
         if immediately {
-          executeCompletion(true)
+            executeCompletion(true)
         }
         validateFile()
         manager?.maintainTasks(with: .succeeded(self))

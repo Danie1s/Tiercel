@@ -166,8 +166,10 @@ public class SessionManager {
 
     private let _progress = Progress()
     public var progress: Progress {
-        _progress.completedUnitCount = tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
-        _progress.totalUnitCount = tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
+        protectedState.read { state in
+            _progress.completedUnitCount = state.tasks.reduce(0, { $0 + $1.progress.completedUnitCount })
+            _progress.totalUnitCount = state.tasks.reduce(0, { $0 + $1.progress.totalUnitCount })
+        }
         return _progress
     }
 
@@ -895,10 +897,12 @@ extension SessionManager {
     }
 
     internal func updateSpeedAndTimeRemaining() {
-        let speed = runningTasks.reduce(Int64(0), {
-            $1.updateSpeedAndTimeRemaining()
-            return $0 + $1.speed
-        })
+        let speed = protectedState.read { state in
+            state.runningTasks.reduce(Int64(0), {
+                $1.updateSpeedAndTimeRemaining()
+                return $0 + $1.speed
+            })
+        }
         updateTimeRemaining(speed)
     }
     

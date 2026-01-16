@@ -80,6 +80,8 @@ public class Cache {
         
         self.downloadFilePath = downloadFilePath ?? (path as NSString).appendingPathComponent("File")
         
+        encoder.outputFormat = .binary
+        
         createDirectory()
 
         decoder.userInfo[.cache] = self

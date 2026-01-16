@@ -25,7 +25,7 @@
 //
 
 import Foundation
-
+import ObjectiveC.runtime
 
 public enum LogOption {
     case `default`
@@ -102,10 +102,30 @@ public protocol TiercelCompatible {
 
 extension TiercelCompatible {
     public var tr: TiercelWrapper<Self> {
-        get { TiercelWrapper(self) }
+        TiercelWrapper(self)
     }
     public static var tr: TiercelWrapper<Self>.Type {
-        get { TiercelWrapper<Self>.self }
+        TiercelWrapper<Self>.self
     }
 }
 
+extension URLSessionTask {
+    private struct AssociatedKeys {
+        static var tiercelTask: UInt8 = 0
+    }
+
+    internal weak var tiercelTask: DownloadTask? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKeys.tiercelTask) as? DownloadTask
+        }
+        set {
+            if let newValue = newValue {
+                objc_setAssociatedObject(
+                    self, &AssociatedKeys.tiercelTask, newValue, .OBJC_ASSOCIATION_ASSIGN)
+            } else {
+                objc_setAssociatedObject(
+                    self, &AssociatedKeys.tiercelTask, nil, .OBJC_ASSOCIATION_ASSIGN)
+            }
+        }
+    }
+}

@@ -245,18 +245,19 @@ public class Task<TaskType>: NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(url, forKey: .url)
-        try container.encode(currentURL, forKey: .currentURL)
-        try container.encode(fileName, forKey: .fileName)
-        try container.encodeIfPresent(headers, forKey: .headers)
-        try container.encode(startDate, forKey: .startDate)
-        try container.encode(endDate, forKey: .endDate)
+        let state = protectedState.read { $0 }
+        try container.encode(state.currentURL, forKey: .currentURL)
+        try container.encode(state.fileName, forKey: .fileName)
+        try container.encodeIfPresent(state.headers, forKey: .headers)
+        try container.encode(state.startDate, forKey: .startDate)
+        try container.encode(state.endDate, forKey: .endDate)
         try container.encode(progress.totalUnitCount, forKey: .totalBytes)
         try container.encode(progress.completedUnitCount, forKey: .completedBytes)
-        try container.encode(status.rawValue, forKey: .status)
-        try container.encodeIfPresent(verificationCode, forKey: .verificationCode)
-        try container.encode(verificationType.rawValue, forKey: .verificationType)
-        try container.encode(validation.rawValue, forKey: .validation)
-        if let error = error {
+        try container.encode(state.status.rawValue, forKey: .status)
+        try container.encodeIfPresent(state.verificationCode, forKey: .verificationCode)
+        try container.encode(state.verificationType.rawValue, forKey: .verificationType)
+        try container.encode(state.validation.rawValue, forKey: .validation)
+        if let error = state.error {
             let errorData: Data = try NSKeyedArchiver.archivedData(withRootObject: (error as NSError), requiringSecureCoding: true)
             try container.encode(errorData, forKey: .error)
         }
