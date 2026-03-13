@@ -21,6 +21,7 @@ Tiercel 是一个纯 Swift 的 iOS 下载框架，专注于原生级别后台下
 
 如果你的项目使用 Objective-C，可以配合 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 使用。
 如果需要私密报告安全漏洞，请查看 [SECURITY.md](SECURITY.md)。
+如果你想参与贡献，请先查看英文版贡献指南 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 为什么选择 Tiercel
 
@@ -186,6 +187,7 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 
 ## 文档与迁移
 
+- [贡献指南（英文）](CONTRIBUTING.md)
 - [安全策略](SECURITY.md)
 - [Wiki](https://github.com/Danie1s/Tiercel/wiki)
 - [Tiercel 3.0 迁移指南](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)

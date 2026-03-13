@@ -21,6 +21,7 @@ Tiercel is a pure-Swift download framework for iOS with native-style background 
 
 If you are working in Objective-C, use [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge).
 For responsible vulnerability disclosure, see [SECURITY.md](SECURITY.md).
+If you want to contribute, start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Why Tiercel
 
@@ -186,6 +187,7 @@ Open `Demo/Tiercel-Demo.xcodeproj` to explore:
 
 ## Docs And Migration
 
+- [Contributing Guide](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 - [Wiki](https://github.com/Danie1s/Tiercel/wiki)
 - [Tiercel 3.0 Migration Guide](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
