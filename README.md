@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="Images/logo.png" alt="Tiercel logo" width="600"/>
+  <img src="Images/logo.png" alt="Tiercel logo" width="600" />
 </div>
 
 <p align="center">
@@ -13,34 +13,44 @@
   <a href="https://swift.org/package-manager/"><img src="https://img.shields.io/badge/SwiftPM-supported-FA7343.svg?style=flat" alt="Swift Package Manager" /></a>
   <a href="https://www.swift.org/"><img src="https://img.shields.io/badge/Swift-5.0%2B-F05138.svg?style=flat" alt="Swift" /></a>
   <a href="https://developer.apple.com/ios/"><img src="https://img.shields.io/badge/iOS-12.0%2B-0A84FF.svg?style=flat" alt="iOS 12.0+" /></a>
+  <a href="https://github.com/matteocrippa/awesome-swift"><img src="https://img.shields.io/badge/Featured-awesome--swift-2ea44f?style=flat" alt="Featured in awesome-swift" /></a>
   <a href="https://github.com/Danie1s/Tiercel/commits/master"><img src="https://img.shields.io/github/last-commit/Danie1s/Tiercel/master?style=flat" alt="Last Commit" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat" alt="License" /></a>
 </p>
 
-Tiercel is a pure-Swift download framework for iOS with native-style background downloads, resumable transfers, and fine-grained task management. It is built for apps that need more than a single fire-and-forget request: batch operations, isolated download managers, persistence across relaunches, validation hooks, and production-friendly progress reporting.
+Tiercel is a production-oriented iOS download framework written in pure Swift. It helps teams ship background downloads, relaunch recovery, resumable transfers, and task orchestration without rebuilding the same `URLSession` infrastructure in every app.
 
-If you are working in Objective-C, use [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge).
-For responsible vulnerability disclosure, see [SECURITY.md](SECURITY.md).
-If you want to contribute, start with [CONTRIBUTING.md](CONTRIBUTING.md).
+> Featured in [matteocrippa/awesome-swift](https://github.com/matteocrippa/awesome-swift).
 
-## Why Tiercel
+If Tiercel saves your team time, consider starring the repository so more iOS engineers can discover it.
 
-- Native-style background downloads built on top of `URLSession`.
-- Resume support after relaunch through persisted task metadata and resume data.
-- Per-task and manager-level controls for start, suspend, cancel, remove, and batch operations.
-- Multiple `SessionManager` instances so different download domains can stay isolated.
-- Configurable concurrency and network access policy, including cellular, constrained, and expensive networks.
-- Built-in speed, remaining time, and file validation callbacks.
-- Thread-safe internal state designed for long-running, real-world download flows.
+## Why Teams Pick Tiercel
 
-## Project Status
+- Background downloads that stay close to native `URLSession` behavior.
+- Relaunch recovery through persisted task metadata and resume data.
+- Fine-grained control for start, suspend, cancel, remove, and batch operations.
+- Multiple `SessionManager` instances so different download domains stay isolated.
+- Network policy knobs for cellular, constrained, and expensive connections.
+- Built-in speed, remaining-time, and file-validation callbacks.
+- Thread-safe internal state designed for long-running download flows.
 
-Tiercel continues to be maintained on the 3.2.x line. Recent work in this repository focuses on thread safety, task-state correctness, and performance improvements around encoding and task restoration.
+## Choose Tiercel If
 
-- Current podspec version: `3.2.9`
-- Minimum platform: `iOS 12.0+`
-- Language baseline: `Swift 5.0+`
-- Distribution: CocoaPods, Swift Package Manager, and manual source integration
+- You need downloads to recover after the app relaunches.
+- You manage more than one download queue, domain, or product surface.
+- You want batch downloads and operational visibility instead of ad hoc tasks.
+- You prefer a higher-level API than raw `URLSessionDownloadTask`, while still using Apple's native stack underneath.
+- You need a download layer that can be evaluated quickly through a real demo app.
+
+## At A Glance
+
+| What you need | Raw `URLSession` only | Tiercel |
+| --- | --- | --- |
+| Background downloads | Base primitives | Higher-level manager and task model |
+| Relaunch recovery | App-specific persistence work | Built-in persisted task metadata and resume data |
+| Batch operations | Manual orchestration | Multi-download helpers and manager-level controls |
+| Download domain isolation | Custom architecture | Multiple isolated `SessionManager` instances |
+| Progress and validation hooks | Hand-rolled callbacks | Built-in progress, speed, ETA, and validation APIs |
 
 ## Installation
 
@@ -172,6 +182,13 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 }
 ```
 
+## Compatibility
+
+- Current podspec version: `3.2.9`
+- Minimum platform: `iOS 12.0+`
+- Language baseline: `Swift 5.0+`
+- Distribution: CocoaPods, Swift Package Manager, and manual source integration
+
 ## Demo
 
 Open `Demo/Tiercel-Demo.xcodeproj` to explore:
@@ -185,13 +202,13 @@ Open `Demo/Tiercel-Demo.xcodeproj` to explore:
 ![Tiercel demo 1](Images/1.gif)
 ![Tiercel demo 2](Images/2.gif)
 
-## Docs And Migration
+## Docs And Links
 
-- [Contributing Guide](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
 - [Wiki](https://github.com/Danie1s/Tiercel/wiki)
 - [Tiercel 3.0 Migration Guide](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
 - [Objective-C Bridge](https://github.com/Danie1s/TiercelObjCBridge)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
 
 ## Repository Layout
 

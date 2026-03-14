@@ -13,34 +13,44 @@
   <a href="https://swift.org/package-manager/"><img src="https://img.shields.io/badge/SwiftPM-supported-FA7343.svg?style=flat" alt="Swift Package Manager" /></a>
   <a href="https://www.swift.org/"><img src="https://img.shields.io/badge/Swift-5.0%2B-F05138.svg?style=flat" alt="Swift" /></a>
   <a href="https://developer.apple.com/ios/"><img src="https://img.shields.io/badge/iOS-12.0%2B-0A84FF.svg?style=flat" alt="iOS 12.0+" /></a>
+  <a href="https://github.com/matteocrippa/awesome-swift"><img src="https://img.shields.io/badge/Featured-awesome--swift-2ea44f?style=flat" alt="Featured in awesome-swift" /></a>
   <a href="https://github.com/Danie1s/Tiercel/commits/master"><img src="https://img.shields.io/github/last-commit/Danie1s/Tiercel/master?style=flat" alt="Last Commit" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat" alt="License" /></a>
 </p>
 
-Tiercel 是一个纯 Swift 的 iOS 下载框架，专注于原生级别后台下载、断点续传以及精细化任务管理。它适合那些不满足于“一次性发起下载请求”的应用场景，比如批量操作、下载模块隔离、应用重启后的任务恢复、文件校验，以及面向生产环境的进度回调与状态管理。
+Tiercel 是一个面向生产环境的纯 Swift iOS 下载框架，专注于后台下载、应用重启后的任务恢复、断点续传，以及下载任务编排。它的目标不是替代 `URLSession`，而是在保留原生能力的前提下，帮团队少写重复的基础设施代码。
 
-如果你的项目使用 Objective-C，可以配合 [TiercelObjCBridge](https://github.com/Danie1s/TiercelObjCBridge) 使用。
-如果需要私密报告安全漏洞，请查看 [SECURITY.md](SECURITY.md)。
-如果你想参与贡献，请先查看英文版贡献指南 [CONTRIBUTING.md](CONTRIBUTING.md)。
+> Tiercel 已被 [matteocrippa/awesome-swift](https://github.com/matteocrippa/awesome-swift) 收录。
 
-## 为什么选择 Tiercel
+如果 Tiercel 帮你节省了时间，欢迎点一个 Star，让更多 iOS 开发者发现它。
 
-- 基于 `URLSession` 的原生级别后台下载能力。
+## 为什么团队会选择 Tiercel
+
+- 基于 `URLSession` 的原生风格后台下载能力。
 - 通过持久化任务信息和 resume data，在应用重启后恢复下载。
-- 支持单任务和管理器级别的开始、暂停、取消、删除与批量操作。
-- 支持多个 `SessionManager` 实例，便于隔离不同下载业务。
-- 支持并发数、蜂窝网络、受限网络和高成本网络等策略配置。
+- 支持开始、暂停、取消、删除，以及批量任务操作。
+- 支持多个 `SessionManager` 实例，方便隔离不同下载业务。
+- 支持蜂窝网络、受限网络和高成本网络等策略配置。
 - 内置下载速度、剩余时间与文件校验回调。
-- 内部状态具备线程安全设计，更适合真实下载场景。
+- 线程安全的内部状态管理，更适合长生命周期下载场景。
 
-## 项目状态
+## 适合用 Tiercel 的场景
 
-Tiercel 目前仍在持续维护 3.2.x 分支。最近的更新主要集中在线程安全、任务状态正确性，以及编码与任务恢复相关的性能优化。
+- 你需要在应用重启后恢复下载任务。
+- 你有多个下载队列、不同业务域，或者不同产品模块需要隔离。
+- 你希望批量管理下载任务，而不是零散地手动拼装逻辑。
+- 你想要比原生 `URLSessionDownloadTask` 更高层的 API，但底层仍然使用苹果原生下载体系。
+- 你希望团队成员能通过现成 Demo 很快评估这个框架。
 
-- 当前 podspec 版本：`3.2.9`
-- 最低平台要求：`iOS 12.0+`
-- 语言基线：`Swift 5.0+`
-- 集成方式：CocoaPods、Swift Package Manager、手动集成
+## 能力一览
+
+| 你需要的能力 | 只用原生 `URLSession` | Tiercel |
+| --- | --- | --- |
+| 后台下载 | 只有底层能力 | 更高层的管理器和任务模型 |
+| 应用重启恢复 | 需要自己做持久化 | 内置任务元数据和 resume data 持久化 |
+| 批量操作 | 需要自己编排 | 提供批量下载和管理器级控制 |
+| 下载域隔离 | 需要自定义架构 | 支持多个隔离的 `SessionManager` |
+| 进度与校验回调 | 需要手写 | 内置进度、速度、剩余时间和校验 API |
 
 ## 安装
 
@@ -172,6 +182,13 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 }
 ```
 
+## 兼容性
+
+- 当前 podspec 版本：`3.2.9`
+- 最低平台要求：`iOS 12.0+`
+- 语言基线：`Swift 5.0+`
+- 集成方式：CocoaPods、Swift Package Manager、手动集成
+
 ## Demo
 
 打开 `Demo/Tiercel-Demo.xcodeproj`，可以快速体验：
@@ -185,13 +202,13 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 ![Tiercel demo 1](Images/1.gif)
 ![Tiercel demo 2](Images/2.gif)
 
-## 文档与迁移
+## 文档与链接
 
-- [贡献指南（英文）](CONTRIBUTING.md)
-- [安全策略](SECURITY.md)
 - [Wiki](https://github.com/Danie1s/Tiercel/wiki)
 - [Tiercel 3.0 迁移指南](https://github.com/Danie1s/Tiercel/wiki/Tiercel-3.0-%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97)
 - [Objective-C Bridge](https://github.com/Danie1s/TiercelObjCBridge)
+- [贡献指南（英文）](CONTRIBUTING.md)
+- [安全策略](SECURITY.md)
 
 ## 仓库结构
 
