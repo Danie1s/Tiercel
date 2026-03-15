@@ -9,20 +9,24 @@
 
 <p align="center">
   <a href="https://cocoapods.org/pods/Tiercel"><img src="https://img.shields.io/cocoapods/v/Tiercel.svg?style=flat" alt="CocoaPods Version" /></a>
-  <a href="https://cocoapods.org/pods/Tiercel"><img src="https://img.shields.io/cocoapods/p/Tiercel.svg?style=flat" alt="Platform" /></a>
   <a href="https://swift.org/package-manager/"><img src="https://img.shields.io/badge/SwiftPM-supported-FA7343.svg?style=flat" alt="Swift Package Manager" /></a>
-  <a href="https://www.swift.org/"><img src="https://img.shields.io/badge/Swift-5.0%2B-F05138.svg?style=flat" alt="Swift" /></a>
-  <a href="https://developer.apple.com/ios/"><img src="https://img.shields.io/badge/iOS-12.0%2B-0A84FF.svg?style=flat" alt="iOS 12.0+" /></a>
+  <a href="https://swiftpackageindex.com/Danie1s/Tiercel"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FDanie1s%2FTiercel%2Fbadge%3Ftype%3Dplatforms" alt="Platforms" /></a>
+  <a href="https://swiftpackageindex.com/Danie1s/Tiercel"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FDanie1s%2FTiercel%2Fbadge%3Ftype%3Dswift-versions" alt="Swift Versions" /></a>
   <a href="https://github.com/matteocrippa/awesome-swift"><img src="https://img.shields.io/badge/Featured-awesome--swift-2ea44f?style=flat" alt="Featured in awesome-swift" /></a>
-  <a href="https://github.com/Danie1s/Tiercel/commits/master"><img src="https://img.shields.io/github/last-commit/Danie1s/Tiercel/master?style=flat" alt="Last Commit" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat" alt="License" /></a>
 </p>
 
-Tiercel 是一个面向生产环境的纯 Swift iOS 下载框架，专注于后台下载、应用重启后的任务恢复、断点续传，以及下载任务编排。它的目标不是替代 `URLSession`，而是在保留原生能力的前提下，帮团队少写重复的基础设施代码。
+<p align="center">
+  Tiercel 是一个面向生产环境的纯 Swift iOS 下载框架，专注于后台下载、重启恢复、断点续传，以及基于 <code>URLSession</code> 的下载任务编排。
+</p>
 
-> Tiercel 已被 [matteocrippa/awesome-swift](https://github.com/matteocrippa/awesome-swift) 收录。
+<p align="center">
+  Tiercel 已被 <a href="https://swiftpackageindex.com/Danie1s/Tiercel">Swift Package Index</a> 收录，并被 <a href="https://github.com/matteocrippa/awesome-swift">awesome-swift</a> 推荐。
+</p>
 
-如果 Tiercel 帮你节省了时间，欢迎点一个 Star，让更多 iOS 开发者发现它。
+<p align="center">
+  如果 Tiercel 对你的下载场景有帮助，可以点一个 Star，让更多 iOS 开发者更容易发现它。
+</p>
 
 ## 为什么团队会选择 Tiercel
 
