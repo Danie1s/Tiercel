@@ -24,7 +24,11 @@
 //  THE SOFTWARE.
 //
 
+import Foundation
+
+#if canImport(UIKit)
 import UIKit
+#endif
 
 public class DownloadTask: Task<DownloadTask> {
     
@@ -111,12 +115,14 @@ public class DownloadTask: Task<DownloadTask> {
         if let fileName = fileName, !fileName.isEmpty {
             self.fileName = fileName
         }
+        #if canImport(UIKit)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(fixDelegateMethodError),
             name: UIApplication.didBecomeActiveNotification,
             object: nil
         )
+        #endif
     }
     
     public override func encode(to encoder: Encoder) throws {

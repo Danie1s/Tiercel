@@ -24,7 +24,11 @@
 //  THE SOFTWARE.
 //
 
+import Foundation
+
+#if canImport(UIKit)
 import UIKit
+#endif
 
 public class SessionManager {
     
@@ -751,7 +755,7 @@ extension SessionManager {
     
     internal func updateProgress() {
         if isControlNetworkActivityIndicator {
-#if !os(visionOS)
+#if canImport(UIKit) && !os(visionOS)
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
@@ -781,7 +785,7 @@ extension SessionManager {
     
     internal func determineStatus(fromRunningTask: Bool) {
         if isControlNetworkActivityIndicator {
-#if !os(visionOS)
+#if canImport(UIKit) && !os(visionOS)
             DispatchQueue.tr.executeOnMain {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }
@@ -1014,5 +1018,4 @@ extension SessionManager {
     }
     
 }
-
 
