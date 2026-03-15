@@ -188,7 +188,6 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 
 ## 兼容性
 
-- 当前 podspec 版本：`3.2.9`
 - 最低平台要求：`iOS 12.0+`
 - 语言基线：`Swift 5.0+`
 - 集成方式：CocoaPods、Swift Package Manager、手动集成

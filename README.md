@@ -188,7 +188,6 @@ task?.validateFile(code: "9e2a3650530b563da297c9246acaad5c",
 
 ## Compatibility
 
-- Current podspec version: `3.2.9`
 - Minimum platform: `iOS 12.0+`
 - Language baseline: `Swift 5.0+`
 - Distribution: CocoaPods, Swift Package Manager, and manual source integration
