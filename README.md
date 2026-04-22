@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-  <a href="README.md"><strong>English</strong></a> |
+  <strong>English</strong> |
   <a href="README.zh.md"><strong>简体中文</strong></a>
 </p>
 
@@ -13,7 +13,6 @@
   <a href="https://swift.org/package-manager/"><img src="https://img.shields.io/badge/SwiftPM-supported-FA7343.svg?style=flat" alt="Swift Package Manager" /></a>
   <a href="https://swiftpackageindex.com/Danie1s/Tiercel"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FDanie1s%2FTiercel%2Fbadge%3Ftype%3Dplatforms" alt="Platforms" /></a>
   <a href="https://swiftpackageindex.com/Danie1s/Tiercel"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FDanie1s%2FTiercel%2Fbadge%3Ftype%3Dswift-versions" alt="Swift Versions" /></a>
-  <a href="https://github.com/matteocrippa/awesome-swift"><img src="https://img.shields.io/badge/Featured-awesome--swift-2ea44f?style=flat" alt="Featured in awesome-swift" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/cocoapods/l/Tiercel.svg?style=flat" alt="License" /></a>
 </p>
 
@@ -22,7 +21,7 @@
 </p>
 
 <p align="center">
-  Indexed on <a href="https://swiftpackageindex.com/Danie1s/Tiercel">Swift Package Index</a> and featured in <a href="https://github.com/matteocrippa/awesome-swift">awesome-swift</a>.
+  Indexed on <a href="https://swiftpackageindex.com/Danie1s/Tiercel">Swift Package Index</a> and featured in <a href="https://github.com/matteocrippa/awesome-swift">awesome-swift</a> and <a href="https://github.com/vsouza/awesome-ios">awesome-ios</a>.
 </p>
 
 <p align="center">
